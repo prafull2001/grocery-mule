@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="smartshopper.com.grocery_mule">
+    package="com.example.smart_shopper">
    <application
-        android:label="grocery_mule"
+        android:label="smart_shopper"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
