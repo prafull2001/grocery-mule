@@ -31,7 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
             Row(
               children: <Widget>[
                 Text(
-                  'SmartShopper',
+                  'GroceryMule',
                   style: TextStyle(
                     fontSize: 40.0,
                     fontWeight: FontWeight.w900,
@@ -44,14 +44,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
             ),
             RoundedButton(
               title: 'Log In',
-              color: Colors.lightBlueAccent,
               onPressed: (){
                 Navigator.pushNamed(context, LoginScreen.id);
               },
             ),
             RoundedButton(
               title: 'Register',
-              color: Colors.blueAccent,
               onPressed: (){
                 Navigator.pushNamed(context, RegistrationScreen.id);
               },

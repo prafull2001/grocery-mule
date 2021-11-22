@@ -28,14 +28,12 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
     final CollectionReference userTestingCollection = FirebaseFirestore.instance.collection('users_test');
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: FutureBuilder<DocumentSnapshot>(
           future: userTestingCollection.doc(curUser.email).get(),
           builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
             String prevEmail;
             String prevFirst;
             String prevLast;
-
             if (snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> data = snapshot.data.data() as Map<String, dynamic>;
               prevEmail = data['email'];

@@ -20,6 +20,13 @@ class SmartShopper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        primaryColor: const Color(0xFFf57f17),
+        primaryColorDark: const Color(0xFFbc5100),
+        primaryColorLight: const Color(0xFFffb04c),
+        accentColor: const Color(0xFFbf360c),
+        scaffoldBackgroundColor: const Color(0xFFffe0b2),
+      ),
       initialRoute: WelcomeScreen.id,
       routes: {
         WelcomeScreen.id: (context) => WelcomeScreen(),

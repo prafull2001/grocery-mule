@@ -45,124 +45,139 @@ class _ListsScreenState extends State<ListsScreen> {
   @override
   Widget build(BuildContext context) {
     print('pulling data');
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('Grocery Lists'),
-      ),
-      drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text(
-                'Menu Options',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+    return WillPopScope(
+        onWillPop: () async => false,
+        child: Scaffold(
+          appBar: AppBar(
+            centerTitle: true,
+            title: const Text('Grocery Lists'),
+          ),
+          drawer: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                const DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFf57f17),
+                  ),
+                  child: Text(
+                    'Menu Options',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            ListTile(
-              title: const Text('Edit Profile'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, UserInfoScreen.id);
-              },
-            ),
-            ListTile(
-              title: const Text('Log Out'),
-              onTap: () async {
-                var currentUser = FirebaseAuth.instance.currentUser;
-                if (currentUser != null) {
-                  await _auth.signOut();
-                  print('User signed out');
-                }
-                Navigator.pop(context);
-                Navigator.pushNamed(context, WelcomeScreen.id);
-              },
-            ),
-          ],
-        ),
-      ),
-
-      body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('users_test').doc(
-              curUser.email).collection('shopping_trips')
-              .snapshots(),
-          builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-            if(streamSnapshot.data == null) return CircularProgressIndicator();
-            return SafeArea(
-              child: Scrollbar(
-                isAlwaysShown: true,
-                child: GridView.builder(
-                  itemCount: streamSnapshot.data.docs.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3),
-                  itemBuilder: (context, int index) {
-                    return ElevatedButton(
-                      child: Text(
-                        '${streamSnapshot.data.docs[index]['trip_title']}\n'
-                            '${streamSnapshot.data.docs[index]['trip_description']}\n'
-                            '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().month}'+
-                            '/'+
-                            '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().day}'+
-                            '/'+
-                            '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().day}',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 15,
-                        ),
-                      ),
-                      onPressed: () async {
-                        ListData curList = new ListData(streamSnapshot.data.docs[index]['trip_title'],
-                            streamSnapshot.data.docs[index]['trip_description'],
-                            (streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate(),
-                            streamSnapshot.data.docs[index].id);
-                        //check if the curData's field is null, if so, set flag
-                        final updatedData = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CreateListScreen(curList))
-                        );
-                        if (updatedData != null) {
-                          updateGridView(
-                              updatedData.name, updatedData.description,
-                              updatedData.date, updatedData.unique_id);
-                        } else {
-                          print('no changes made to be saved!');
-                        }
-                      },
-                    );
+                ListTile(
+                  title: const Text('Edit Profile'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, UserInfoScreen.id);
                   },
                 ),
-              ),
-            );
-          }
-      ),
+                ListTile(
+                  title: const Text('Log Out'),
+                  onTap: () async {
+                    var currentUser = FirebaseAuth.instance.currentUser;
+                    if (currentUser != null) {
+                      await _auth.signOut();
+                      print('User signed out');
+                    }
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, WelcomeScreen.id);
+                  },
+                ),
+              ],
+            ),
+          ),
 
-      floatingActionButton: Container(
-        height: 80,
-        width: 80,
-        child: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () async {
-            final listData = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreateListScreen(null))
-            );
-            updateGridView(listData.name, listData.description, listData.date, listData.unique_id);
-          },
+          body: StreamBuilder(
+              stream: FirebaseFirestore.instance.collection('users_test').doc(
+                  curUser.email).collection('shopping_trips')
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+                if(streamSnapshot.data == null) return CircularProgressIndicator();
+                return SafeArea(
+                  child: Scrollbar(
+                  isAlwaysShown: true,
+                  child: GridView.builder(
+                    padding: EdgeInsets.all(8),
+                    itemCount: streamSnapshot.data.docs.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3, mainAxisSpacing: 10, crossAxisSpacing: 7),
+                    itemBuilder: (context, int index) {
+                      return Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFf57f17),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFffab91),
+                              blurRadius: 3,
+                              offset: Offset(3, 6), // Shadow position
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          title: Text(
+                            '\n${streamSnapshot.data.docs[index]['trip_title']}\n'
+                                '${streamSnapshot.data.docs[index]['trip_description']}\n\n'
+                                '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().month}'+
+                                '/'+
+                                '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().day}'+
+                                '/'+
+                                '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().year}',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 15,
+                            ),
+                          ),
+                          onTap: () async {
+                            ListData curList = new ListData(streamSnapshot.data.docs[index]['trip_title'],
+                                streamSnapshot.data.docs[index]['trip_description'],
+                                (streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate(),
+                                streamSnapshot.data.docs[index].id);
+                            //check if the curData's field is null, if so, set flag
+                            final updatedData = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CreateListScreen(curList))
+                            );
+                            if (updatedData != null) {
+                              updateGridView(
+                                  updatedData.name, updatedData.description,
+                                  updatedData.date, updatedData.unique_id);
+                            } else {
+                              print('no changes made to be saved!');
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                  ),
+                );
+              }
+          ),
+
+          floatingActionButton: Container(
+            height: 80,
+            width: 80,
+            child: FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () async {
+                final listData = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CreateListScreen(null))
+                );
+                updateGridView(listData.name, listData.description, listData.date, listData.unique_id);
+              },
+            ),
+          ),
         ),
-      ),
     );
   }
 }
