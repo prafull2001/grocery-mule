@@ -80,7 +80,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context: context,
         initialDate: tripDate,
         firstDate: DateTime(2021),
-        lastDate: DateTime(2050));
+        lastDate: DateTime(2050),
+        builder: (BuildContext context, Widget child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: ColorScheme.light().copyWith(
+                primary: const Color(0xFFbc5100),
+              ),
+            ),
+            child: child,
+          );
+        }
+    );
     if (picked != null && picked != tripDate)
       setState(() {
         tripDate = picked;
@@ -95,8 +106,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         title: const Text('Create List'),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
+        child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               SizedBox(
@@ -160,9 +170,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     SizedBox(
                       height: 20.0,
                     ),
-                    ElevatedButton(
+                    RoundedButton(
                       onPressed: () => _selectDate(context),
-                      child: Text('Select Date'),
+                      title: 'Select Date',
                     ),
                   ],
                 ),
@@ -284,28 +294,30 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               Container(
                 height: 70,
                 width: 150,
-                child: ElevatedButton(
+                child: RoundedButton(
                   onPressed: () {
                     final listData = ListData(tripTitle, tripDescription, tripDate, trip_id);
                     Navigator.pop(context, listData);
                   },
-                  child: Text("Create List", style: TextStyle(fontSize: 20)),
+                  title: "Create List",
                 ),
+              ),
+              SizedBox(
+                height: 20,
               ),
               Container(
                 height: 70,
                 width: 150,
-                child: ElevatedButton(
+                child: RoundedButton(
                   onPressed: () {
-                     delete(trip_id);
+                    delete(trip_id);
                     Navigator.pop(context);
                   },
-                  child: Text("Delete List", style: TextStyle(fontSize: 20)),
+                  title: "Delete List",
                 ),
               )
             ],
           ),
-        ),
       ),
     );
   }
