@@ -4,6 +4,9 @@ import 'package:smart_shopper/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_shopper/database/updateListData.dart';
 import 'package:smart_shopper/screens/lists.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:smart_shopper/database/google_signin.dart';
+
 
 class RegistrationScreen extends StatefulWidget {
   static String id = 'registration_screen';
@@ -12,13 +15,16 @@ class RegistrationScreen extends StatefulWidget {
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
+
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  String email;
-  String password;
-  String firstName;
-  String lastName;
+  String email="";
+  String password="";
+  String firstName="";
+  String lastName="";
 
   FirebaseAuth auth = FirebaseAuth.instance;
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +115,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         email: email,
                         password: password,
                     );
-
                     if (userCredential != null){
                       //app always hangs at this spot, could be something to do with the asynchrony?
                       print(email + ' ' + firstName + ' ' + lastName);
@@ -122,10 +127,69 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     print(e);
                   }
                 }
-            )
+            ),
+            GoogleSignIn(),
           ],
         ),
       ),
     );
+  }
+}
+class GoogleSignIn extends StatefulWidget {
+  @override
+  _GoogleSignInState createState() => _GoogleSignInState();
+}
+
+class _GoogleSignInState extends State<GoogleSignIn> {
+  bool isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery
+        .of(context)
+        .size;
+    return !isLoading ? SizedBox(
+      width: size.width * 0.8,
+      child: RoundedButton(
+        title: "testing",
+        onPressed: () async {
+          setState(() {
+            isLoading = true;
+          });
+          FirebaseService service = new FirebaseService();
+          try {
+            await service.signInwithGoogle();
+            print('doing stuff');
+          } catch (e) {
+            if (e is FirebaseAuthException) {
+              showMessage(e.message);
+            }
+          }
+          setState(() {
+            isLoading = false;
+          });
+        },
+
+      ),
+    ) : CircularProgressIndicator();
+  }
+
+  void showMessage(String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Error"),
+            content: Text(message),
+            actions: [
+              TextButton(
+                child: Text("Ok"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
   }
 }

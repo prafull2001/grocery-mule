@@ -7,6 +7,7 @@ import 'package:smart_shopper/screens/lists.dart';
 import 'package:smart_shopper/screens/createlist.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+
 void main() async {
   // Ensure that Firebase is initialized
   WidgetsFlutterBinding.ensureInitialized();
