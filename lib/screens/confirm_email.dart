@@ -40,6 +40,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
           centerTitle: true,
           title: const Text('Email Confirmation'),
           backgroundColor: const Color(0xFFf57f17),
+          automaticallyImplyLeading: false,
         ),
         body: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -51,7 +52,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                 children: <Widget>[
                   Flexible(
                     child: Text(
-                      'You are in! Just one more step...',
+                      'You\'re in! Just one more step...',
                       style: TextStyle(
                         fontSize: 40.0,
                         fontWeight: FontWeight.w900,
@@ -64,10 +65,10 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                 children: <Widget>[
                   Flexible(
                     child: Text(
-                      'Please verify your email account before you continue!',
+                      'Please check your inbox and verify your email account before you continue!',
                       style: TextStyle(
                         fontSize: 30.0,
-                        fontWeight: FontWeight.w100,
+                        fontWeight: FontWeight.w200,
                       ),
                     ),
                   ),
