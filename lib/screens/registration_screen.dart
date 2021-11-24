@@ -3,6 +3,7 @@ import 'package:smart_shopper/components/rounded_ button.dart';
 import 'package:smart_shopper/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_shopper/database/updateListData.dart';
+import 'package:smart_shopper/screens/confirm_email.dart';
 import 'package:smart_shopper/screens/lists.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -31,7 +32,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             Row(
               children: <Widget>[
                 Text(
-                  'Log In',
+                  'Register',
                   style: TextStyle(
                     fontSize: 40.0,
                     fontWeight: FontWeight.w900,
@@ -109,12 +110,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         email: email,
                         password: password,
                     );
-
                     if (userCredential != null){
-                      //app always hangs at this spot, could be something to do with the asynchrony?
                       print(email + ' ' + firstName + ' ' + lastName);
+                      await Navigator.pushNamed(context, ConfirmEmailScreen.id);
                       await DatabaseService(userID: email).initializeUserData(firstName, lastName, email);
-                      print('moving to lists screen');
                       Navigator.pop(context);
                       Navigator.pushNamed(context, ListsScreen.id);
                     }
@@ -122,7 +121,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     print(e);
                   }
                 }
-            )
+            ),
+
           ],
         ),
       ),
