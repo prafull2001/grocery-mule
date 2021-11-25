@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_shopper/components/rounded_ button.dart';
 import 'package:smart_shopper/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:smart_shopper/screens/confirm_email.dart';
 import 'package:smart_shopper/screens/lists.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -78,8 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async{
                 try {
                   final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
-                  if (user != null){
+                  if (user != null && user.user.emailVerified){
                     debugPrint('User signed in');
+                    Navigator.pushNamed(context, ListsScreen.id);
+                  } else if (!(user.user.emailVerified)){
+                    await Navigator.pushNamed(context, ConfirmEmailScreen.id);
                     Navigator.pushNamed(context, ListsScreen.id);
                   }
                 } on FirebaseAuthException catch (e){

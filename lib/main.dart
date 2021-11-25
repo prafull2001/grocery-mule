@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_shopper/screens/confirm_email.dart';
 import 'package:smart_shopper/screens/user_info.dart';
 import 'package:smart_shopper/screens/welcome_screen.dart';
 import 'package:smart_shopper/screens/login_screen.dart';
@@ -35,6 +36,7 @@ class SmartShopper extends StatelessWidget {
         ListsScreen.id: (context) => ListsScreen(),
         CreateListScreen.id: (context) => CreateListScreen(null),
         UserInfoScreen.id: (context) => UserInfoScreen(),
+        ConfirmEmailScreen.id: (context) => ConfirmEmailScreen(),
       },
     );
   }
