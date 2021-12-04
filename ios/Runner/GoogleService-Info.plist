@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>281444330747-6n70e7c0pmg6pjqrcfl60vkkrs4m4jqf.apps.googleusercontent.com</string>
+	<string>656233033461-csgdsik1g456af2cfsfosbn4h9hsope4.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.281444330747-6n70e7c0pmg6pjqrcfl60vkkrs4m4jqf</string>
+	<string>com.googleusercontent.apps.656233033461-csgdsik1g456af2cfsfosbn4h9hsope4</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAaN4bUchigZACzmhgLz2NBnWApzk4OxVQ</string>
+	<string>AIzaSyB_oa6OnlimIROhDdWbNZiPwtU6q7TssMM</string>
 	<key>GCM_SENDER_ID</key>
-	<string>281444330747</string>
+	<string>656233033461</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>smartShopper.co</string>
+	<string>net.grocerymule.grocerymule</string>
 	<key>PROJECT_ID</key>
-	<string>smart-shopper-e7d18</string>
+	<string>grocerymule-51aab</string>
 	<key>STORAGE_BUCKET</key>
-	<string>smart-shopper-e7d18.appspot.com</string>
+	<string>grocerymule-51aab.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:281444330747:ios:21c213b1c90b25e732545e</string>
+	<string>1:656233033461:ios:99223a1abc30123d0fdfbc</string>
 </dict>
 </plist>
