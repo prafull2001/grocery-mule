@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "656233033461",
+    "project_id": "grocerymule-51aab",
+    "storage_bucket": "grocerymule-51aab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:656233033461:android:9069abd9214a46df0fdfbc",
+        "android_client_info": {
+          "package_name": "net.grocerymule.grocerymule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "656233033461-m01ahvagbudi70mnn5ldesmtd63b3iq9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrxzWQkv1JvwyEV1Gz2mnn9dl3kXPWzo0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "656233033461-m01ahvagbudi70mnn5ldesmtd63b3iq9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
