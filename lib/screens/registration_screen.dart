@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_shopper/database/updateListData.dart';
 import 'package:smart_shopper/screens/confirm_email.dart';
 import 'package:smart_shopper/screens/lists.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static String id = 'registration_screen';
@@ -20,31 +19,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String firstName;
   String lastName;
   FirebaseAuth auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  Future<UserCredential> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
-
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      final UserCredential res =
-      await auth.signInWithCredential(credential);
-      print("signed in " + res.user.displayName);
-
-      if(res.user == null)
-        return await signInWithGoogle();
-      else
-        return res;
-    } catch (e) {
-      print("Sign In Error:" + e.toString());
-      //return await signInWithGoogle();
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -152,25 +126,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             SizedBox(
               height: 24.0,
             ),
-            RoundedButton(
-                title: 'Sign in with Google',
-                color: Colors.blueAccent,
-                onPressed: ()
-                async {
-                  try {
-                    UserCredential userCredential = await signInWithGoogle();
-                    if (userCredential != null){
-                      print(email + ' ' + firstName + ' ' + lastName);
-                      await Navigator.pushNamed(context, ConfirmEmailScreen.id);
-                      await DatabaseService(userID: email).initializeUserData(firstName, lastName, email);
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, ListsScreen.id);
-                    }
-                  }  catch (e) {
-                    print(e);
-                  }
-                }
-            ),
+
           ],
         ),
       ),
