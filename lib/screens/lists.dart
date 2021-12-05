@@ -85,6 +85,9 @@ class _ListsScreenState extends State<ListsScreen> {
                       print('User signed out');
                     }
                     Navigator.pop(context);
+                    Navigator.of(context).popUntil((route){
+                      return route.settings.name == WelcomeScreen.id;
+                    });
                     Navigator.pushNamed(context, WelcomeScreen.id);
                   },
                 ),
