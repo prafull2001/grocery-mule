@@ -118,7 +118,24 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Navigator.pop(context);
                       Navigator.pushNamed(context, ListsScreen.id);
                     }
-                  }  catch (e) {
+                  } on FirebaseAuthException catch (e) {
+                    print(e);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(e.message),
+                          actions: [
+                            TextButton(
+                              child: Text("OK"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                     print(e);
                   }
                 }

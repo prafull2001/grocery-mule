@@ -87,11 +87,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.pushNamed(context, ListsScreen.id);
                   }
                 } on FirebaseAuthException catch (e){
-                  if (e.code == 'user-not-found') {
-                    print('No user found for that email.');
-                  } else if (e.code == 'wrong-password') {
-                    print('Wrong password provided for that user.');
-                  }
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(e.message),
+                          actions: [
+                            TextButton(
+                              child: Text("OK"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
                 }
               },
             )

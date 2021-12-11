@@ -106,218 +106,243 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         title: const Text('Create List'),
       ),
       body: SafeArea(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'List Name',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 100,
-                        child: TextField(
-                            keyboardType: TextInputType.text,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black),
-                            controller: _tripTitleController,
-                            onChanged: (value){
-                              tripTitle = value;
-                            }
-
-                        ),
-                      )
-                    ],
-                  )
-                ],
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Date of Trip',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
+        child: Scrollbar(
+          child: ListView(
+              padding: const EdgeInsets.all(25),
+              children: [
+                SizedBox(
+                  height: 10,
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text("${tripDate.toLocal()}".split(' ')[0]),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    RoundedButton(
-                      onPressed: () => _selectDate(context),
-                      title: 'Select Date',
-                    ),
-                  ],
-                ),
-              ]),
-              SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Description',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 100,
-                        child: TextField(
-                            keyboardType: TextInputType.emailAddress,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black),
-                            controller: _tripDescriptionController,
-                            onChanged: (value){
-                              tripDescription = value;
-                            }
-                        ),
-                      )
-                    ],
-                  )
-                ],
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Host',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'PS',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Beneficiaries',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        child: Text(
-                          'DJ AT VP',
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'List Name',
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 20,
                           ),
                         ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 100,
+                          child: TextField(
+                              keyboardType: TextInputType.text,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.black),
+                              controller: _tripTitleController,
+                              onChanged: (value){
+                                tripTitle = value;
+                              }
+
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 40,
+                ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Date of Trip',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
                       ),
-                      //TODO: Add users to list of beneficiaries when + button is pressed
-                      Container(
-                          child: IconButton(icon: const Icon(Icons.add_circle))),
                     ],
                   ),
-                ],
-              ),
-              SizedBox(
-                height: 60,
-                child: Divider(
-                  color: Colors.black,
-                  thickness: 1.5,
-                  indent: 75,
-                  endIndent: 75,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text("${tripDate.toLocal()}".split(' ')[0]),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      RoundedButton(
+                        onPressed: () => _selectDate(context),
+                        title: 'Select Date',
+                      ),
+                    ],
+                  ),
+                ]),
+                SizedBox(
+                  height: 20,
                 ),
-              ),
-              Container(
-                height: 70,
-                width: 150,
-                child: RoundedButton(
-                  onPressed: () {
-                    final listData = ListData(tripTitle, tripDescription, tripDate, trip_id);
-                    Navigator.pop(context, listData);
-                  },
-                  title: "Create List",
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Description',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 100,
+                          child: TextField(
+                              keyboardType: TextInputType.emailAddress,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.black),
+                              controller: _tripDescriptionController,
+                              onChanged: (value){
+                                tripDescription = value;
+                              }
+                          ),
+                        )
+                      ],
+                    )
+                  ],
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                height: 70,
-                width: 150,
-                child: RoundedButton(
-                  onPressed: () {
-                    delete(trip_id);
-                    Navigator.pop(context);
-                  },
-                  title: "Delete List",
+                SizedBox(
+                  height: 40,
                 ),
-              )
-            ],
-          ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Host',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'PS',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 40,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Beneficiaries',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          child: Text(
+                            'DJ AT VP',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        //TODO: Add users to list of beneficiaries when + button is pressed
+                        Container(
+                            child: IconButton(icon: const Icon(Icons.add_circle))),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 60,
+                  child: Divider(
+                    color: Colors.black,
+                    thickness: 1.5,
+                    indent: 75,
+                    endIndent: 75,
+                  ),
+                ),
+                Container(
+                  height: 70,
+                  width: 5,
+                  child: RoundedButton(
+                    onPressed: () {
+                      if(tripTitle != '') {
+                        final listData = ListData(
+                            tripTitle, tripDescription, tripDate, trip_id);
+                        Navigator.pop(context, listData);
+                      }else{
+                        print("triggered");
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("List name cannot be empty"),
+                              actions: [
+                                TextButton(
+                                  child: Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
+                    title: "Create List",
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () {
+                      delete(trip_id);
+                      Navigator.pop(context);
+                    },
+                    title: "Delete List",
+                  ),
+                )
+              ],
+            ),
+        ),
       ),
     );
   }
