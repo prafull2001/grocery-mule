@@ -299,8 +299,29 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   width: 5,
                   child: RoundedButton(
                     onPressed: () {
-                      final listData = ListData(tripTitle, tripDescription, tripDate, trip_id);
-                      Navigator.pop(context, listData);
+                      if(tripTitle != '') {
+                        final listData = ListData(
+                            tripTitle, tripDescription, tripDate, trip_id);
+                        Navigator.pop(context, listData);
+                      }else{
+                        print("triggered");
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("List name cannot be empty"),
+                              actions: [
+                                TextButton(
+                                  child: Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     },
                     title: "Create List",
                   ),
