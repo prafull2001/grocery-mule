@@ -10,7 +10,7 @@ class DatabaseService {
   final CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
   final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
 
-  Future createListData(ShoppingTrip new_trip) async{
+  Future createShoppingTrip(ShoppingTrip new_trip) async{
     return await tripCollection.doc(new_trip.uuid).set({
       'uuid': new_trip.uuid,
       'date': new_trip.date,

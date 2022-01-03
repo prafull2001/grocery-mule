@@ -39,7 +39,7 @@ class _ListsScreenState extends State<ListsScreen> {
       var host = 'cringe';
       var beneficiaries = ['cringo', 'cringo', 'cringo'];
       ShoppingTrip new_trip = new ShoppingTrip(tripTitle, tripDate, tripDescription, host, beneficiaries);
-      await DatabaseService(uuid: curUser.uid).createListData(new_trip);
+      await DatabaseService(uuid: curUser.uid).createShoppingTrip(new_trip);
     } catch (e) {
       print(e.toString());
     }
