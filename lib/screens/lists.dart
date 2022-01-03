@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_shopper/components/rounded_ button.dart';
-import 'package:smart_shopper/constants.dart';
-import 'package:smart_shopper/screens/createlist.dart';
-import 'package:smart_shopper/screens/welcome_screen.dart';
+import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/screens/createlist.dart';
+import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:smart_shopper/classes/ListData.dart';
-import 'package:smart_shopper/database/updateListData.dart';
-import 'package:smart_shopper/screens/user_info.dart';
+import 'package:grocery_mule/classes/ListData.dart';
+import 'package:grocery_mule/classes/data_structures.dart';
+import 'package:grocery_mule/database/updateListData.dart';
+import 'package:grocery_mule/screens/user_info.dart';
 
 
 
@@ -32,12 +33,13 @@ class _ListsScreenState extends State<ListsScreen> {
     super.initState();
   }
 
-  void updateGridView(String tripTitle, String tripDescription,
-      DateTime tripDate, String unique_id) async {
+  void updateGridView(String tripTitle, String tripDescription, DateTime tripDate) async {
     try {
-      ListData data = new ListData(
-          tripTitle, tripDescription, tripDate, unique_id);
-      await DatabaseService(userID: curUser.email).createListData(data);
+      // ListData data = new ListData(tripTitle, tripDescription, tripDate, unique_id);
+      var host = 'cringe';
+      var beneficiaries = ['cringo', 'cringo', 'cringo'];
+      ShoppingTrip new_trip = new ShoppingTrip(tripTitle, tripDate, tripDescription, host, beneficiaries);
+      await DatabaseService(uuid: curUser.uid).createListData(new_trip);
     } catch (e) {
       print(e.toString());
     }
@@ -96,9 +98,7 @@ class _ListsScreenState extends State<ListsScreen> {
           ),
 
           body: StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('users_test').doc(
-                  curUser.email).collection('shopping_trips')
-                  .snapshots(),
+              stream: FirebaseFirestore.instance.collection('shopping_trips_test').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
                 if(streamSnapshot.data == null) return CircularProgressIndicator();
                 return SafeArea(
@@ -126,33 +126,30 @@ class _ListsScreenState extends State<ListsScreen> {
                         ),
                         child: ListTile(
                           title: Text(
-                            '\n${streamSnapshot.data.docs[index]['trip_title']}\n'
-                                '${streamSnapshot.data.docs[index]['trip_description']}\n\n'
-                                '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().month}'+
+                            '\n${streamSnapshot.data.docs[index]['title']}\n'
+                                '${streamSnapshot.data.docs[index]['description']}\n\n'
+                                '${(streamSnapshot.data.docs[index]['date'] as Timestamp).toDate().month}'+
                                 '/'+
-                                '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().day}'+
+                                '${(streamSnapshot.data.docs[index]['date'] as Timestamp).toDate().day}'+
                                 '/'+
-                                '${(streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate().year}',
+                                '${(streamSnapshot.data.docs[index]['date'] as Timestamp).toDate().year}',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 15,
                             ),
                           ),
                           onTap: () async {
-                            ListData curList = new ListData(streamSnapshot.data.docs[index]['trip_title'],
-                                streamSnapshot.data.docs[index]['trip_description'],
+                            ShoppingTrip cur_trip = new ShoppingTrip(streamSnapshot.data.docs[index]['trip_title'],
                                 (streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate(),
-                                streamSnapshot.data.docs[index].id);
+                                streamSnapshot.data.docs[index]['trip_description'],
+                                '', []);
                             //check if the curData's field is null, if so, set flag
                             final updatedData = await Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) => CreateListScreen(curList))
+                                MaterialPageRoute(builder: (context) => CreateListScreen(cur_trip))
                             );
                             if (updatedData != null) {
-                              updateGridView(
-                                  updatedData.name, updatedData.description,
-                                  updatedData.date, updatedData.unique_id);
+                              updateGridView(cur_trip.title, cur_trip.description, cur_trip.date);
                             } else {
                               print('no changes made to be saved!');
                             }
@@ -172,11 +169,11 @@ class _ListsScreenState extends State<ListsScreen> {
             child: FloatingActionButton(
               child: const Icon(Icons.add),
               onPressed: () async {
-                final listData = await Navigator.push(
+                final shopping_trip = await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => CreateListScreen(null))
                 );
-                updateGridView(listData.name, listData.description, listData.date, listData.unique_id);
+                updateGridView(shopping_trip.name, shopping_trip.description, shopping_trip.date);
               },
             ),
           ),

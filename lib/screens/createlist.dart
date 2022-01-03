@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_shopper/components/rounded_ button.dart';
-import 'package:smart_shopper/constants.dart';
+import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:grocery_mule/constants.dart';
 import 'dart:async';
-import 'package:smart_shopper/screens/lists.dart';
-import 'package:smart_shopper/classes/ListData.dart';
+import 'package:grocery_mule/screens/lists.dart';
+import 'package:grocery_mule/classes/ListData.dart';
+import 'package:grocery_mule/classes/data_structures.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,26 +14,21 @@ class CreateListScreen extends StatefulWidget {
   String initTitle;
   String initDescription;
   DateTime initDate;
-  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
-  String unique_id;
 
-  //creatList has the ids
-  //when creatlist has a list that's aleady filled
+  //createList has the ids
+  //when createList has a list that's already filled
   //keep a field of the original id, but generate a new id
   //in the return variable
-  CreateListScreen(ListData data){
-    if(data == null){
+  CreateListScreen(ShoppingTrip trip) {
+    if(trip == null){
       initTitle = "";
       initDescription = "";
       initDate = DateTime.now();
-      String dateID = dateFormat.format(DateTime.now());
-      unique_id = "LISTID:" + dateID.replaceAll(' ', '');
       //we are creating new list
     } else {
-      initTitle = data.name;
-      initDescription = data.description;
-      initDate = data.date;
-      unique_id = data.unique_id;
+      initTitle = trip.title;
+      initDescription = trip.description;
+      initDate = trip.date;
       //if the data already exits, then we are just updating it
     }
   }
@@ -48,15 +44,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   String trip_id;
   var _tripTitleController;
   var _tripDescriptionController;
-  final String userID = FirebaseAuth.instance.currentUser.email;
+  final String userID = FirebaseAuth.instance.currentUser.uid;
+
 
   Future<void> delete(String listId) async{
     print(listId);
     await FirebaseFirestore.instance
-        .collection('users_test')
+        .collection('shopping_trips_test')
         .doc(userID)
-        .collection('shopping_trips')
-        .doc(listId)
         .delete()
         .then((value) => print('deleted'))
         .catchError((error)=>print("failed"))
@@ -71,7 +66,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     tripTitle =  widget.initTitle;
     tripDescription = widget.initDescription;
     tripDate = widget.initDate;
-    trip_id = widget.unique_id;
     super.initState();
   }
 

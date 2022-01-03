@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_shopper/components/rounded_ button.dart';
-import 'package:smart_shopper/constants.dart';
+import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:grocery_mule/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:smart_shopper/screens/confirm_email.dart';
-import 'package:smart_shopper/screens/lists.dart';
+import 'package:grocery_mule/screens/confirm_email.dart';
+import 'package:grocery_mule/screens/lists.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = 'login_screen';
