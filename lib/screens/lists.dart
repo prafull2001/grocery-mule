@@ -139,9 +139,9 @@ class _ListsScreenState extends State<ListsScreen> {
                             ),
                           ),
                           onTap: () async {
-                            ShoppingTrip cur_trip = new ShoppingTrip(streamSnapshot.data.docs[index]['trip_title'],
-                                (streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate(),
-                                streamSnapshot.data.docs[index]['trip_description'],
+                            ShoppingTrip cur_trip = new ShoppingTrip(streamSnapshot.data.docs[index]['title'],
+                                (streamSnapshot.data.docs[index]['date'] as Timestamp).toDate(),
+                                streamSnapshot.data.docs[index]['description'],
                                 '', []);
                             //check if the curData's field is null, if so, set flag
                             final updatedData = await Navigator.push(
