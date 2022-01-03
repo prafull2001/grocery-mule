@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:smart_shopper/components/rounded_ button.dart';
-import 'package:smart_shopper/constants.dart';
+import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:grocery_mule/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:smart_shopper/database/updateListData.dart';
-import 'package:smart_shopper/screens/lists.dart';
+import 'package:grocery_mule/database/updateListData.dart';
+import 'package:grocery_mule/screens/lists.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 
@@ -26,10 +26,11 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final CollectionReference userTestingCollection = FirebaseFirestore.instance.collection('users_test');
+    final CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
-          future: userTestingCollection.doc(curUser.email).get(),
+          future: userCollection.doc(curUser.uid).get(),
           builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
             String prevEmail;
             String prevFirst;
@@ -91,7 +92,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         onPressed: ()
                         async {
                           try {
-                            await DatabaseService(userID: curUser.email).updateUserData(firstName, lastName, email);
+                            await DatabaseService(uuid: curUser.uid).updateUserData(firstName, lastName, email);
                             print('moving to lists screen');
                             Navigator.pop(context);
                           }  catch (e) {

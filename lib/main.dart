@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_shopper/screens/confirm_email.dart';
-import 'package:smart_shopper/screens/user_info.dart';
-import 'package:smart_shopper/screens/welcome_screen.dart';
-import 'package:smart_shopper/screens/login_screen.dart';
-import 'package:smart_shopper/screens/registration_screen.dart';
-import 'package:smart_shopper/screens/lists.dart';
-import 'package:smart_shopper/screens/createlist.dart';
+import 'package:grocery_mule/screens/confirm_email.dart';
+import 'package:grocery_mule/screens/user_info.dart';
+import 'package:grocery_mule/screens/welcome_screen.dart';
+import 'package:grocery_mule/screens/login_screen.dart';
+import 'package:grocery_mule/screens/registration_screen.dart';
+import 'package:grocery_mule/screens/lists.dart';
+import 'package:grocery_mule/screens/createlist.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
