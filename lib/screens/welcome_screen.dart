@@ -68,7 +68,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 Text(
                   'GroceryMule',
                   style: TextStyle(
-                    fontSize: 40.0,
+                    fontSize: 35.0,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
