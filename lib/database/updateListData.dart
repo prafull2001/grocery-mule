@@ -22,6 +22,18 @@ class DatabaseService {
       'receipt:': new_trip.items,
     });
   }
+  Future updateShoppingTrip(ShoppingTrip new_trip) async{
+    return await tripCollection.doc(new_trip.uuid).update({
+      'uuid': new_trip.uuid,
+      'date': new_trip.date,
+      'title': new_trip.title,
+      'description': new_trip.description,
+      'host': new_trip.host,
+      'beneficiaries': new_trip.beneficiaries,
+      'items': new_trip.items,
+      'receipt:': new_trip.items,
+    });
+  }
   Future updateUserData(String first, String last, String email) async{
     print(uuid);
     return await userTestingCollection.doc(uuid).update({
