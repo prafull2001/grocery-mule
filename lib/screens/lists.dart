@@ -33,13 +33,18 @@ class _ListsScreenState extends State<ListsScreen> {
     super.initState();
   }
 
-  void updateGridView(String tripTitle, String tripDescription, DateTime tripDate) async {
+  void updateGridView(String tripTitle, String tripDescription, DateTime tripDate, String temp_uuid, bool new_trip) async {
     try {
       // ListData data = new ListData(tripTitle, tripDescription, tripDate, unique_id);
       var host = 'cringe';
       var beneficiaries = ['cringo', 'cringo', 'cringo'];
-      ShoppingTrip new_trip = new ShoppingTrip(tripTitle, tripDate, tripDescription, host, beneficiaries);
-      await DatabaseService(uuid: curUser.uid).createShoppingTrip(new_trip);
+      ShoppingTrip temp_trip = new ShoppingTrip(tripTitle, tripDate, tripDescription, host, beneficiaries);
+      temp_trip.uuid = temp_uuid;
+      if(new_trip) {
+        await DatabaseService(uuid: temp_uuid).createShoppingTrip(temp_trip);
+      } else {
+        await DatabaseService(uuid: temp_uuid).updateShoppingTrip(temp_trip);
+      }
     } catch (e) {
       print(e.toString());
     }
@@ -139,17 +144,20 @@ class _ListsScreenState extends State<ListsScreen> {
                             ),
                           ),
                           onTap: () async {
-                            ShoppingTrip cur_trip = new ShoppingTrip(streamSnapshot.data.docs[index]['trip_title'],
-                                (streamSnapshot.data.docs[index]['trip_date'] as Timestamp).toDate(),
-                                streamSnapshot.data.docs[index]['trip_description'],
-                                '', []);
+                            ShoppingTrip cur_trip = new ShoppingTrip(streamSnapshot.data.docs[index]['title'],
+                                (streamSnapshot.data.docs[index]['date'] as Timestamp).toDate(),
+                                streamSnapshot.data.docs[index]['description'],
+                                curUser.uid, []);
+                            cur_trip.uuid = streamSnapshot.data.docs[index]['uuid'];
+                            print("lists.dart method (uuid): "+cur_trip.uuid);
                             //check if the curData's field is null, if so, set flag
+                            //print("rig rag shig shag: "+cur_trip.uuid);
                             final updatedData = await Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => CreateListScreen(cur_trip))
                             );
                             if (updatedData != null) {
-                              updateGridView(cur_trip.title, cur_trip.description, cur_trip.date);
+                              updateGridView(updatedData.title, updatedData.description, updatedData.date, cur_trip.uuid, false);
                             } else {
                               print('no changes made to be saved!');
                             }
@@ -171,9 +179,9 @@ class _ListsScreenState extends State<ListsScreen> {
               onPressed: () async {
                 final shopping_trip = await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CreateListScreen(null))
+                    MaterialPageRoute(builder: (context) => CreateListScreen(new ShoppingTrip('', new DateTime.now(), '', curUser.uid, [])))
                 );
-                updateGridView(shopping_trip.name, shopping_trip.description, shopping_trip.date);
+                updateGridView(shopping_trip.title, shopping_trip.description, shopping_trip.date, shopping_trip.uuid, true);
               },
             ),
           ),

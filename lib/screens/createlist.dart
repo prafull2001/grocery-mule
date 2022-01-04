@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateListScreen extends StatefulWidget {
   static String id = 'create_list_screen';
+  String uuid;
   String initTitle;
   String initDescription;
   DateTime initDate;
@@ -20,17 +21,11 @@ class CreateListScreen extends StatefulWidget {
   //keep a field of the original id, but generate a new id
   //in the return variable
   CreateListScreen(ShoppingTrip trip) {
-    if(trip == null){
-      initTitle = "";
-      initDescription = "";
-      initDate = DateTime.now();
-      //we are creating new list
-    } else {
-      initTitle = trip.title;
-      initDescription = trip.description;
-      initDate = trip.date;
-      //if the data already exits, then we are just updating it
-    }
+    initTitle = trip.title;
+    initDescription = trip.description;
+    initDate = trip.date;
+    uuid = trip.uuid;
+    print("createlist.dart constructor (uuid): "+uuid);
   }
 
   @override
@@ -47,11 +42,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   final String userID = FirebaseAuth.instance.currentUser.uid;
 
 
-  Future<void> delete(String listId) async{
-    print(listId);
+  Future<void> delete(String tripID) async{
     await FirebaseFirestore.instance
         .collection('shopping_trips_test')
-        .doc(userID)
+        .doc(tripID)
         .delete()
         .then((value) => print('deleted'))
         .catchError((error)=>print("failed"))
@@ -63,6 +57,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     // TODO: implement initState
     _tripTitleController = TextEditingController()..text = widget.initTitle;
     _tripDescriptionController = TextEditingController()..text = widget.initDescription;
+    trip_id = widget.uuid;
     tripTitle =  widget.initTitle;
     tripDescription = widget.initDescription;
     tripDate = widget.initDate;
@@ -294,9 +289,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   child: RoundedButton(
                     onPressed: () {
                       if(tripTitle != '') {
-                        final listData = ListData(
-                            tripTitle, tripDescription, tripDate, trip_id);
-                        Navigator.pop(context, listData);
+                        var shopping_trip = new ShoppingTrip(tripTitle, tripDate, tripDescription, userID, []);
+                        shopping_trip.uuid = trip_id;
+                        // print("createlist.dart method (uuid): "+shopping_trip.uuid);
+                        // final listData = ListData(tripTitle, tripDescription, tripDate, trip_id);
+                        Navigator.pop(context, shopping_trip);
                       }else{
                         print("triggered");
                         showDialog(
