@@ -72,6 +72,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                     fontWeight: FontWeight.w900,
                   ),
                 ),
+                Container(
+                  child: Image.asset('images/logo.png'),
+                  height: 100.0,
+                ),
               ],
             ),
             SizedBox(
