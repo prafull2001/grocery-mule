@@ -47,6 +47,7 @@ class _GroceryMuleState extends State<GroceryMule>{
         primaryColorLight: const Color(0xFFffb04c),
         accentColor: const Color(0xFFbf360c),
         scaffoldBackgroundColor: const Color(0xFFffe0b2),
+        canvasColor: const Color(0xFFffe0b2)
       ),
       home: home,
       routes: {
