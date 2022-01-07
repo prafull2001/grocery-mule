@@ -16,6 +16,7 @@ dependencies:
   flutter_spinkit: ^5.1.0
   google_sign_in: ^5.1.0
   uuid: 3.0.5
+  number_inc_dec: ^0.8.0
 
 dev_dependencies:
   flutter_test:

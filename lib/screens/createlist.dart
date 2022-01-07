@@ -8,6 +8,7 @@ import 'package:grocery_mule/classes/ListData.dart';
 import 'package:grocery_mule/classes/data_structures.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:number_inc_dec/number_inc_dec.dart';
 
 class CreateListScreen extends StatefulWidget {
   static String id = 'create_list_screen';
@@ -87,6 +88,116 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       });
   }
 
+  Widget simple_item(){
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: Colors.amberAccent
+      ),
+
+      child: (
+        Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Container(
+            child: Text(
+              'Apple',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+              ),
+            ),
+            padding: EdgeInsets.all(20),
+          ),
+          Container(
+            child: Text(
+              'x7',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+              ),
+            ),
+          ),
+          Container(
+              child: IconButton(
+                  icon: const Icon(Icons.expand_more_sharp)
+              )
+          ),
+        ],
+      )),
+    );
+  }
+  Widget quant(){
+    return NumberInputWithIncrementDecrement(
+      controller: TextEditingController(),
+    );
+  }
+  Widget indie_item(){
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Container(
+            child: Text(
+            'Harry',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              ),
+            ),
+            padding: EdgeInsets.all(20),
+          ),
+          Container(
+            child: quant(),
+            padding: EdgeInsets.all(20),
+          ),
+        ]
+      ),
+    );
+  }
+  Widget expanded_item(){
+    return Container(
+      decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.amberAccent
+      ),
+
+      child: Column(
+        children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  child: Text(
+                    'Apple',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                  padding: EdgeInsets.all(20),
+                ),
+                Container(
+                  child: Text(
+                    'x7',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                Container(
+                    child: IconButton(
+                        icon: const Icon(Icons.expand_less_sharp)
+                    )
+                ),
+              ],
+            ),
+         // indie_item(),
+        ],
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,6 +394,52 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     endIndent: 75,
                   ),
                 ),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      child: Text(
+                        'Add Item',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    Container(
+                        child: IconButton(
+                            icon: const Icon(Icons.add_circle)
+                        )
+                    ),
+                  ],
+                ),
+                simple_item(),
+                expanded_item(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 70,
+                      width: 150,
+                      child: RoundedButton(
+                        onPressed: () {
+
+                        },
+                        title: "Master List",
+                      ),
+                    ),
+                    Container(
+                      height: 70,
+                      width: 150,
+                      child: RoundedButton(
+                        onPressed: () {
+                          //go master list page
+                        },
+                        title: "Personal List",
+                      ),
+                    )
+                  ],
+                ),
                 Container(
                   height: 70,
                   width: 5,
@@ -314,7 +471,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         );
                       }
                     },
-                    title: "Create List",
+                    title: "Create/Update List",
                   ),
                 ),
                 SizedBox(
