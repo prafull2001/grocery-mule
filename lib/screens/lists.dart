@@ -58,6 +58,7 @@ class _ListsScreenState extends State<ListsScreen> {
           appBar: AppBar(
             centerTitle: true,
             title: const Text('Grocery Lists'),
+            backgroundColor: const Color(0xFFbc5100),
           ),
           drawer: Drawer(
             child: ListView(
@@ -65,14 +66,13 @@ class _ListsScreenState extends State<ListsScreen> {
               children: [
                 const DrawerHeader(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFf57f17),
+                    color: const Color(0xFFbc5100),
                   ),
                   child: Text(
                     'Menu Options',
                     style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 20
                     ),
                   ),
                 ),
