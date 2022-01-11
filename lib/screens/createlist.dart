@@ -204,6 +204,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Create List'),
+        backgroundColor: const Color(0xFFbc5100),
       ),
       body: SafeArea(
         child: Scrollbar(
