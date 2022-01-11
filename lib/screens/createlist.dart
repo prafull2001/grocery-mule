@@ -9,6 +9,7 @@ import 'package:grocery_mule/classes/data_structures.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
+typedef StringVoidFunc = void Function(String,int);
 
 class CreateListScreen extends StatefulWidget {
   static String id = 'create_list_screen';
@@ -32,7 +33,18 @@ class CreateListScreen extends StatefulWidget {
   @override
   _CreateListsScreenState createState() => _CreateListsScreenState();
 }
-
+class Item_front_end {
+  int expand;
+  Map<String,int> quantity;
+  String food;
+  int id;
+  Item_front_end(int id,String name){  //pass in list of beneficiaries, food
+    expand = 0;
+    quantity = {'Harry':0,'Praf':0,'Dhruv':0};
+    food = name;
+    this.id = id;
+  }
+}
 class _CreateListsScreenState extends State<CreateListScreen> {
   String tripTitle;
   String tripDescription;
@@ -41,8 +53,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   var _tripTitleController;
   var _tripDescriptionController;
   final String userID = FirebaseAuth.instance.currentUser.uid;
-
-
+  Map<int,Item_front_end> grocery_list = {0:new Item_front_end(0,"apple")};
+  static int item_id = 1;
+  bool isAdd = false;
   Future<void> delete(String tripID) async{
     await FirebaseFirestore.instance
         .collection('shopping_trips_test')
@@ -87,59 +100,117 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         tripDate = picked;
       });
   }
+  void add_item(String food){
+    Item_front_end new_item = new Item_front_end(item_id,food);
+    if(grocery_list[item_id] == null) {
+      setState(() {
+        grocery_list[item_id] = new_item;
+        item_id++;
+        //update backend here
+      });
+    }
+    else
+      print("item already exists");
+  }
 
-  Widget simple_item(){
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: Colors.amberAccent
+  void delete_item(int id){
+
+    if(grocery_list[id] != null) {
+      setState(() {
+        grocery_list.remove(id);
+        //update backend here
+      });
+    }
+
+  }
+  Widget simple_item(Item_front_end item){
+    String food = item.food;
+    int quantity = 0;
+    item.quantity.forEach((key, value) {
+      quantity = quantity + value;
+    });
+
+    return Dismissible(
+      key: Key(item.food),
+      onDismissed: (direction) {
+        // Remove the item from the data source.
+        setState(() {
+          delete_item(item.id);
+        });
+      },
+      confirmDismiss: (DismissDirection direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Confirm"),
+              content: const Text("Are you sure you wish to delete this item?"),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text("DELETE")
+                ),
+                FlatButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text("CANCEL"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.amberAccent
+        ),
+
+        child: (
+          Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Container(
+              child: Text(
+                '$food',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                ),
+              ),
+              padding: EdgeInsets.all(20),
+            ),
+            Container(
+              child: Text(
+                'x$quantity',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            Container(
+                child: IconButton(
+                    icon: const Icon(Icons.expand_more_sharp),
+                    onPressed:
+                        () =>(
+                        setState(() { item.expand = 1;}))
+                )
+            ),
+          ],
+        )),
       ),
+      background: Container(color: Colors.red),
+    );
+  }
 
-      child: (
-        Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Container(
-            child: Text(
-              'Apple',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-              ),
-            ),
-            padding: EdgeInsets.all(20),
-          ),
-          Container(
-            child: Text(
-              'x7',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-              ),
-            ),
-          ),
-          Container(
-              child: IconButton(
-                  icon: const Icon(Icons.expand_more_sharp)
-              )
-          ),
-        ],
-      )),
-    );
-  }
-  Widget quant(){
-    return NumberInputWithIncrementDecrement(
-      controller: TextEditingController(),
-    );
-  }
-  Widget indie_item(){
+  Widget indie_item(String name, int number,StringVoidFunc callback){
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Container(
             child: Text(
-            'Harry',
+            '$name',
             style: TextStyle(
               color: Colors.black,
               fontSize: 20,
@@ -148,14 +219,38 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             padding: EdgeInsets.all(20),
           ),
           Container(
-            child: quant(),
-            padding: EdgeInsets.all(20),
+            child:
+              NumberInputWithIncrementDecrement(
+                initialValue: number,
+                controller: TextEditingController(),
+                onIncrement: (num newlyIncrementedValue) {
+                  callback(name,newlyIncrementedValue);
+                },
+                onDecrement: (num newlyDecrementedValue) {
+                  callback(name,newlyDecrementedValue);
+                },
+              ),
+            height: 60,
+            width: 105,
+
           ),
         ]
       ),
+
     );
   }
-  Widget expanded_item(){
+
+  Widget expanded_item(Item_front_end item){
+    String food = item.food;
+    int quantity = 0;
+    item.quantity.forEach((key, value) {
+      quantity = quantity + value;
+    });
+    void updateUsrQuantity(String name, int number){
+      setState(() {
+        item.quantity[name] = number;
+      });
+    };
     return Container(
       decoration: BoxDecoration(
           shape: BoxShape.rectangle,
@@ -169,7 +264,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               children: [
                 Container(
                   child: Text(
-                    'Apple',
+                    '$food',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 20,
@@ -179,7 +274,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 ),
                 Container(
                   child: Text(
-                    'x7',
+                    'x$quantity',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 20,
@@ -188,14 +283,86 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 ),
                 Container(
                     child: IconButton(
-                        icon: const Icon(Icons.expand_less_sharp)
+                        icon: const Icon(Icons.expand_less_sharp),
+                      onPressed:
+                        () =>(
+                        setState(() {item.expand = 0;}))
                     )
                 ),
               ],
             ),
-         // indie_item(),
+          for(var entry in item.quantity.entries)
+            indie_item(entry.key,entry.value,updateUsrQuantity)
         ],
       ),
+    );
+  }
+  Widget single_item(Item_front_end test){
+
+    return (
+        (test.expand == 1)?expanded_item(test)
+        : simple_item(test)
+    );
+  }
+
+  Widget create_item(){
+     String food = '';
+     return Container(
+      decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: Colors.amberAccent
+      ),
+
+      child: (
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Container(
+                child: Text(
+                  'Enter Item',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+                padding: EdgeInsets.all(20),
+              ),
+              Container(
+                height: 45,
+                width: 100,
+                child: TextField(
+                    decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'EX: Apple',
+                    ),
+                    onChanged: (text) {
+                      food = text;
+                    },
+                 ),
+              ),
+              Container(
+                  child: IconButton(
+                      icon: const Icon(Icons.add_circle),
+                      onPressed:
+                          () {
+                            if (food != '')
+                              setState(() {
+                                add_item(food);
+                                isAdd = false;
+                              });
+                          }
+                  )
+              ),
+              Container(
+                  child: IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed:
+                          () =>(
+                          setState(() {isAdd = false; }))
+                  )
+              ),
+            ],
+          )),
     );
   }
   @override
@@ -409,13 +576,21 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     ),
                     Container(
                         child: IconButton(
-                            icon: const Icon(Icons.add_circle)
+                            icon: const Icon(Icons.add_circle),
+                          onPressed: () {
+                              setState(() {
+                                isAdd = true;
+                              });
+                          },
                         )
                     ),
                   ],
                 ),
-                simple_item(),
-                expanded_item(),
+                if(isAdd)
+                  create_item(),
+                //single_item(grocery_list[1]),
+                for(var key in grocery_list.keys)
+                  single_item(grocery_list[key]),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
