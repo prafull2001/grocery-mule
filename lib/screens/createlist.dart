@@ -60,6 +60,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   static int item_id = 1;
   bool isAdd = false;
   bool delete_list = false;
+  bool invite_guest = false;
   Future<void> delete(String tripID) async{
     await FirebaseFirestore.instance
         .collection('shopping_trips_test')
@@ -111,6 +112,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         tripDate = picked;
       });
   }
+
+  Widget add_guest(){
+
+  }
   void add_beneficiary(String name){
     if(!users.contains(name))
       setState(() {
@@ -148,8 +153,32 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         //update backend here
       });
     }
+  }
+
+  //this function returns a unique id for a
+  //new item on the list, also need to increment the next id
+  int get_item_id(){
 
   }
+
+  //called by backend to update front end item appearance
+  //usage: when one person changes a quantity on an item, it needs
+  //to be reflected on everyone's list
+  void update_front_list(int id, String person, int quantity){
+
+  }
+
+  //add in new item from backend
+  void add_list_backend(int id, String food, ){
+
+  }
+
+  //when the host invites a new bene,
+  //backend calls everyone else to update the bene list
+  void add_bene_backend(String bene){
+
+  }
+
   Widget simple_item(Item_front_end item){
     String food = item.food;
     int quantity = 0;
@@ -276,6 +305,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     void updateUsrQuantity(String name, int number){
       setState(() {
         item.quantity[name] = number;
+        //update backend here for real time change
       });
     };
     return Container(
