@@ -38,9 +38,11 @@ class Item_front_end {
   Map<String,int> quantity;
   String food;
   int id;
-  Item_front_end(int id,String name){  //pass in list of beneficiaries, food
+  Item_front_end(int id,String name,List<String> users){  //pass in list of beneficiaries, food
     expand = 0;
-    quantity = {'Harry':0,'Praf':0,'Dhruv':0};
+    quantity = {};
+    users.forEach((element) {quantity[element] = 0;});
+    //quantity = {'Harry':0,'Praf':0,'Dhruv':0};
     food = name;
     this.id = id;
   }
@@ -53,9 +55,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   var _tripTitleController;
   var _tripDescriptionController;
   final String userID = FirebaseAuth.instance.currentUser.uid;
-  Map<int,Item_front_end> grocery_list = {0:new Item_front_end(0,"apple")};
+  Map<int,Item_front_end> grocery_list = {};
+  List<String> users = [];
   static int item_id = 1;
   bool isAdd = false;
+  bool delete_list = false;
   Future<void> delete(String tripID) async{
     await FirebaseFirestore.instance
         .collection('shopping_trips_test')
@@ -75,6 +79,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     tripTitle =  widget.initTitle;
     tripDescription = widget.initDescription;
     tripDate = widget.initDate;
+    users.add(FirebaseAuth.instance.currentUser.displayName);
+    //test code
+    users.add("Praf");
+    users.add("Dhruv");
+    grocery_list = {0:new Item_front_end(0,"apple",users)};
+
+    //end test code
     super.initState();
   }
 
@@ -100,8 +111,24 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         tripDate = picked;
       });
   }
+  void add_beneficiary(String name){
+    if(!users.contains(name))
+      setState(() {
+        users.add(name);
+        //update backend here
+      });
+    else
+      print("beneficary already exists");
+  }
+  void delete_beneficiary(String name){
+    if(!users.contains(name))
+      setState(() {
+        users.remove(name);
+        //update backend here
+      });
+  }
   void add_item(String food){
-    Item_front_end new_item = new Item_front_end(item_id,food);
+    Item_front_end new_item = new Item_front_end(item_id,food,users);
     if(grocery_list[item_id] == null) {
       setState(() {
         grocery_list[item_id] = new_item;
@@ -367,6 +394,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    String host = users[0];
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -507,7 +535,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          'PS',
+                          '$host',
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 20,
@@ -537,15 +565,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          child: Text(
-                            'DJ AT VP',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
+                        for(String name in users)
+                          if(name != users[0])
+                            Container(
+                            child: Text(
+                              '$name ',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                              ),
                             ),
                           ),
-                        ),
+
                         //TODO: Add users to list of beneficiaries when + button is pressed
                         Container(
                             child: IconButton(icon: const Icon(Icons.add_circle))),
@@ -657,9 +688,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   height: 70,
                   width: 150,
                   child: RoundedButton(
-                    onPressed: () {
-                      delete(trip_id);
-                      Navigator.pop(context);
+                    onPressed: () async {
+                      await check_delete(context);
+                      if(delete_list) {
+                        delete(trip_id);
+                        Navigator.pop(context);
+                      }
                     },
                     title: "Delete List",
                   ),
@@ -668,6 +702,35 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             ),
         ),
       ),
+    );
+  }
+
+  check_delete(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm"),
+          content: const Text("Are you sure you wish to delete this item?"),
+          actions: <Widget>[
+            FlatButton(
+                onPressed: () => {
+                  delete_list = true,
+                  Navigator.of(context).pop(),
+                  },
+                child: const Text("DELETE")
+            ),
+            FlatButton(
+              onPressed: () => {
+                delete_list = false,
+                Navigator.of(context).pop(),
+
+              },
+              child: const Text("CANCEL"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
