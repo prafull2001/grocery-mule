@@ -324,39 +324,9 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
               child: StreamBuilder<QuerySnapshot>(
                 stream: getFriendData(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> listsnapshot) {
-                  if (listsnapshot.connectionState == ConnectionState.done) {
-                    List<QueryDocumentSnapshot> snapshot_data = <QueryDocumentSnapshot>[];
-                    if (listsnapshot.hasData) {
-                      snapshot_data = listsnapshot.data.docs;
-                    }
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(2),
-                      // scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: snapshot_data.length,
-                      itemBuilder: (context, int index) {
-                        return Container(
-                          child: Row(
-                            children: <Widget>[
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(snapshot_data[index]['first_name']+' '+snapshot_data[index]['last_name']),
-                                  SizedBox(height: 1.0,),
-                                  Text(snapshot_data[index]['email']),
-                                  // Text('cringelord'),
-                                ],
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.deepOrange),
-                            borderRadius: BorderRadius.all(Radius.circular(6.0)),
-                          ),
-                        );
-                      },
-                    );
+                  List<QueryDocumentSnapshot> snapshot_data = <QueryDocumentSnapshot>[];
+                  if (listsnapshot.hasData) {
+                    snapshot_data = listsnapshot.data.docs;
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.all(2.0),
