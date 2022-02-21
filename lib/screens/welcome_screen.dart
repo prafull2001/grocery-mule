@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:grocery_mule/classes/data_structures.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:grocery_mule/database/updateListData.dart';
-import 'package:grocery_mule/screens/confirm_email.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:grocery_mule/screens/lists.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -101,8 +100,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   try {
                     UserCredential userCredential = await signInWithGoogle();
                     if (userCredential != null){
-                      var new_cowboy = new Cowboy(userCredential.user.uid, firstName, lastName, email);
-                      await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
+                      context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
                       Navigator.pop(context);
                       Navigator.pushNamed(context, ListsScreen.id);
                     }

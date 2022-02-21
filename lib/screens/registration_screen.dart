@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:grocery_mule/database/updateListData.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/lists.dart';
-import 'package:grocery_mule/classes/data_structures.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static String id = 'registration_screen';
@@ -114,9 +114,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     );
                     if (userCredential != null){
                       print(email + ' ' + firstName + ' ' + lastName);
-                      var new_cowboy = new Cowboy(userCredential.user.uid, firstName, lastName, email);
+                      context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
                       await Navigator.pushNamed(context, ConfirmEmailScreen.id);
-                      await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
+                      // await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
                       Navigator.pop(context);
                       Navigator.pushNamed(context, ListsScreen.id);
                     }

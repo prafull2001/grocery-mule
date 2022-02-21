@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
+import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/screens/lists.dart';
 import 'package:grocery_mule/screens/createlist.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/screens/friend_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // Ensure that Firebase is initialized
@@ -15,7 +20,15 @@ void main() async {
   await Firebase.initializeApp();
   // Initialize Firebase
   //
-  runApp(GroceryMule());
+  runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => Cowboy()),
+          ChangeNotifierProvider(create: (_) => ShoppingTrip()),
+        ],
+        child: GroceryMule(),
+      )
+  );
 }
 
 class GroceryMule extends StatefulWidget {
@@ -55,9 +68,11 @@ class _GroceryMuleState extends State<GroceryMule>{
         LoginScreen.id: (context) => LoginScreen(),
         RegistrationScreen.id: (context) => RegistrationScreen(),
         ListsScreen.id: (context) => ListsScreen(),
-        CreateListScreen.id: (context) => CreateListScreen(null),
+        CreateListScreen.id: (context) => CreateListScreen(true),
+        EditListScreen.id: (context) => EditListScreen(null),
         UserInfoScreen.id: (context) => UserInfoScreen(),
         ConfirmEmailScreen.id: (context) => ConfirmEmailScreen(),
+        FriendScreen.id: (context) => FriendScreen(),
       },
     );
   }
