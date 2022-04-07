@@ -127,7 +127,7 @@ class ShoppingTrip with ChangeNotifier{
 
   // for initializing the trip within the database
   initializeTripDB() {
-    tripCollection.doc(_uuid).set(
+     tripCollection.doc(_uuid).set(
         {'uuid': _uuid,
           'title': _title,
           'date': _date,
@@ -136,6 +136,7 @@ class ShoppingTrip with ChangeNotifier{
           'beneficiaries': _beneficiaries,
           'items': itemsToMap(),
         });
+
   }
   // only update trip date in db
   // TODO may need to make two more similar methods for date and description

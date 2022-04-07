@@ -154,6 +154,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<ShoppingTrip>().addBeneficiary('Praf');
         context.read<ShoppingTrip>().addBeneficiary('Dhruv');
         context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
+        print(context.read<Cowboy>().shoppingTrips);
       } else {
         context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
