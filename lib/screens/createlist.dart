@@ -11,7 +11,7 @@ import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
-
+import 'dart:io';
 typedef StringVoidFunc = void Function(String,int);
 
 class CreateListScreen extends StatefulWidget {
@@ -52,6 +52,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   bool delete_list = false;
   bool invite_guest = false;
   ShoppingTrip cur_trip;
+  Map<String,String> uid_name = {};
   @override
   void initState() {
     trip_uuid = widget.trip_uuid;
@@ -87,8 +88,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         List<String> beneficiaries = <String>[];
         Map<String, Item> items = <String, Item>{};
         date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
-        ((snapshot.data() as Map<String, dynamic>)['beneficiaries'] as List<dynamic>).forEach((dynamicElement) {
-          beneficiaries.add(dynamicElement.toString());
+        (snapshot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
+          uid_name[uid.toString()] = name.toString();
         });
         ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
           items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
@@ -102,9 +103,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               (snapshot.data() as Map<String, dynamic>)['title'], date,
               (snapshot.data() as Map<String, dynamic>)['description'],
               (snapshot.data() as Map<String, dynamic>)['host'],
-              beneficiaries, items);
+              uid_name, items);
 
         });
+      }else{
+        uid_name[hostUUID] = hostFirstName;
+        uid_name['AU8H9TXaKHckfCKIjyDBWFqQRGf2'] = 'Praf';
+        uid_name['yTWmoo2Qskf3wFcbxaJYUt9qrZM2'] = 'Dhruv';
+
       }
     });
   }
@@ -142,17 +148,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     }
   }
 
-  void updateGridView(bool new_trip) async {
+  Future<void> updateGridView(bool new_trip) async {
       if(new_trip) {
         print("made here");
-        context.read<ShoppingTrip>().initializeTrip(
+        await context.read<ShoppingTrip>().initializeTrip(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
             context.read<ShoppingTrip>().description,
+            uid_name,
             curUser.uid);
-        context.read<ShoppingTrip>().addBeneficiary(hostFirstName);
-        context.read<ShoppingTrip>().addBeneficiary('Praf');
-        context.read<ShoppingTrip>().addBeneficiary('Dhruv');
+        context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
+        context.read<ShoppingTrip>().addBeneficiary('AU8H9TXaKHckfCKIjyDBWFqQRGf2','Praf');
+        context.read<ShoppingTrip>().addBeneficiary('yTWmoo2Qskf3wFcbxaJYUt9qrZM2','Dhruv');
         context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
         print(context.read<Cowboy>().shoppingTrips);
       } else {
@@ -295,13 +302,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   height: 70,
                   width: 5,
                   child: RoundedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if(context.read<ShoppingTrip>().title != '') {
-                        updateGridView(newList);
+                        await updateGridView(newList);
                         Navigator.pop(context);
                         //Navigator.pushNamed(context, ListsScreen.id);
+                        /*
                         if(newList)
                           Navigator.push(context, MaterialPageRoute(builder: (context) => EditListScreen(context.read<Cowboy>().uuid)));
+                         */
                       } else {
                         // print("triggered");
                         showDialog(

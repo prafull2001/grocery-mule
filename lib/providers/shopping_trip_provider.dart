@@ -11,24 +11,25 @@ class ShoppingTrip with ChangeNotifier{
   DateTime _date = DateTime.now();
   String _description = '';
   String _host = ''; // host uuid
-  List<String> _beneficiaries = <String>[];
+  Map<String,String> _beneficiaries = {};
   Map<String, Item> _items = <String, Item>{}; // name to item
   Receipt _receipt;
 
   // from user creation screen for metadata
-  initializeTrip(String title, DateTime date, String description, String host) {
+  Future<void> initializeTrip(String title, DateTime date, String description, Map<String,String> uid_name, String host) async {
     var uuider = Uuid();
     _uuid = uuider.v4();
     _title = title;
     _date = date;
     _description = description;
     _host = host;
+    _beneficiaries = uid_name;
     print(_date);
-    initializeTripDB();
+    await initializeTripDB();
     notifyListeners();
   }
   // takes in formatted data from snapshot to directly update the provider
-  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, List<String> beneficiaries, Map<String, Item> items) {
+  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, Map<String,String> beneficiaries, Map<String, Item> items) {
     _uuid = uuid;
     _title = title;
     _date = date;
@@ -43,7 +44,7 @@ class ShoppingTrip with ChangeNotifier{
   String get title => _title;
   DateTime get date => _date;
   String get description => _description;
-  List<String> get beneficiaries => _beneficiaries;
+  Map<String,String> get beneficiaries => _beneficiaries;
   Map<String, Item> get items => _items;
 
   // metadata editing methods
@@ -83,20 +84,24 @@ class ShoppingTrip with ChangeNotifier{
   }
 
   // adds beneficiary, notifies listeners, updates database
-  addBeneficiary(String beneficiary_uuid) {
-    _beneficiaries.add(beneficiary_uuid);
-    _items.forEach((name, item) {
-      item.addBeneficiary(beneficiary_uuid);
-    });
+  addBeneficiary(String beneficiary_uuid, String name) {
+    _beneficiaries[beneficiary_uuid] = name;
+    if(_items.isNotEmpty) {
+      _items.forEach((name, item) {
+        item.addBeneficiary(beneficiary_uuid);
+      });
+    }
     updateBeneficiaryDB();
     notifyListeners();
   }
   // removes beneficiary, notifies listeners, updates database
   removeBeneficiary(String beneficiary_uuid) {
     _beneficiaries.remove(beneficiary_uuid);
-    _items.forEach((name, item) {
-      item.removeBeneficiary(beneficiary_uuid);
-    });
+    if(_items.isNotEmpty) {
+      _items.forEach((name, item) {
+        item.removeBeneficiary(beneficiary_uuid);
+      });
+    }
     updateBeneficiaryDB();
     notifyListeners();
   }
@@ -126,8 +131,9 @@ class ShoppingTrip with ChangeNotifier{
   }
 
   // for initializing the trip within the database
-  initializeTripDB() {
-     tripCollection.doc(_uuid).set(
+
+  Future<void> initializeTripDB() async {
+     await tripCollection.doc(_uuid).set(
         {'uuid': _uuid,
           'title': _title,
           'date': _date,
@@ -179,10 +185,10 @@ class Item {
   int quantity;
   Map<String, int> subitems = <String, int>{}; // uuid to individual quantity needed
   bool isExpanded;
-  Item(this.name, this.quantity, List<String> beneficiaries) {
+  Item(this.name, this.quantity, Map<String,String> beneficiaries) {
     subitems = <String, int>{};
-    beneficiaries.forEach((beneficiary) {
-      subitems[beneficiary] = 0;
+    beneficiaries.forEach((uid,name) {
+      subitems[uid] = 0;
     });
 
     this.isExpanded = false;
@@ -190,6 +196,7 @@ class Item {
   Item.withSubitems(this.name, this.quantity, this.subitems){
     this.isExpanded = true;
   }
+
   Item.fromMap(Map<String, dynamic> itemMap) {
     this.name = itemMap['name'].toString();
     this.quantity = int.parse(itemMap['quantity'].toString());

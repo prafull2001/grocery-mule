@@ -37,6 +37,8 @@ class _EditListsScreenState extends State<EditListScreen> {
   bool isAdd = false;
   bool invite_guest = false;
   String hostFirstName;
+  Map<String,String> uid_name = {};
+  static bool reload = true;
   @override
   void initState() {
     tripUUID = widget.tripUUID;
@@ -46,6 +48,10 @@ class _EditListsScreenState extends State<EditListScreen> {
     _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
     _tripDescriptionController = TextEditingController()..text = context.read<ShoppingTrip>().description;
     super.initState();
+    if(reload){
+      reload = false;
+      (context as Element).reassemble();
+    }
   }
 
   int _selectedIndex = 0;
@@ -67,12 +73,11 @@ class _EditListsScreenState extends State<EditListScreen> {
     _queryCurrentTrip().then((DocumentSnapshot snapshot) {
       if(snapshot != null) {
         DateTime date = DateTime.now();
-        List<String> beneficiaries = <String>[];
         Map<String, Item> items = <String, Item>{};
         date = (snapshot['date'] as Timestamp).toDate();
         //print(raw_date);
-        ((snapshot.data() as Map<String, dynamic>)['beneficiaries'] as List<dynamic>).forEach((dynamicElement) {
-          beneficiaries.add(dynamicElement.toString());
+        (snapshot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
+          uid_name[uid.toString()] = name.toString();
         });
         ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
           items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
@@ -81,14 +86,11 @@ class _EditListsScreenState extends State<EditListScreen> {
           //frontend_list[name] = new Item_front_end(name, items[name]);
         });
 
-        setState(() {
           context.read<ShoppingTrip>().initializeTripFromDB(snapshot['uuid'],
               (snapshot.data() as Map<String, dynamic>)['title'], date,
               (snapshot.data() as Map<String, dynamic>)['description'],
               (snapshot.data() as Map<String, dynamic>)['host'],
-              beneficiaries, items);
-
-        });
+              uid_name, items);
       }
     });
   }
@@ -190,7 +192,8 @@ class _EditListsScreenState extends State<EditListScreen> {
 
 
 
-  Widget indie_item(String name, int number,StringVoidFunc callback){
+  Widget indie_item(String uid, int number,StringVoidFunc callback){
+    String name = uid_name[uid];
     return Container(
       color: Theme.of(context).primaryColorLight,
       child: Row(
@@ -213,10 +216,10 @@ class _EditListsScreenState extends State<EditListScreen> {
                 initialValue: number,
                 controller: TextEditingController(),
                 onIncrement: (num newlyIncrementedValue) {
-                  callback(name,newlyIncrementedValue);
+                  callback(uid,newlyIncrementedValue);
                 },
                 onDecrement: (num newlyDecrementedValue) {
-                  callback(name,newlyDecrementedValue);
+                  callback(uid,newlyDecrementedValue);
                 },
               ),
               height: 60,
@@ -431,7 +434,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                   ),
                   Row(
                     children: [
-                      for(String name in context.watch<ShoppingTrip>().beneficiaries)
+                      for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
                         Container(
                           child: Text(
                             '$name ',

@@ -53,7 +53,11 @@ class Cowboy with ChangeNotifier {
     this._email = email;
     notifyListeners();
   }
-
+  clearUserField(){
+    _friends.clear();
+    _shoppingTrips.clear();
+    _requests.clear();
+  }
   // getters since '_' identifier makes fields private
   String get uuid => _uuid;
   String get firstName => _firstName;
