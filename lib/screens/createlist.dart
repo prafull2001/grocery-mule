@@ -12,6 +12,9 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 import 'dart:io';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
+
+
 typedef StringVoidFunc = void Function(String,int);
 
 class CreateListScreen extends StatefulWidget {
@@ -53,6 +56,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   bool invite_guest = false;
   ShoppingTrip cur_trip;
   Map<String,String> uid_name = {};
+  List<MultiSelectItem<String>> friend_bene = [];
+  List<String> selected_friend = [];
+
   @override
   void initState() {
     trip_uuid = widget.trip_uuid;
@@ -71,6 +77,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     // full_list = trip.beneficiaries;
     //end test code
     super.initState();
+
+    friend_bene = context.read<Cowboy>().friends.keys
+        .map((uid) => MultiSelectItem<String>(uid,context.read<Cowboy>().friends[uid]))
+        .toList();
+
+
   }
   
   void clear_provider(){
@@ -157,9 +169,16 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().description,
             uid_name,
             curUser.uid);
+
+
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
-        context.read<ShoppingTrip>().addBeneficiary('NpGPpb8B0Te8OZyywLr69f3WEwn1','Praf');
-        context.read<ShoppingTrip>().addBeneficiary('yTWmoo2Qskf3wFcbxaJYUt9qrZM2','Dhruv');
+        for(var friend in selected_friend) {
+          context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
+        }
+
+        // context.read<ShoppingTrip>().addBeneficiary('NpGPpb8B0Te8OZyywLr69f3WEwn1','Praf');
+        // context.read<ShoppingTrip>().addBeneficiary('yTWmoo2Qskf3wFcbxaJYUt9qrZM2','Dhruv');
+
         context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
         print(context.read<Cowboy>().shoppingTrips);
       } else {
@@ -294,6 +313,39 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 ),
                 SizedBox(
                   height: 40,
+                ),
+                Container(
+                  child:
+                  MultiSelectDialogField(
+                    searchable: true,
+                    items: friend_bene,
+                    title: Text("Friends"),
+                    selectedColor: const Color(0xFFbc5100),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFbc5100).withOpacity(0.1),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                      border: Border.all(
+                        color: const Color(0xFFbc5100),
+                        width: 2,
+                      ),
+                    ),
+                    buttonIcon: Icon(
+                      Icons.person,
+                      color: const Color(0xFFbc5100),
+                    ),
+                    buttonText: Text(
+                      "Selected friends",
+                      style: TextStyle(
+                        color: const Color(0xFFbc5100),
+                        fontSize: 16,
+                      ),
+                    ),
+                    onConfirm: (results) {
+                      selected_friend = results;
+                      print(selected_friend);
+                    },
+                  ),
+
                 ),
                 Container(
                   height: 70,
