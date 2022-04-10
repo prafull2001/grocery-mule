@@ -87,9 +87,38 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     String name =  context.read<ShoppingTrip>().beneficiaries[uuid];
     return Column(
         children: <Widget>[
-          Text('$name'),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('$name',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w400,
+              )
+              ),
+            ],
+          ),
+          if(aggre_cleaned_list[uuid].isNotEmpty)...[
           for (var entry in aggre_cleaned_list[uuid].entries)
             simple_item(entry.key, entry.value)
+          ]else...[
+            Container(
+              height: 40,
+              width: 400,
+
+              child: Column(
+                  children: [
+                  Text('No items found',
+                    style: TextStyle(
+                      color: Colors.red,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w400,
+                    )
+                    ),
+                  ]
+              ),
+            )
+          ]
         ]
     );
 
@@ -109,7 +138,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           for (var entry in aggre_cleaned_list.entries)
             personalList(entry.key),
         ],
-      )
+
+      ),
     );
   }
 
