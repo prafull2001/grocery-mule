@@ -124,13 +124,6 @@ class _ListsScreenState extends State<ListsScreen> {
                   },
                 ),
                 ListTile(
-                  title: const Text('Cowamigos'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, FriendScreen.id);
-                  },
-                ),
-                ListTile(
                   title: const Text('Edit Profile'),
                   onTap: () {
                     //Navigator.pop(context);
