@@ -100,7 +100,23 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           ),
           if(aggre_cleaned_list[uuid].isNotEmpty)...[
           for (var entry in aggre_cleaned_list[uuid].entries)
-            simple_item(entry.key, entry.value)
+            simple_item(entry.key, entry.value),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                //comment
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () {
+                    },
+                    title: "Paypal",
+                  ),
+                ),
+
+              ],
+            )
           ]else...[
             Container(
               height: 40,
@@ -137,6 +153,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
         children: [
           for (var entry in aggre_cleaned_list.entries)
             personalList(entry.key),
+
         ],
 
       ),
