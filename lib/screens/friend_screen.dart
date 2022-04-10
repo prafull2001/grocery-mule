@@ -68,7 +68,9 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   }
   Stream<QuerySnapshot> getFriendData() {
     List<String> friendUUIDs = context.read<Cowboy>().friends.keys.toList();
-    if(friendUUIDs.length>10) {
+    if (friendUUIDs.isEmpty) {
+      return null;
+    } else if(friendUUIDs.length>10) {
       return userCollection.where('uuid', whereIn: friendUUIDs.sublist(1, 11)).snapshots();
     } else {
       return userCollection.where('uuid', whereIn: friendUUIDs).snapshots();
@@ -314,10 +316,10 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
               ],
             ),
             SizedBox(height: 12.0,),
-            SizedBox(
+            if(context.watch<Cowboy>().friends.values.length != 0)...[SizedBox(
               height: 36.0,
               child: Text('Friends', style: TextStyle(fontSize: 24.0),),
-            ),
+            )],
             Container(
               child: StreamBuilder<QuerySnapshot>(
                 stream: getFriendData(),
