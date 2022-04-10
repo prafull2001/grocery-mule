@@ -143,7 +143,6 @@ class ShoppingTrip with ChangeNotifier{
           'beneficiaries': _beneficiaries,
           'items': itemsToMap(),
         });
-
   }
   // only update trip date in db
   // TODO may need to make two more similar methods for date and description
