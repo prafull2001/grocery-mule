@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/user_info.dart';
@@ -76,6 +77,7 @@ class _GroceryMuleState extends State<GroceryMule>{
         ConfirmEmailScreen.id: (context) => ConfirmEmailScreen(),
         FriendScreen.id: (context) => FriendScreen(),
         PersonalListScreen.id: (context) => PersonalListScreen(),
+        CheckoutScreen.id: (context) => CheckoutScreen(),
       },
     );
   }
