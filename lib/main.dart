@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:grocery_mule/constants.dart';
-=======
 import 'package:grocery_mule/screens/checkout_screen.dart';
->>>>>>> e2b5fcc (added checkout_screen skelly)
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/user_info.dart';
