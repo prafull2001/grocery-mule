@@ -37,7 +37,63 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     print('aggregate list');
     print(aggre_cleaned_list);
   }
+  Widget simple_item(String item_name, int item_quantity){
+    String name = item_name;
+    int quantity = item_quantity;
 
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: Theme.of(context).primaryColorDark,
+      ),
+      child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  child: Text(
+                    '$name',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                  padding: EdgeInsets.all(20),
+                ),
+                Container(
+                  child: Text(
+                    'x$quantity',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
+            Container(
+              height: 2.5,
+              width: 400,
+              color: Colors.white,
+            ),
+          ]
+      ),
+    );
+  }
+  Widget personalList(String uuid){
+    String name =  context.read<ShoppingTrip>().beneficiaries[uuid];
+    return Column(
+        children: <Widget>[
+          Text('$name'),
+          for (var entry in aggre_cleaned_list[uuid].entries)
+            simple_item(entry.key, entry.value)
+        ]
+    );
+
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -47,7 +103,13 @@ class _CheckoutScreen extends State<CheckoutScreen> {
         title: const Text('Checkout Screen'),
         backgroundColor: const Color(0xFFbc5100),
       ),
-
+      body: ListView(
+        padding: const EdgeInsets.all(25),
+        children: [
+          for (var entry in aggre_cleaned_list.entries)
+            personalList(entry.key),
+        ],
+      )
     );
   }
 

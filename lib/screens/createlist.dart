@@ -108,7 +108,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         });
       }else{
         uid_name[hostUUID] = hostFirstName;
-        uid_name['AU8H9TXaKHckfCKIjyDBWFqQRGf2'] = 'Praf';
+        uid_name['NpGPpb8B0Te8OZyywLr69f3WEwn1'] = 'Praf';
         uid_name['yTWmoo2Qskf3wFcbxaJYUt9qrZM2'] = 'Dhruv';
 
       }
@@ -158,7 +158,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             uid_name,
             curUser.uid);
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
-        context.read<ShoppingTrip>().addBeneficiary('AU8H9TXaKHckfCKIjyDBWFqQRGf2','Praf');
+        context.read<ShoppingTrip>().addBeneficiary('NpGPpb8B0Te8OZyywLr69f3WEwn1','Praf');
         context.read<ShoppingTrip>().addBeneficiary('yTWmoo2Qskf3wFcbxaJYUt9qrZM2','Dhruv');
         context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
         print(context.read<Cowboy>().shoppingTrips);
