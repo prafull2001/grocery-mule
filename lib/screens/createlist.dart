@@ -169,13 +169,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().description);
         // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
       }
-
   }
 
   @override
   Widget build(BuildContext context) {
     String hostUUID = context.read<Cowboy>().uuid;
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -297,7 +295,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 SizedBox(
                   height: 40,
                 ),
-
                 Container(
                   height: 70,
                   width: 5,
@@ -311,6 +308,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         if(newList)
                           Navigator.push(context, MaterialPageRoute(builder: (context) => EditListScreen(context.read<Cowboy>().uuid)));
                          */
+
                       } else {
                         // print("triggered");
                         showDialog(
