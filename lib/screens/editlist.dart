@@ -474,6 +474,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                       ),
                     ),
                   ),
+
                   Container(
                       child: IconButton(
                         icon: const Icon(Icons.add_circle),
@@ -490,26 +491,11 @@ class _EditListsScreenState extends State<EditListScreen> {
                 create_item(),
               //single_item(grocery_list[1]),
               _buildPanel(),
-              //for(var key in cur_trip.items.keys.toList().reversed)
-              //  single_item(cur_trip.items[key]),
-              /*
-              for(var key in frontend_list.keys.toList().reversed)
-                single_item(frontend_list[key]),
 
-               */
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    height: 70,
-                    width: 150,
-                    child: RoundedButton(
-                      onPressed: () {
 
-                      },
-                      title: "Master List",
-                    ),
-                  ),
                   Container(
                     height: 70,
                     width: 150,
@@ -519,7 +505,20 @@ class _EditListsScreenState extends State<EditListScreen> {
                       },
                       title: "Personal List",
                     ),
-                  )
+                  ),
+                  if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
+                    Container(
+                      height: 70,
+                      width: 150,
+                      child: RoundedButton(
+                        onPressed: () {
+
+                        },
+                        title: "Checkout",
+                      ),
+                    ),
+                    ]
+
                 ],
               ),
 
