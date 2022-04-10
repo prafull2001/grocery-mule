@@ -16,13 +16,31 @@ class PersonalListScreen extends StatefulWidget {
 
 class _PersonalListScreen extends State<PersonalListScreen> {
   String hostFirstName;
+  Map<String, Item> list_items;
+  Map<String, int> item_list;
+  Map<String, int> cleaned_list;
 
   @override
   void initState() {
     hostFirstName = context.read<Cowboy>().firstName;
+    list_items = context.read<ShoppingTrip>().items;
+    cleaned_list = <String, int>{};
+
+    list_items.forEach((key, item) {
+      Item curItem = item;
+      if(item.subitems[context.read<Cowboy>().uuid] > 0) {
+        cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid];
+      }
+    });
+    //print(cleaned_list);
+
+    // print("printing items:");
+    // print(list_items);
+
   }
 
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -43,9 +61,53 @@ class _PersonalListScreen extends State<PersonalListScreen> {
                     fontSize: 25,
                   ),
               ),
-            ]
+              // for(int i=0; i<list_items.length; i++)
+              //   simple_item(list_items.values[i]);
+              for (var entry in cleaned_list.entries)
+                simple_item(entry.key, entry.value),
+
+          ]
         ),
       ),
+    );
+  }
+
+  Widget simple_item(String item_name, int item_quantity){
+    String name = item_name;
+    int quantity = item_quantity;
+
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: Theme.of(context).primaryColorDark,
+      ),
+      child: (
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Container(
+                child: Text(
+                  '$name',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+                padding: EdgeInsets.all(20),
+              ),
+              Container(
+                child: Text(
+                  'x$quantity',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+
+            ],
+          )),
     );
   }
 }
