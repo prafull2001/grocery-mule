@@ -86,11 +86,7 @@ class _ListsScreenState extends State<ListsScreen> {
     }
   }
 
-
-
-   final  Stream<QuerySnapshot<Map<String, dynamic>>> _list =  FirebaseFirestore.instance.collection('shopping_trips_test').snapshots();
-
-
+  final  Stream<QuerySnapshot<Map<String, dynamic>>> _list =  FirebaseFirestore.instance.collection('shopping_trips_test').snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +97,7 @@ class _ListsScreenState extends State<ListsScreen> {
           appBar: AppBar(
             centerTitle: true,
             title: const Text('Grocery Lists'),
-            backgroundColor: const Color(0xFFbc5100),
+            backgroundColor: const Color(0xff97877E),
           ),
           drawer: Drawer(
             child: ListView(
@@ -153,8 +149,7 @@ class _ListsScreenState extends State<ListsScreen> {
               ],
             ),
           ),
-
-          body:
+     body:
           FutureBuilder(
             future: Cowsnapshot,
             builder: (context, AsyncSnapshot<void> futSnap) {
@@ -177,7 +172,6 @@ class _ListsScreenState extends State<ListsScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator();
                     }
-
                     return SafeArea(
                       child: Scrollbar(
                         isAlwaysShown: true,
@@ -203,9 +197,7 @@ class _ListsScreenState extends State<ListsScreen> {
                                   ),
                                 ],
                               ),
-
-
-                              child: ListTile(
+                                child: ListTile(
                                 title: Text(
                                   '\n${snapshot.data.docs[index]['title']}\n'
                                       '${snapshot.data
@@ -257,7 +249,6 @@ class _ListsScreenState extends State<ListsScreen> {
                     context,
                     MaterialPageRoute(builder: (context) => CreateListScreen(true))
                 );
-
               },
             ),
           ),

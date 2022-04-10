@@ -4,11 +4,15 @@ import 'package:grocery_mule/components/rounded_ button.dart';
 import 'dart:async';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/personal_list.dart';
+import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 import 'createlist.dart';
+
+
 typedef StringVoidFunc = void Function(String,int);
 
 class EditListScreen extends StatefulWidget {
@@ -25,7 +29,6 @@ class EditListScreen extends StatefulWidget {
   @override
   _EditListsScreenState createState() => _EditListsScreenState();
 }
-
 
 
 class _EditListsScreenState extends State<EditListScreen> {
@@ -45,6 +48,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     tripUUID = widget.tripUUID;
     hostFirstName = context.read<Cowboy>().firstName;
     _loadCurrentTrip();
+
     // TODO: implement initState
     _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
     _tripDescriptionController = TextEditingController()..text = context.read<ShoppingTrip>().description;
@@ -131,7 +135,6 @@ class _EditListsScreenState extends State<EditListScreen> {
       onDismissed: (direction) {
         context.read<ShoppingTrip>().removeItem(name);
         // Remove the item from the data source.
-
       },
       confirmDismiss: (DismissDirection direction) async {
         return await showDialog(
@@ -183,16 +186,12 @@ class _EditListsScreenState extends State<EditListScreen> {
                     ),
                   ),
                 ),
-
               ],
             )),
       ),
       background: Container(color: Colors.red),
     );
   }
-
-
-
   Widget indie_item(String uid, int number,StringVoidFunc callback){
     String name = uid_name[uid];
     return Container(
@@ -256,7 +255,6 @@ class _EditListsScreenState extends State<EditListScreen> {
     );
   }
 
-
   Widget _buildPanel() {
     return ExpansionPanelList(
       expansionCallback: (int index, bool isExpanded) {
@@ -276,7 +274,6 @@ class _EditListsScreenState extends State<EditListScreen> {
               isExpanded: item.isExpanded,
             );
           }).toList(),
-
     );
   }
 
@@ -350,7 +347,6 @@ class _EditListsScreenState extends State<EditListScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     //full_list.add(host_uuid);
     return Masterlist(context);
   }
@@ -402,7 +398,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                     children: [
                       (context.watch<Cowboy>().firstName == null)?
                       CircularProgressIndicator():
-
                       Text(
                         // may show an old name if name has been updated extremely recently
                         '$hostFirstName',
@@ -491,11 +486,10 @@ class _EditListsScreenState extends State<EditListScreen> {
                 create_item(),
               //single_item(grocery_list[1]),
               _buildPanel(),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
+                //comment
                   Container(
                     height: 70,
                     width: 150,
@@ -512,7 +506,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                       width: 150,
                       child: RoundedButton(
                         onPressed: () {
-
+                          Navigator.pushNamed(context, CheckoutScreen.id);
                         },
                         title: "Checkout",
                       ),
@@ -521,7 +515,6 @@ class _EditListsScreenState extends State<EditListScreen> {
 
                 ],
               ),
-
             ],
           ),
         ),

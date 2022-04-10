@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+const cream = Color(0xffFFE9D0);
+const orange = Color(0xffFF6E40);
+const red = Color(0xFFEF5350);
+const dark_beige = Color(0xff97877E);
+const darker_beige = Color(0xff49413D);
+
 const kSendButtonTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
   fontSize: 18.0,
@@ -19,18 +25,18 @@ const kMessageContainerDecoration = BoxDecoration(
 
 const kTextFieldDecoration = InputDecoration(
   hintText: 'Placeholder Text',
-  hintStyle: TextStyle(fontSize: 20.0, color: Colors.blueGrey),
+  hintStyle: TextStyle(fontSize: 20.0, color: dark_beige),
   contentPadding:
   EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
   border: OutlineInputBorder(
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
   enabledBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.blueAccent, width: 1.0),
+    borderSide: BorderSide(color: dark_beige, width: 1.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
   focusedBorder: OutlineInputBorder(
-    borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+    borderSide: BorderSide(color: dark_beige, width: 2.0),
     borderRadius: BorderRadius.all(Radius.circular(32.0)),
   ),
 );
