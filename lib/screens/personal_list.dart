@@ -9,7 +9,6 @@ import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 
 class PersonalListScreen extends StatefulWidget {
   static String id = 'personallist_screen';
-
   @override
   _PersonalListScreen createState() => _PersonalListScreen();
 }

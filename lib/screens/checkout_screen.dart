@@ -15,9 +15,27 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreen extends State<CheckoutScreen> {
+  Map<String, Item> list_items;
+  Map<String, int> item_list;
+  Map<String, Map<String,int>> aggre_cleaned_list;
+  //map each bene uuid to their own map
   @override
   void initState() {
-
+    list_items = context.read<ShoppingTrip>().items;
+    aggre_cleaned_list = {};
+    context.read<ShoppingTrip>().beneficiaries.keys.forEach((uuid){
+      aggre_cleaned_list[uuid] = {};
+    });
+    list_items.forEach((key, item) {
+      //iterate through each subitem in the item
+      context.read<ShoppingTrip>().beneficiaries.keys.forEach((uuid) {
+        if(item.subitems[uuid] > 0) {
+          aggre_cleaned_list[uuid][key] = item.subitems[uuid];
+        }
+      });
+    });
+    print('aggregate list');
+    print(aggre_cleaned_list);
   }
 
   @override
