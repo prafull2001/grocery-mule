@@ -22,48 +22,41 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   int num_requests;
   Stream<QuerySnapshot> friendData;
   List<Cowboy> searchResults; // search results
-  List<Cowboy> friendRequests; // friend requests
   Widget searchResultsWidget; // widget to display upon search
   Icon searchIcon; // changes between 'X' and search icon while searching
   var searchTextController = TextEditingController();
   @override
   void initState() {
     super.initState();
+    loadCurrentCowboy();
     num_requests = context.read<Cowboy>().requests.length;
     friendData = getFriendData();
     searchQuery = '';
     searchResults = <Cowboy>[];
     searchIcon = Icon(Icons.search);
-    friendRequests = <Cowboy>[];
-    _loadCurrentRequests();
   }
-  void _loadCurrentRequests() {
-    // TODO once code is being change to null safety, remove this line and return Future<Null> from _getRequestUsers()
-    if(context.read<Cowboy>().requests.isEmpty) {
-      return;
-    }
-    _getRequestUsers().then((QuerySnapshot snapshot) {
-      if(snapshot != null) {
-        snapshot.docs.forEach((QueryDocumentSnapshot qds) {
-          Cowboy requestBoy = Cowboy();
-          requestBoy.initializeCowboyFriend(qds['uuid'], qds['first_name'], qds['last_name'], qds['email']);
-          setState(() {
-            if(requestBoy != null) {
-              friendRequests.add(requestBoy);
-            }
-          });
+  loadCurrentCowboy() {
+    Future<DocumentSnapshot> tempShot = userCollection.doc(context.read<Cowboy>().uuid).get();
+    tempShot.then((DocumentSnapshot snapshot) {
+      List<String> curRequests = [];
+      if((snapshot.get('requests') as List<dynamic>).isNotEmpty) {
+        (snapshot.get('requests') as List<dynamic>).forEach((element) {
+          curRequests.add(element.toString());
         });
       }
+      print('adding cowboys: ${curRequests}');
+      context.read<Cowboy>().updateCowboyRequests(curRequests);
     });
   }
-  Future<QuerySnapshot> _getRequestUsers() {
+  // TODO cowboy's requests don't get updated, only friends list from existing requests does
+  Stream<QuerySnapshot> _getRequestUsers() {
     if(context.read<Cowboy>().requests.isEmpty) {
       return null;
     }
     if(context.read<Cowboy>().requests.length > 10) {
-      return userCollection.where('uuid', whereIn: context.read<Cowboy>().requests.sublist(1, 11)).get();
+      return userCollection.where('uuid', whereIn: context.read<Cowboy>().requests.sublist(1, 11)).snapshots();
     } else {
-      return userCollection.where('uuid', whereIn: context.read<Cowboy>().requests).get();
+      return userCollection.where('uuid', whereIn: context.read<Cowboy>().requests).snapshots();
     }
   }
   Stream<QuerySnapshot> getFriendData() {
@@ -86,22 +79,6 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    int reqindex = 0;
-
-    int indexfind(String fruuid) {
-      int frind = 0;
-      for(Cowboy cowboy in friendRequests) {
-        print('name: '+cowboy.firstName);
-        if(cowboy.uuid == fruuid) {
-          reqindex = frind;
-          return frind;
-        }
-        frind += 1;
-      };
-      reqindex = 0;
-      return 0;
-    }
-
     return Scaffold(
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
@@ -211,67 +188,74 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                     SizedBox(
                                       height: 10.0,
                                     ),
-                                    ListView.separated(
-                                      shrinkWrap: true,
-                                        itemCount: context.watch<Cowboy>().requests.length,
-                                        itemBuilder: (BuildContext context, int index) {
-                                          return Container(
-                                            padding: EdgeInsets.all(2.0),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  lengthify(friendRequests[indexfind(context.read<Cowboy>().requests[index])].firstName+' '+friendRequests[reqindex].lastName)+'\n'+lengthify(friendRequests[reqindex].email),
-                                                  //lengthify(friendRequests[index].firstName+' '+friendRequests[index].lastName)+'\n'+lengthify(friendRequests[index].email),
-                                                  //        8       16      24   29 // trim characters 27, 28, 29 to be '...'
-                                                  //lengthify('asdfjkl;asdfjkl;asdfjkl;asdfj')+'\n'+lengthify('asdfjkl;asdfjkl;asdfjkl;asdfjkl;'),
-                                                  style: TextStyle(fontSize: 15.0),
+                                    StreamBuilder<QuerySnapshot>(
+                                      stream: _getRequestUsers(),
+                                      builder: (context, snapshot) {
+                                        List<QueryDocumentSnapshot> snapdata = <QueryDocumentSnapshot>[];
+                                        if (snapshot.hasData) {
+                                          snapdata = snapshot.data.docs;
+                                        }
+                                        return ListView.separated(
+                                          shrinkWrap: true,
+                                            itemCount: snapdata.length,
+                                            itemBuilder: (BuildContext context, int index) {
+                                              return Container(
+                                                padding: EdgeInsets.all(2.0),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      lengthify(snapdata[index]['first_name']+snapdata[index]['last_name'])+'\n'+lengthify(snapdata[index]['email']),
+                                                      //lengthify(friendRequests[index].firstName+' '+friendRequests[index].lastName)+'\n'+lengthify(friendRequests[index].email),
+                                                      //        8       16      24   29 // trim characters 27, 28, 29 to be '...'
+                                                      //lengthify('asdfjkl;asdfjkl;asdfjkl;asdfj')+'\n'+lengthify('asdfjkl;asdfjkl;asdfjkl;asdfjkl;'),
+                                                      style: TextStyle(fontSize: 15.0),
+                                                    ),
+                                                    Spacer(),
+                                                    SizedBox(
+                                                      // ACCEPT
+                                                      width: 35.0,
+                                                      child: TextButton(
+                                                        onPressed: () {
+                                                          context.read<Cowboy>().addFriend(snapdata[index]['uuid'], snapdata[index]['first_name']);
+                                                          Navigator.pop(context);
+                                                        },
+                                                        style: ButtonStyle(
+                                                          backgroundColor: MaterialStateProperty.all<Color>(orange),
+                                                          foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.done,
+                                                          size: 18.0,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      // REJECT
+                                                      width: 35.0,
+                                                      child: TextButton(
+                                                        onPressed: () {
+                                                          context.read<Cowboy>().removeFriendRequest(snapdata[index]['uuid']);
+                                                          Navigator.pop(context);
+                                                        },
+                                                        style: ButtonStyle(
+                                                          backgroundColor: MaterialStateProperty.all<Color>(red),
+                                                          foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.close,
+                                                          size: 18.0,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                Spacer(),
-                                                SizedBox(
-                                                  // ACCEPT
-                                                  width: 35.0,
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      context.read<Cowboy>().addFriend(friendRequests[reqindex].uuid, friendRequests[reqindex].firstName);
-                                                      print('adding this cuck ('+friendRequests[reqindex].uuid+'): '+friendRequests[reqindex].firstName);
-                                                      Navigator.pop(context);
-                                                    },
-                                                    style: ButtonStyle(
-                                                      backgroundColor: MaterialStateProperty.all<Color>(orange),
-                                                      foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.done,
-                                                      size: 18.0,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  // REJECT
-                                                  width: 35.0,
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      context.read<Cowboy>().removeFriendRequest(friendRequests[reqindex].uuid);
-                                                      print('removing this bullshit: '+friendRequests[reqindex].uuid);
-                                                      Navigator.pop(context);
-                                                    },
-                                                    style: ButtonStyle(
-                                                      backgroundColor: MaterialStateProperty.all<Color>(red),
-                                                      foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.close,
-                                                      size: 18.0,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                        separatorBuilder: (context, index) {
-                                          return SizedBox(height: 2.0,);
-                                        },
+                                              );
+                                            },
+                                            separatorBuilder: (context, index) {
+                                              return SizedBox(height: 2.0,);
+                                            },
+                                        );
+                                      }
                                     )
                                   ],
                                 ),
@@ -486,7 +470,6 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
       return null;
     }
   }
-
   Widget searchResultsList() {
     if(searchResults != null) {
       if (searchResults.length == 0) {
