@@ -4,6 +4,7 @@ import 'package:grocery_mule/components/rounded_ button.dart';
 import 'dart:async';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
@@ -358,7 +359,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Edit grocery items'),
+        title: const Text('Edit List'),
         backgroundColor: const Color(0xFFbc5100),
         actions: <Widget>[
           PopupMenuButton<int>(
@@ -514,7 +515,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                     width: 150,
                     child: RoundedButton(
                       onPressed: () {
-                        //go master list page
+                        Navigator.pushNamed(context, PersonalListScreen.id);
                       },
                       title: "Personal List",
                     ),

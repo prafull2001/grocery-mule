@@ -4,6 +4,7 @@ import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
+import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/screens/lists.dart';
 import 'package:grocery_mule/screens/createlist.dart';
@@ -73,6 +74,7 @@ class _GroceryMuleState extends State<GroceryMule>{
         UserInfoScreen.id: (context) => UserInfoScreen(),
         ConfirmEmailScreen.id: (context) => ConfirmEmailScreen(),
         FriendScreen.id: (context) => FriendScreen(),
+        PersonalListScreen.id: (context) => PersonalListScreen(),
       },
     );
   }
