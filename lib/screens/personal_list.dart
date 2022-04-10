@@ -61,6 +61,9 @@ class _PersonalListScreen extends State<PersonalListScreen> {
                     fontSize: 25,
                   ),
               ),
+              SizedBox(
+                height: 30.0,
+              ),
               // for(int i=0; i<list_items.length; i++)
               //   simple_item(list_items.values[i]);
               for (var entry in cleaned_list.entries)
@@ -82,32 +85,40 @@ class _PersonalListScreen extends State<PersonalListScreen> {
         shape: BoxShape.rectangle,
         color: Theme.of(context).primaryColorDark,
       ),
-      child: (
+      child: Column(
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Container(
-                child: Text(
-                  '$name',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Container(
+                  child: Text(
+                    '$name',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                  padding: EdgeInsets.all(20),
+                ),
+                Container(
+                  child: Text(
+                    'x$quantity',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
                   ),
                 ),
-                padding: EdgeInsets.all(20),
-              ),
-              Container(
-                child: Text(
-                  'x$quantity',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
 
-            ],
-          )),
+              ],
+            ),
+          Container(
+            height: 2.5,
+            width: 400,
+            color: Colors.white,
+          ),
+      ]
+      ),
     );
   }
 }
