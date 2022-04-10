@@ -41,7 +41,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
       List<String> curRequests = [];
       if((snapshot.get('requests') as List<dynamic>).isNotEmpty) {
         (snapshot.get('requests') as List<dynamic>).forEach((element) {
-          curRequests.add(element.toString());
+          curRequests.add(element.toString().trim());
         });
       }
       print('adding cowboys: ${curRequests}');
@@ -52,10 +52,10 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   Stream<QuerySnapshot> _getRequestUsers() {
     if(context.read<Cowboy>().requests.isEmpty) {
       return null;
-    }
-    if(context.read<Cowboy>().requests.length > 10) {
+    } else if(context.read<Cowboy>().requests.length > 10) {
       return userCollection.where('uuid', whereIn: context.read<Cowboy>().requests.sublist(1, 11)).snapshots();
     } else {
+      // print('lin:${context.read<Cowboy>().requests[0]}');
       return userCollection.where('uuid', whereIn: context.read<Cowboy>().requests).snapshots();
     }
   }
@@ -192,12 +192,17 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                       stream: _getRequestUsers(),
                                       builder: (context, snapshot) {
                                         List<QueryDocumentSnapshot> snapdata = <QueryDocumentSnapshot>[];
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return Text("Loading");
+                                        }
                                         if (snapshot.hasData) {
                                           snapdata = snapshot.data.docs;
+                                          print('len len: ${snapdata.length}');
                                         }
                                         return ListView.separated(
                                           shrinkWrap: true,
                                             itemCount: snapdata.length,
+                                            controller: ScrollController(),
                                             itemBuilder: (BuildContext context, int index) {
                                               return Container(
                                                 padding: EdgeInsets.all(2.0),
@@ -317,6 +322,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                     // scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     itemCount: snapshot_data.length,
+                    controller: ScrollController(),
                     itemBuilder: (BuildContext context, int index) {
                       return GestureDetector(
                         onTap: () {
@@ -477,6 +483,8 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
       }
       return ListView.separated(
         shrinkWrap: true,
+        itemCount: searchResults.length,
+        controller: ScrollController(),
         scrollDirection: Axis.vertical,
         itemBuilder: (BuildContext context, int index) {
           return Container(
@@ -521,7 +529,6 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
         separatorBuilder: (BuildContext context, int index) {
           return SizedBox(height: 5.0,);
         },
-        itemCount: searchResults.length,
       );
     }
     return SizedBox(height: 0.0,);
