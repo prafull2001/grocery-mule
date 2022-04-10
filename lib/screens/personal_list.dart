@@ -32,11 +32,6 @@ class _PersonalListScreen extends State<PersonalListScreen> {
         cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid];
       }
     });
-    //print(cleaned_list);
-
-    // print("printing items:");
-    // print(list_items);
-
   }
 
   Widget build(BuildContext context) {
@@ -64,10 +59,29 @@ class _PersonalListScreen extends State<PersonalListScreen> {
               SizedBox(
                 height: 30.0,
               ),
-              // for(int i=0; i<list_items.length; i++)
-              //   simple_item(list_items.values[i]);
-              for (var entry in cleaned_list.entries)
-                simple_item(entry.key, entry.value),
+              if(!(cleaned_list.isEmpty))...[
+                for (var entry in cleaned_list.entries)
+                  simple_item(entry.key, entry.value)
+              ] else ...[
+                SizedBox(
+                  height: 70.0,
+                ),
+
+                Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(
+                        'Your personal list will appear once you\'ve added items to your list!',
+                        style: TextStyle(
+                          fontSize: 40.0,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ]
+
 
           ]
         ),

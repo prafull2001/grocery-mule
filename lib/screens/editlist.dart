@@ -4,11 +4,15 @@ import 'package:grocery_mule/components/rounded_ button.dart';
 import 'dart:async';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/personal_list.dart';
+import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 import 'createlist.dart';
+
+
 typedef StringVoidFunc = void Function(String,int);
 
 class EditListScreen extends StatefulWidget {
@@ -502,6 +506,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                       width: 150,
                       child: RoundedButton(
                         onPressed: () {
+                          Navigator.pushNamed(context, CheckoutScreen.id);
                         },
                         title: "Checkout",
                       ),
