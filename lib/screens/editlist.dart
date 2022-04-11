@@ -1,12 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:grocery_mule/constants.dart';
 import 'dart:async';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/personal_list.dart';
-import 'package:grocery_mule/screens/checkout_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
@@ -160,7 +161,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       child: Container(
         decoration: BoxDecoration(
             shape: BoxShape.rectangle,
-            color: Theme.of(context).primaryColorDark,
+            color: dark_beige,
         ),
 
         child: (
@@ -189,13 +190,13 @@ class _EditListsScreenState extends State<EditListScreen> {
               ],
             )),
       ),
-      background: Container(color: Colors.red),
+      background: Container(color: red),
     );
   }
   Widget indie_item(String uid, int number,StringVoidFunc callback){
     String name = uid_name[uid];
     return Container(
-      color: Theme.of(context).primaryColorLight,
+      color: beige,
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -243,7 +244,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     return Container(
       decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          color: Theme.of(context).primaryColorDark,
+          color: beige,
       ),
 
       child: Column(
@@ -283,7 +284,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     return Container(
       decoration: BoxDecoration(
           shape: BoxShape.rectangle,
-          color: Colors.amberAccent
+          color: beige,
       ),
 
       child: (
@@ -304,8 +305,15 @@ class _EditListsScreenState extends State<EditListScreen> {
                 height: 45,
                 width: 100,
                 child: TextField(
+                  style: TextStyle(color: darker_beige),
+                  cursorColor: darker_beige,
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: darker_beige,),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: darker_beige, width: 2),
+                    ),
                     hintText: 'EX: Apple',
                   ),
                   onChanged: (text) {
@@ -355,8 +363,17 @@ class _EditListsScreenState extends State<EditListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Edit List'),
-        backgroundColor: const Color(0xFFbc5100),
+        title: const Text(
+          'Edit List',
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: light_orange,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarBrightness: Brightness.light,
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
         actions: <Widget>[
           PopupMenuButton<int>(
             onSelected: (item) => handleClick(item),
@@ -367,162 +384,129 @@ class _EditListsScreenState extends State<EditListScreen> {
         ],
       ),
 
-      body: SafeArea(
-        child: Scrollbar(
-          child: ListView(
-            padding: const EdgeInsets.all(25),
-            children: [
-              SizedBox(
-                height: 10,
-              ),
+      body: Container(
+        child: Column(
+          //padding: const EdgeInsets.all(25),
+          children: [
+            SizedBox(
+              height: 20,
+            ),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Host',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
+            Row(
+              children: [
+                SizedBox(width: 10.0,),
+                Text(
+                  'Host - $hostFirstName',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
                   ),
-                  // TODO how to call watch
-                  // Container(child: Text(context.watch<Cowboy>().first_name),),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      (context.watch<Cowboy>().firstName == null)?
-                      CircularProgressIndicator():
-                      Text(
-                        // may show an old name if name has been updated extremely recently
-                        '$hostFirstName',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Beneficiaries',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                        Column(
-                          children: [
-                            for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
-                                Container(
-                                  width: 70,
-                                  height: 50,
-                                  child: Text(
-                                         '$name',
-                                         style: TextStyle(
-                                           color: Colors.black,
-                                           fontSize: 15,
-                                         ),
-                                  ),
-                                ),
-                          ],
-                        ),
-
-                      //TODO: Add users to list of beneficiaries when + button is pressed
-                      Container(
-                          child: IconButton(icon: const Icon(Icons.add_circle))),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 60,
-                child: Divider(
-                  color: Colors.black,
-                  thickness: 1.5,
-                  indent: 75,
-                  endIndent: 75,
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    child: Text(
-                      'Add Item',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                SizedBox(width: 10.0,),
+                Text(
+                  'Beneficiaries -',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                  ),
+                ),
+                SizedBox(width: 10.0,),
+                Row(
+                  children: [
+                    for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+                      Text(
+                        '$name  ',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                        ),
                       ),
+                  ],
+                ),
+                Spacer(),
+                IconButton(icon: Icon(Icons.add_circle),),
+              ],
+            ),
+            //SizedBox(height: 10),
+            SizedBox(
+              height: 40,
+              width: double.maxFinite,
+              child: Divider(
+                color: Colors.black,
+                thickness: 1.5,
+                indent: 75,
+                endIndent: 75,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  child: Text(
+                    'Add Item',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
                     ),
                   ),
+                ),
 
-                  Container(
-                      child: IconButton(
-                        icon: const Icon(Icons.add_circle),
-                        onPressed: () {
-                          setState(() {
-                            isAdd = true;
-                          });
-                        },
-                      )
+                Container(
+                    child: IconButton(
+                      icon: const Icon(Icons.add_circle),
+                      onPressed: () {
+                        setState(() {
+                          isAdd = true;
+                        });
+                      },
+                    )
+                ),
+              ],
+            ),
+            if(isAdd)
+              create_item(),
+            //single_item(grocery_list[1]),
+            _buildPanel(),
+            SizedBox(height: 10.0,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+              //comment
+                SizedBox(width: 40.0,),
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, PersonalListScreen.id);
+                    },
+                    title: "Personal List",
                   ),
-                ],
-              ),
-              if(isAdd)
-                create_item(),
-              //single_item(grocery_list[1]),
-              _buildPanel(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                //comment
+                ),
+                Spacer(),
+                if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
                   Container(
                     height: 70,
                     width: 150,
                     child: RoundedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, PersonalListScreen.id);
+                        Navigator.pushNamed(context, CheckoutScreen.id);
                       },
-                      title: "Personal List",
+                      title: "Checkout",
                     ),
                   ),
-                  if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
-                    Container(
-                      height: 70,
-                      width: 150,
-                      child: RoundedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, CheckoutScreen.id);
-                        },
-                        title: "Checkout",
-                      ),
-                    ),
-                    ]
-
-                ],
-              ),
-            ],
-          ),
+                  ],
+                SizedBox(width: 40.0,),
+              ],
+            ),
+          ],
         ),
       ),
     );

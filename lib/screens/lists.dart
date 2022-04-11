@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
@@ -96,8 +96,15 @@ class _ListsScreenState extends State<ListsScreen> {
         child: Scaffold(
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Grocery Lists'),
-            backgroundColor: const Color(0xff97877E),
+            title: Text('Howdy ${context.read<Cowboy>().firstName}!', style: TextStyle(fontSize: 24, color: Colors.black),),
+            backgroundColor: light_orange,
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarBrightness: Brightness.light,
+            ),
+            iconTheme: IconThemeData(
+              color: darker_beige,
+            ),
+            elevation: 0,
           ),
           drawer: Drawer(
             child: ListView(
@@ -105,7 +112,7 @@ class _ListsScreenState extends State<ListsScreen> {
               children: [
                 const DrawerHeader(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFbc5100),
+                    color: dark_beige,
                   ),
                   child: Text(
                     'Menu Options',

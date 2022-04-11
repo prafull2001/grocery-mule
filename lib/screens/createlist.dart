@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:flutter/services.dart';
+import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/screens/editlist.dart';
 import 'dart:async';
@@ -148,7 +149,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           return Theme(
             data: ThemeData.light().copyWith(
               colorScheme: ColorScheme.light().copyWith(
-                primary: const Color(0xFFbc5100),
+                primary: dark_beige,
               ),
             ),
             child: child,
@@ -198,11 +199,247 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create List'),
-        backgroundColor: const Color(0xFFbc5100),
+        title: const Text(
+          'Create List',
+          style: TextStyle(color: Colors.black),
+        ),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarBrightness: Brightness.light,
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
+        backgroundColor: light_orange,
       ),
-      body: SafeArea(
-        child: Scrollbar(
+      body: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            // list name
+            Row(
+              children: [
+                Text(
+                  'List Name:',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    child: TextField(
+                        keyboardType: TextInputType.text,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                        decoration: InputDecoration(
+                          fillColor: darker_beige,
+                        ),
+                        controller: _tripTitleController,
+                        onChanged: (value){
+                          context.read<ShoppingTrip>().editTripTitle(value);
+                        }
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 10.0,),
+
+            // trip date
+            Row(
+              children: [
+                Text(
+                  'Trip Date:',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                SizedBox(width: 10.0,),
+                Text(
+                  '${context.read<ShoppingTrip>().date.toLocal()}'.split(' ')[0].replaceAll('-', '/'),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                //SizedBox(width: 5.0,),
+                IconButton(
+                  icon: Icon(Icons.calendar_today, color: orange,),
+                  onPressed: () => _selectDate(context),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 10.0,),
+
+            // description header
+            Row(
+              children: [
+                Text(
+                  'Description',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+
+            // description body
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    child: TextField(
+                        keyboardType: TextInputType.text,
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
+                        decoration: InputDecoration(
+                          fillColor: darker_beige,
+                        ),
+                        controller: _tripDescriptionController,
+                        onChanged: (value){
+                          context.read<ShoppingTrip>().editTripDescription(value);
+                        }
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 10.0,),
+
+            // selected friends
+            Container(
+              child:
+              MultiSelectDialogField(
+                searchable: true,
+                items: friend_bene,
+                title: Text('Friends'),
+                selectedColor: dark_beige,
+                decoration: BoxDecoration(
+                  color: dark_beige.withOpacity(0.25),
+                  borderRadius: BorderRadius.all(Radius.circular(40)),
+                  border: Border.all(
+                    color: darker_beige,
+                    width: 2,
+                  ),
+                ),
+                buttonIcon: Icon(
+                  Icons.person,
+                  color: orange,
+                ),
+                buttonText: Text(
+                  'Selected Friends',
+                  style: TextStyle(
+                    color: darker_beige,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                onConfirm: (results) {
+                  selected_friend = results;
+                  print(selected_friend);
+                },
+              ),
+            ),
+
+            // spacer
+            Spacer(),
+
+            // create/delete buttons
+            Row(
+              children: [
+                Container(
+                  width: 180,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child: Text(
+                      'Create List',
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(orange),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+                      ),
+                    ),
+                    onPressed: () async {
+                      if(context.read<ShoppingTrip>().title != '') {
+                        await updateGridView(newList);
+                        Navigator.pop(context);
+                      } else {
+                        // print("triggered");
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('List name cannot be empty'),
+                              actions: [
+                                TextButton(
+                                  child: Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Spacer(),
+                Container(
+                  width: 180,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child: Text(
+                      'Delete List',
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(red),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+                      ),
+                    ),
+                    onPressed: () async {
+                      await check_delete(context);
+                      if(delete_list) {
+                        if(!newList) {
+                          print('delete');
+                          context.read<ShoppingTrip>().deleteTripDB();
+                          context.read<Cowboy>().removeTrip(context.read<ShoppingTrip>().uuid);
+                        }
+                        Navigator.of(context).popUntil((route){
+                          return route.settings.name == ListsScreen.id;
+                        });
+                        Navigator.pushNamed(context, ListsScreen.id);
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(height: 200.0,),
+              ],
+            ),
+          ],
+        ),
+      ),
+        /*Scrollbar(
           child: ListView(
               padding: const EdgeInsets.all(25),
               children: [
@@ -414,8 +651,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 )
               ],
             ),
-        ),
-      ),
+        ),*/
     );
   }
 
