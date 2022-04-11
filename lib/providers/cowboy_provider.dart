@@ -128,14 +128,12 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(friend_uuid).update({'friends': FieldValue.arrayRemove([_uuid])});
   }
 
-<<<<<<< HEAD
   // updates from database
   updateCowboyRequests(List<String> newRequests) {
     _requests = newRequests;
     notifyListeners();
   }
-=======
->>>>>>> e34a4c2fb1b522a3c5f89ce19e7622da50b64a56
+
   addTripToBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
   }
