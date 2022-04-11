@@ -430,15 +430,21 @@ class _EditListsScreenState extends State<EditListScreen> {
                   ),
                   Row(
                     children: [
-                      for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
-                        Container(
-                          child: Text(
-                            '$name ',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                            ),
-                          ),
+                        Column(
+                          children: [
+                            for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+                                Container(
+                                  width: 70,
+                                  height: 50,
+                                  child: Text(
+                                         '$name',
+                                         style: TextStyle(
+                                           color: Colors.black,
+                                           fontSize: 15,
+                                         ),
+                                  ),
+                                ),
+                          ],
                         ),
 
                       //TODO: Add users to list of beneficiaries when + button is pressed
