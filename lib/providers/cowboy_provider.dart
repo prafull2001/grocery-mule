@@ -127,7 +127,7 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(_uuid).update({'friends': _friends});
     userCollection.doc(friend_uuid).update({'friends': FieldValue.arrayRemove([_uuid])});
   }
-  
+
   // updates from database
   updateCowboyRequests(List<String> newRequests) {
     _requests = newRequests;

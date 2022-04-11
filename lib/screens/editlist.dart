@@ -46,7 +46,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   @override
   void initState() {
     tripUUID = widget.tripUUID;
-    hostFirstName = context.read<Cowboy>().firstName;
+    hostFirstName = context.read<ShoppingTrip>().host;
     _loadCurrentTrip();
 
     // TODO: implement initState
