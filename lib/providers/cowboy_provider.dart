@@ -24,6 +24,15 @@ class Cowboy with ChangeNotifier {
     updateCowboyEmail();
     notifyListeners();
   }
+  updateCowboyFirst() {
+    userCollection.doc(_uuid).update({'first_name': _firstName});
+  }
+  updateCowboyLast() {
+    userCollection.doc(_uuid).update({'last_name': _lastName});
+  }
+  updateCowboyEmail() {
+    userCollection.doc(_uuid).update({'email': _email});
+  }
   // to initialize fields after empty constructor has been called by provider init
   fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, Map<String, String> friends, List<String> requests) {
     this._uuid = uuid;
@@ -44,6 +53,18 @@ class Cowboy with ChangeNotifier {
     this._email = email;
     intializeCowboyDB();
     notifyListeners();
+  }
+  // initialize cowboy in database for first time
+  intializeCowboyDB() {
+    userCollection.doc(_uuid).set({
+      'uuid': _uuid,
+      'first_name': _firstName,
+      'last_name': _lastName,
+      'email': _email,
+      'shopping_trips': _shoppingTrips,
+      'friends': _friends,
+      'requests': _requests,
+    });
   }
   // only to instantiate during email search
   initializeCowboyFriend(String uuid, String firstName, String lastName, String email) {
@@ -79,6 +100,10 @@ class Cowboy with ChangeNotifier {
     updateCowboyTrips();
     notifyListeners();
   }
+  updateCowboyTrips() {
+    userCollection.doc(_uuid).update({'shopping_trips': _shoppingTrips});
+    //delete trip from the shopping trip collection
+  }
 
   // removes friend from requests, adds friend, notifies listeners, updates database
   addFriend(String friend_uuid, String friend_name) {
@@ -102,6 +127,16 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(_uuid).update({'friends': _friends});
     userCollection.doc(friend_uuid).update({'friends': FieldValue.arrayRemove([_uuid])});
   }
+
+  // updates from database
+  updateCowboyRequests(List<String> newRequests) {
+    _requests = newRequests;
+    notifyListeners();
+  }
+
+  addTripToBene(String bene_uuid, String trip_uuid){
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
+  }
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {
     // _requests.add(friendUUID);
@@ -113,35 +148,6 @@ class Cowboy with ChangeNotifier {
     _requests.remove(friendUUID);
     updateCowboyRequestsRemove(friendUUID);
     notifyListeners();
-  }
-
-  // initialize cowboy in database for first time
-  intializeCowboyDB() {
-    userCollection.doc(_uuid).set({
-      'uuid': _uuid,
-      'first_name': _firstName,
-      'last_name': _lastName,
-      'email': _email,
-      'shopping_trips': _shoppingTrips,
-      'friends': _friends,
-      'requests': _requests,
-    });
-  }
-  // UPDATE FUNCTIONS
-  // only update one field each, straight to firestore, completes in background
-  // TODO maybe need to add a check to call update() or set()
-  updateCowboyFirst() {
-    userCollection.doc(_uuid).update({'first_name': _firstName});
-  }
-  updateCowboyLast() {
-    userCollection.doc(_uuid).update({'last_name': _lastName});
-  }
-  updateCowboyEmail() {
-    userCollection.doc(_uuid).update({'email': _email});
-  }
-  updateCowboyTrips() {
-    userCollection.doc(_uuid).update({'shopping_trips': _shoppingTrips});
-    //delete trip from the shopping trip collection
   }
   updateCowboyRequestsAdd(String friendUUID) {
     userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
