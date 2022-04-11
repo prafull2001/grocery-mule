@@ -174,6 +174,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
         for(var friend in selected_friend) {
           context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
+          context.read<Cowboy>().addTripToBene(friend,context.read<ShoppingTrip>().uuid );
+               //addTripToBene(String bene_uuid, String trip_uuid)
         }
 
         // context.read<ShoppingTrip>().addBeneficiary('NpGPpb8B0Te8OZyywLr69f3WEwn1','Praf');
