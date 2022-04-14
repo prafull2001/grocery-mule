@@ -45,7 +45,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: Theme.of(context).primaryColorDark,
+        color: dark_beige,
       ),
       child: Column(
           children: [
@@ -146,16 +146,14 @@ class _CheckoutScreen extends State<CheckoutScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Checkout Screen'),
-        backgroundColor: const Color(0xFFbc5100),
+        backgroundColor: light_orange,
       ),
       body: ListView(
         padding: const EdgeInsets.all(25),
         children: [
           for (var entry in aggre_cleaned_list.entries)
             personalList(entry.key),
-
         ],
-
       ),
     );
   }

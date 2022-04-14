@@ -58,12 +58,10 @@ class _GroceryMuleState extends State<GroceryMule>{
 
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: const Color(0xffF47F20),
-        // primaryColorDark: const Color(0xFFbc5100),
-        // primaryColorLight: const Color(0xFFffb04c),
+        primaryColor: dark_beige,
         scaffoldBackgroundColor: cream,
-        canvasColor: cream,
-                      colorScheme: ColorScheme.fromSwatch().copyWith(secondary: const Color(0xffF47F20))
+        cardColor: dark_beige,
+        canvasColor: cream, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: light_orange)
       ),
       home: home,
       routes: {
