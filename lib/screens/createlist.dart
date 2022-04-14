@@ -185,10 +185,31 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
         print(context.read<Cowboy>().shoppingTrips);
       } else {
+        //check if any bene needs to be removed
+        context.read<ShoppingTrip>().beneficiaries.forEach((uid, name) {
+          if(!selected_friend.contains(uid)){
+            context.read<ShoppingTrip>().removeBeneficiary(uid);
+          }
+        });
+        //check if new bene need to be added
+        for(var friend in selected_friend) {
+          if(!context.read<ShoppingTrip>().beneficiaries.containsKey(friend)) {
+            context.read<ShoppingTrip>().addBeneficiary(friend, context
+                .read<Cowboy>()
+                .friends[friend]);
+            context.read<Cowboy>().addTripToBene(friend, context
+                .read<ShoppingTrip>()
+                .uuid);
+
+          }
+          //addTripToBene(String bene_uuid, String trip_uuid)
+        }
         context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
-            context.read<ShoppingTrip>().description);
+            context.read<ShoppingTrip>().description,
+            context.read<ShoppingTrip>().beneficiaries,
+        );
         // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
       }
   }
@@ -199,9 +220,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
+        title: (newList)? const Text(
           'Create List',
           style: TextStyle(color: Colors.black),
+        ):
+        Text(
+          'List Settings',
+          style: TextStyle(fontSize: 18, color: Colors.black),
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarBrightness: Brightness.light,
@@ -321,6 +346,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               MultiSelectDialogField(
                 searchable: true,
                 items: friend_bene,
+                initialValue: context.read<ShoppingTrip>().beneficiaries.keys.toList(),
                 title: Text('Friends'),
                 selectedColor: dark_beige,
                 decoration: BoxDecoration(
@@ -363,8 +389,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child: Text(
+                    child: (newList)? Text(
                       'Create List',
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ):Text(
+                      'Edit List',
                       style: TextStyle(fontSize: 18, color: Colors.black),
                     ),
                     style: ButtonStyle(

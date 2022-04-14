@@ -76,10 +76,11 @@ class ShoppingTrip with ChangeNotifier{
     notifyListeners();
   }
   // when metadata update fields are called from first screen, this method should be called
-  updateTripMetadata(String title, DateTime date, String description) {
+  updateTripMetadata(String title, DateTime date, String description, Map<String, String> beneficiary) {
     _title = title;
     _date = date;
     _description = description;
+    _beneficiaries = beneficiary;
     updateTripMetadataDB();
     notifyListeners();
   }
@@ -160,6 +161,7 @@ class ShoppingTrip with ChangeNotifier{
     tripCollection.doc(_uuid).update({'title': _title});
     tripCollection.doc(_uuid).update({'date': _date});
     tripCollection.doc(_uuid).update({'description': _description});
+
   }
   // updates after a beneficiary has been added
   updateBeneficiaryDB() {
