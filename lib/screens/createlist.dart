@@ -260,7 +260,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 ),
                 SizedBox(width: 10.0,),
                 Text(
-                  '${context.read<ShoppingTrip>().date.toLocal()}'.split(' ')[0].replaceAll('-', '/'),
+                  '${context.watch<ShoppingTrip>().date.toLocal()}'.split(' ')[0].replaceAll('-', '/'),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w400,
