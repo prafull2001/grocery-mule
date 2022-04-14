@@ -41,14 +41,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
         idToken: googleAuth.idToken,
       );
       UserCredential res = await auth.signInWithCredential(credential);
+
+      String full_name = res.user.displayName;
+      List<String> name_array = full_name.split(" ");
+      firstName = name_array[0];
+      lastName = name_array[1];
+      email = res.user.email;
       if (res.additionalUserInfo.isNewUser) {
         print("new user");
         //final new_res = await signInWithGoogle();
-        String full_name = res.user.displayName;
-        List<String> name_array = full_name.split(" ");
-        firstName = name_array[0];
-        lastName = name_array[1];
-        email = res.user.email;
+
         context.read<Cowboy>().initializeCowboy(res.user.uid, firstName, lastName, email);
         //User logging in for the first time
         // Redirect user to tutorial

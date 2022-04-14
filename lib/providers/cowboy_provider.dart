@@ -101,6 +101,11 @@ class Cowboy with ChangeNotifier {
     //delete trip from the shopping trip collection
   }
 
+  clearData(){
+    _shoppingTrips.clear();
+     _friends.clear(); // uuid to first name
+     _requests.clear();
+  }
   // removes friend from requests, adds friend, notifies listeners, updates database
   addFriend(String friend_uuid, String friend_name) {
     _requests.remove(friend_uuid);

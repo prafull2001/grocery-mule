@@ -151,6 +151,7 @@ class ShoppingTrip with ChangeNotifier{
   }
 
   deleteTripDB(){
+    print(_uuid);
     tripCollection.doc(_uuid).delete();
     notifyListeners();
   }
