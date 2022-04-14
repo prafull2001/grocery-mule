@@ -138,6 +138,9 @@ class Cowboy with ChangeNotifier {
   addTripToBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
   }
+  RemoveTripFromBene(String bene_uuid, String trip_uuid){
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
+  }
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {
     // _requests.add(friendUUID);

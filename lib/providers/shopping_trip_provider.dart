@@ -47,7 +47,6 @@ class ShoppingTrip with ChangeNotifier{
   Map<String,String> get beneficiaries => _beneficiaries;
   Map<String, Item> get items => _items;
   String get host => _host;
-
   // metadata editing methods
   editTripTitle(String title) {
     _title = title;
