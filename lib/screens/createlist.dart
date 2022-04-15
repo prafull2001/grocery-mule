@@ -170,8 +170,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().description,
             uid_name,
             curUser.uid);
-
-
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
         for(var friend in selected_friend) {
           context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
@@ -185,10 +183,32 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
         print(context.read<Cowboy>().shoppingTrips);
       } else {
+        //check if any bene needs to be removed
+        context.read<ShoppingTrip>().beneficiaries.forEach((uid, name) {
+          if(!selected_friend.contains(uid)){
+            context.read<ShoppingTrip>().removeBeneficiary(uid);
+            context.read<Cowboy>().RemoveTripFromBene(uid,context.read<ShoppingTrip>().uuid);
+          }
+        });
+        //check if new bene need to be added
+        for(var friend in selected_friend) {
+          if(!context.read<ShoppingTrip>().beneficiaries.containsKey(friend)) {
+            context.read<ShoppingTrip>().addBeneficiary(friend, context
+                .read<Cowboy>()
+                .friends[friend]);
+            context.read<Cowboy>().addTripToBene(friend, context
+                .read<ShoppingTrip>()
+                .uuid);
+
+          }
+          //addTripToBene(String bene_uuid, String trip_uuid)
+        }
         context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
-            context.read<ShoppingTrip>().description);
+            context.read<ShoppingTrip>().description,
+            context.read<ShoppingTrip>().beneficiaries,
+        );
         // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
       }
   }
@@ -199,9 +219,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
+        title: (newList)? const Text(
           'Create List',
           style: TextStyle(color: Colors.black),
+        ):
+        Text(
+          'List Settings',
+          style: TextStyle(fontSize: 18, color: Colors.black),
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarBrightness: Brightness.light,
@@ -260,7 +284,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 ),
                 SizedBox(width: 10.0,),
                 Text(
-                  '${context.read<ShoppingTrip>().date.toLocal()}'.split(' ')[0].replaceAll('-', '/'),
+                  '${context.watch<ShoppingTrip>().date.toLocal()}'.split(' ')[0].replaceAll('-', '/'),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w400,
@@ -321,6 +345,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               MultiSelectDialogField(
                 searchable: true,
                 items: friend_bene,
+                initialValue: context.read<ShoppingTrip>().beneficiaries.keys.toList(),
                 title: Text('Friends'),
                 selectedColor: dark_beige,
                 decoration: BoxDecoration(
@@ -363,8 +388,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child: Text(
+                    child: (newList)? Text(
                       'Create List',
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                    ):Text(
+                      'Edit List',
                       style: TextStyle(fontSize: 18, color: Colors.black),
                     ),
                     style: ButtonStyle(
@@ -377,6 +405,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                       if(context.read<ShoppingTrip>().title != '') {
                         await updateGridView(newList);
                         Navigator.pop(context);
+                        setState(() {});
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) =>
+                                EditListScreen(context.read<ShoppingTrip>().uuid)));
                       } else {
                         // print("triggered");
                         showDialog(
@@ -389,6 +421,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                   child: Text("OK"),
                                   onPressed: () {
                                     Navigator.of(context).pop();
+
                                   },
                                 ),
                               ],
@@ -439,219 +472,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           ],
         ),
       ),
-        /*Scrollbar(
-          child: ListView(
-              padding: const EdgeInsets.all(25),
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'List Name',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 100,
-                          child: TextField(
-                              keyboardType: TextInputType.text,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.black),
-                              controller: _tripTitleController,
-                              onChanged: (value){
-                                context.read<ShoppingTrip>().editTripTitle(value);
-                              }
-
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Date of Trip',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("${context.read<ShoppingTrip>().date.toLocal()}".split(' ')[0]),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      RoundedButton(
-                        onPressed: () => _selectDate(context),
-                        title: 'Select Date',
-                      ),
-                    ],
-                  ),
-                ]),
-                SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Description',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 100,
-                          child: TextField(
-                              keyboardType: TextInputType.emailAddress,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.black),
-                              controller: _tripDescriptionController,
-                              onChanged: (value){
-                                context.read<ShoppingTrip>().editTripDescription(value);
-                              }
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                Container(
-                  child:
-                  MultiSelectDialogField(
-                    searchable: true,
-                    items: friend_bene,
-                    title: Text("Friends"),
-                    selectedColor: const Color(0xFFbc5100),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFbc5100).withOpacity(0.1),
-                      borderRadius: BorderRadius.all(Radius.circular(40)),
-                      border: Border.all(
-                        color: const Color(0xFFbc5100),
-                        width: 2,
-                      ),
-                    ),
-                    buttonIcon: Icon(
-                      Icons.person,
-                      color: const Color(0xFFbc5100),
-                    ),
-                    buttonText: Text(
-                      "Selected friends",
-                      style: TextStyle(
-                        color: const Color(0xFFbc5100),
-                        fontSize: 16,
-                      ),
-                    ),
-                    onConfirm: (results) {
-                      selected_friend = results;
-                      print(selected_friend);
-                    },
-                  ),
-
-                ),
-                Container(
-                  height: 70,
-                  width: 5,
-                  child: RoundedButton(
-                    onPressed: () async {
-                      if(context.read<ShoppingTrip>().title != '') {
-                        await updateGridView(newList);
-                        Navigator.pop(context);
-                        //Navigator.pushNamed(context, ListsScreen.id);
-                        /*
-                        if(newList)
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => EditListScreen(context.read<Cowboy>().uuid)));
-                         */
-
-                      } else {
-                        // print("triggered");
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text("List name cannot be empty"),
-                              actions: [
-                                TextButton(
-                                  child: Text("OK"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    },
-                    title: "Create List",
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
-                    onPressed: () async {
-                      await check_delete(context);
-                      if(delete_list) {
-                        if(!newList) {
-                          print("delete");
-                          context.read<ShoppingTrip>().deleteTripDB();
-                          context.read<Cowboy>().removeTrip(context
-                              .read<ShoppingTrip>()
-                              .uuid);
-                        }
-                        Navigator.of(context).popUntil((route){
-                          return route.settings.name == ListsScreen.id;
-                        });
-                        Navigator.pushNamed(context, ListsScreen.id);
-                      }
-                    },
-                    title: "Delete List",
-                  ),
-                )
-              ],
-            ),
-        ),*/
     );
   }
 

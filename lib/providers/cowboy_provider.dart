@@ -101,6 +101,11 @@ class Cowboy with ChangeNotifier {
     //delete trip from the shopping trip collection
   }
 
+  clearData(){
+    _shoppingTrips.clear();
+     _friends.clear(); // uuid to first name
+     _requests.clear();
+  }
   // removes friend from requests, adds friend, notifies listeners, updates database
   addFriend(String friend_uuid, String friend_name) {
     _requests.remove(friend_uuid);
@@ -132,6 +137,9 @@ class Cowboy with ChangeNotifier {
 
   addTripToBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
+  }
+  RemoveTripFromBene(String bene_uuid, String trip_uuid){
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
   }
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {

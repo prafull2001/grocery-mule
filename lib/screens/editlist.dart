@@ -46,9 +46,10 @@ class _EditListsScreenState extends State<EditListScreen> {
   static bool reload = true;
   @override
   void initState() {
+    setState(() {});
     tripUUID = widget.tripUUID;
     hostFirstName = context.read<Cowboy>().firstName;
-    _loadCurrentTrip();
+    _queryCurrentTrip();
 
     // TODO: implement initState
     _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
@@ -75,8 +76,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     ),
   ];
 
-  void _loadCurrentTrip() {
-    _queryCurrentTrip().then((DocumentSnapshot snapshot) {
+  void _loadCurrentTrip(DocumentSnapshot snapshot) {
       if(snapshot != null) {
         DateTime date = DateTime.now();
         Map<String, Item> items = <String, Item>{};
@@ -98,18 +98,31 @@ class _EditListsScreenState extends State<EditListScreen> {
               (snapshot.data() as Map<String, dynamic>)['host'],
               uid_name, items);
       }
-    });
   }
 
-  Future<DocumentSnapshot> _queryCurrentTrip() async {
-    if(tripUUID != '') {
-      DocumentSnapshot tempShot;
-      await shoppingTripCollection.doc(tripUUID).get().then((docSnapshot) => tempShot=docSnapshot);
-      print(tempShot.data());
-      return tempShot;
-    } else {
-      return null;
-    }
+  Future<void> _queryCurrentTrip() async {
+
+      DocumentSnapshot tempShot = await shoppingTripCollection.doc(tripUUID).get();
+      DateTime date = DateTime.now();
+      Map<String, Item> items = <String, Item>{};
+      date = (tempShot['date'] as Timestamp).toDate();
+      //print(raw_date);
+      (tempShot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
+        uid_name[uid.toString()] = name.toString();
+      });
+      ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
+        items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
+        items[name].isExpanded = false;
+        //add each item to the panel (for expandable items presented to user)
+        //frontend_list[name] = new Item_front_end(name, items[name]);
+      });
+
+      context.read<ShoppingTrip>().initializeTripFromDB(tempShot['uuid'],
+          (tempShot.data() as Map<String, dynamic>)['title'], date,
+          (tempShot.data() as Map<String, dynamic>)['description'],
+          (tempShot.data() as Map<String, dynamic>)['host'],
+          uid_name, items);
+      return;
   }
 
 
@@ -350,6 +363,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     switch (item) {
       case 1:
       Navigator.push(context,MaterialPageRoute(builder: (context) => CreateListScreen(false,context.read<ShoppingTrip>().uuid)));
+      setState(() {});
     }
   }
 
@@ -357,6 +371,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   Widget build(BuildContext context) {
     //full_list.add(host_uuid);
     return Masterlist(context);
+
   }
 
   Widget Masterlist(BuildContext context){
@@ -376,7 +391,9 @@ class _EditListsScreenState extends State<EditListScreen> {
         ),
         actions: <Widget>[
           PopupMenuButton<int>(
-            onSelected: (item) => handleClick(item),
+            onSelected: (item) => {
+              handleClick(item),
+            },
             itemBuilder: (context) => [
               PopupMenuItem<int>(value: 1, child: Text('Trip Settings')),
             ],
