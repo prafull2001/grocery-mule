@@ -72,6 +72,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       _tripTitleController = TextEditingController()..text = cur_trip.title;
       _tripDescriptionController = TextEditingController()..text = cur_trip.description;
       newList = false;
+      selected_friend = context.read<ShoppingTrip>().beneficiaries.keys.toList();
     }else{
       clear_provider();
     }
@@ -404,11 +405,16 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     onPressed: () async {
                       if(context.read<ShoppingTrip>().title != '') {
                         await updateGridView(newList);
-                        Navigator.pop(context);
                         setState(() {});
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) =>
-                                EditListScreen(context.read<ShoppingTrip>().uuid)));
+                        Navigator.pop(context);
+
+                        if(newList) {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) =>
+                                  EditListScreen(context
+                                      .read<ShoppingTrip>()
+                                      .uuid)));
+                        }
                       } else {
                         // print("triggered");
                         showDialog(
