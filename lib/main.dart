@@ -3,6 +3,7 @@ import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/editlist.dart';
+import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
@@ -18,6 +19,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:after_layout/after_layout.dart';
+import 'dart:io';
+
 
 void main() async {
   // Ensure that Firebase is initialized
@@ -25,56 +28,55 @@ void main() async {
   await Firebase.initializeApp();
   // Initialize Firebase
   //
-  final prefs = await SharedPreferences.getInstance();
-  final bool showHome = prefs.getBool('showHome') ?? false;
+
   runApp(
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => Cowboy()),
           ChangeNotifierProvider(create: (_) => ShoppingTrip()),
         ],
-        child: GroceryMule(showHome: showHome),
+        child: GroceryMule(),
       ),
 
   );
 }
 
 class GroceryMule extends StatefulWidget {
-  final bool show_home;
-  const GroceryMule({Key key, bool showHome, this.show_home}); // might need to swap orders
-
-
   @override
   _GroceryMuleState createState() => _GroceryMuleState();
 }
 
-class _GroceryMuleState extends State<GroceryMule>{
-/*
-  Future checkFirstLaunch() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool first_launch = prefs.getBool('first_launch') ?? false;
+class _GroceryMuleState extends State<GroceryMule> with AfterLayoutMixin<GroceryMule>{
+  bool seen_intro;
 
-    if(first_launch) {
-      //Navigator.pushNamed(context, WelcomeScreen.id); // switch to intro screen
-      return true;
+  checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool cur_state = prefs.getBool('show_home') ?? false;
+
+    print('cur_state: ' + cur_state.toString());
+
+    if (cur_state == false) {
+      print('FIRST TIME LAUNCH');
+      await prefs.setBool('show_home', true);
+      seen_intro = false;
+      //Navigator.pushNamed(context, IntroScreen.id);
     } else {
-      prefs.setBool('first_launch', true);
-      return false;
-      //might need to push home screen, but may need await ^^ for that
+      seen_intro = true;
     }
   }
 
-  // @override
-  // void afterFirstLayout(BuildContext context) => checkFirstLaunch();
-*/
+
+
 
   @override
   Widget build(BuildContext context) {
     Widget home;
     final User curUser = FirebaseAuth.instance.currentUser;
 
-    // put this all in the 'else' statement of the introduction screen
-    if(widget.show_home == true){
+    print('seen_intro: ' + seen_intro.toString());
+    if(seen_intro == false){
+      home = IntroScreen();
+    } else {
       if(curUser == null) {
         print('USER IS NULL');
         setState((){
@@ -85,9 +87,7 @@ class _GroceryMuleState extends State<GroceryMule>{
         setState((){
           home = ListsScreen();
         });
-      };
-    } else {
-      // stuff for intro page
+      }
     }
 
     return MaterialApp(
@@ -110,7 +110,13 @@ class _GroceryMuleState extends State<GroceryMule>{
         FriendScreen.id: (context) => FriendScreen(),
         PersonalListScreen.id: (context) => PersonalListScreen(),
         CheckoutScreen.id: (context) => CheckoutScreen(),
+        IntroScreen.id: (context) => IntroScreen(),
       },
     );
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    checkFirstSeen();
   }
 }
