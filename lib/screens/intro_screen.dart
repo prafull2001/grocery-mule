@@ -17,8 +17,8 @@ class _IntroScreenState extends State<IntroScreen> {
   final introKey = GlobalKey<IntroductionScreenState>();
 
   void _onIntroEnd(context) {
+    Navigator.pop(context);
     Navigator.pushNamed(context, WelcomeScreen.id);
-    //Navigator.pop(context);
   }
 
   Widget _buildImage(String assetName, [double width = 350]) {
@@ -49,7 +49,7 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
       globalFooter: SizedBox(
         width: double.infinity,
-        height: 60,
+        height: 80,
         child: ElevatedButton(
           child: const Text(
             'Let\'s go right away!',
