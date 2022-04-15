@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_mule/constants.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 
@@ -31,7 +32,7 @@ class _IntroScreenState extends State<IntroScreen> {
       titleTextStyle: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w700),
       bodyTextStyle: bodyStyle,
       bodyPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
-      pageColor: Colors.white,
+      pageColor: cream,
       imagePadding: EdgeInsets.zero,
     );
 
@@ -43,7 +44,6 @@ class _IntroScreenState extends State<IntroScreen> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(top: 16, right: 16),
-            child: _buildImage('flutter.png', 100),
           ),
         ),
       ),
@@ -60,24 +60,38 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
       pages: [
         PageViewModel(
-          title: "Fractional shares",
+          title: "Welcome!",
           body:
-          "Instead of having to buy an entire share, invest any amount you want.",
-          image: _buildImage('logo.jpg'),
+          "Welcome to GroceryMule! Create an account to get started.",
+          image: _buildImage('logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Learn as you go",
+          title: "Add some friends",
           body:
-          "Download the Stockpile app and master the market with our mini-lesson.",
-          image: _buildImage('img2.jpg'),
+          "Head over to the Cowamigos tab to search and add friends",
+          image: _buildImage('logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Kids and teens",
+          title: "Create a list",
           body:
-          "Kids and teens can track their stocks 24/7 and place trades that you approve.",
-          image: _buildImage('img3.jpg'),
+          "Create a list by pressing the + sign at the bottom right",
+          image: _buildImage('logo.png'),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Add items",
+          body:
+          "Add some items to your list and click the \'Personal List\' to see the items you\'ve added",
+          image: _buildImage('logo.png'),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Checkout",
+          body:
+          "When you\'re done shopping, add send payment requests with the touch of a button!",
+          image: _buildImage('logo.png'),
           decoration: pageDecoration,
         ),
       ],
