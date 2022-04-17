@@ -21,6 +21,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:after_layout/after_layout.dart';
 import 'dart:io';
 
+bool seen_intro;
+
+Future<Null> checkFirstSeen() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool cur_state = prefs.getBool('show_home') ?? false;
+  print('cur_state: ' + cur_state.toString());
+  if (cur_state == false) {
+    print('FIRST TIME LAUNCH');
+    await prefs.setBool('show_home', true);
+    seen_intro = false;
+  } else if (cur_state == true ){
+    seen_intro = true;
+  } else {
+    print('something wrong with sharedpreference');
+  }
+}
 
 void main() async {
   // Ensure that Firebase is initialized
@@ -29,66 +45,77 @@ void main() async {
   // Initialize Firebase
   //
 
+  Widget _defaultHome;
+  await checkFirstSeen(); // update seen_intro bool
+
+  if (!seen_intro) {
+    _defaultHome = new IntroScreen();
+  } else {
+    final User curUser = FirebaseAuth.instance.currentUser;
+    if(curUser == null) {
+      print('USER IS NULL');
+      //welcome screen
+      _defaultHome = new WelcomeScreen();
+    } else {
+      print('USER IS NOT NULL');
+      //listsscreen
+      _defaultHome = new ListsScreen();
+    }
+  }
+
+
   runApp(
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => Cowboy()),
           ChangeNotifierProvider(create: (_) => ShoppingTrip()),
         ],
-        child: GroceryMule(),
+        child: new MaterialApp(
+          theme: ThemeData(
+            primaryColor: dark_beige,
+            scaffoldBackgroundColor: cream,
+            cardColor: dark_beige,
+            canvasColor: cream, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: light_orange)
+          ),
+          home: _defaultHome,
+          routes: {
+            WelcomeScreen.id: (context) => WelcomeScreen(),
+            LoginScreen.id: (context) => LoginScreen(),
+            RegistrationScreen.id: (context) => RegistrationScreen(),
+            ListsScreen.id: (context) => ListsScreen(),
+            CreateListScreen.id: (context) => CreateListScreen(true),
+            EditListScreen.id: (context) => EditListScreen(null),
+            UserInfoScreen.id: (context) => UserInfoScreen(),
+            ConfirmEmailScreen.id: (context) => ConfirmEmailScreen(),
+            FriendScreen.id: (context) => FriendScreen(),
+            PersonalListScreen.id: (context) => PersonalListScreen(),
+            CheckoutScreen.id: (context) => CheckoutScreen(),
+            IntroScreen.id: (context) => IntroScreen(),
+          },
+        ),
       ),
-
   );
 }
 
+
+/*
 class GroceryMule extends StatefulWidget {
   @override
   _GroceryMuleState createState() => _GroceryMuleState();
 }
+//with AfterLayoutMixin<GroceryMule>
+class _GroceryMuleState extends State<GroceryMule> {
 
-class _GroceryMuleState extends State<GroceryMule> with AfterLayoutMixin<GroceryMule>{
-  bool seen_intro;
-
-  checkFirstSeen() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool cur_state = prefs.getBool('show_home') ?? false;
-
-    print('cur_state: ' + cur_state.toString());
-
-    if (cur_state == false) {
-      print('FIRST TIME LAUNCH');
-      await prefs.setBool('show_home', true);
-      seen_intro = false;
-      //Navigator.pushNamed(context, IntroScreen.id);
-    } else {
-      seen_intro = true;
-    }
+  @override
+  void initState() {
+    super.initState();
+    checkFirstSeen();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
-    Widget home;
+    //Widget home;
     final User curUser = FirebaseAuth.instance.currentUser;
-
-    print('seen_intro: ' + seen_intro.toString());
-    if(seen_intro == false){
-      home = IntroScreen();
-    } else {
-      if(curUser == null) {
-        print('USER IS NULL');
-        setState((){
-          home = WelcomeScreen();
-        });
-      } else {
-        print('USER IS NOT NULL');
-        setState((){
-          home = ListsScreen();
-        });
-      }
-    }
 
     return MaterialApp(
       theme: ThemeData(
@@ -115,8 +142,9 @@ class _GroceryMuleState extends State<GroceryMule> with AfterLayoutMixin<Grocery
     );
   }
 
-  @override
-  void afterFirstLayout(BuildContext context) {
-    checkFirstSeen();
-  }
+  // @override
+  // void afterFirstLayout(BuildContext context) {
+  //   checkFirstSeen();
+  // }
 }
+*/
