@@ -198,6 +198,6 @@ class Cowboy with ChangeNotifier {
     // notifyListeners();
   }
   updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
+    userCollection.doc(friendUUID).update({'requests.${_uuid}': (_email+'|~|'+_firstName+' '+lastName)});
   }
 }
