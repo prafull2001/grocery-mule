@@ -174,20 +174,26 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
         for(var friend in selected_friend) {
           context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
-          context.read<Cowboy>().addTripToBene(friend,context.read<ShoppingTrip>().uuid );
+          context.read<Cowboy>().addTripToBene(friend,
+              context.read<ShoppingTrip>().uuid,
+              context.read<ShoppingTrip>().title,
+              context.read<ShoppingTrip>().date,
+              context.read<ShoppingTrip>().description
+          );
                //addTripToBene(String bene_uuid, String trip_uuid)
         }
-
-        // context.read<ShoppingTrip>().addBeneficiary('NpGPpb8B0Te8OZyywLr69f3WEwn1','Praf');
-        // context.read<ShoppingTrip>().addBeneficiary('yTWmoo2Qskf3wFcbxaJYUt9qrZM2','Dhruv');
-
-        context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
+        context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid,
+            context.read<ShoppingTrip>().title,
+            context.read<ShoppingTrip>().date,
+            context.read<ShoppingTrip>().description
+            );
         print(context.read<Cowboy>().shoppingTrips);
       } else {
         //check if any bene needs to be removed
         context.read<ShoppingTrip>().beneficiaries.forEach((uid, name) {
           if(!selected_friend.contains(uid)){
             context.read<ShoppingTrip>().removeBeneficiary(uid);
+            //below doesn't work
             context.read<Cowboy>().RemoveTripFromBene(uid,context.read<ShoppingTrip>().uuid);
           }
         });
@@ -197,9 +203,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().addBeneficiary(friend, context
                 .read<Cowboy>()
                 .friends[friend]);
-            context.read<Cowboy>().addTripToBene(friend, context
-                .read<ShoppingTrip>()
-                .uuid);
+            context.read<Cowboy>().addTripToBene(friend,
+                context.read<ShoppingTrip>().uuid,
+                context.read<ShoppingTrip>().title,
+                context.read<ShoppingTrip>().date,
+                context.read<ShoppingTrip>().description
+            );
 
           }
           //addTripToBene(String bene_uuid, String trip_uuid)
@@ -407,7 +416,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         await updateGridView(newList);
                         setState(() {});
                         Navigator.pop(context);
-
                         if(newList) {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) =>

@@ -76,32 +76,20 @@ class _EditListsScreenState extends State<EditListScreen> {
     ),
   ];
 
-  void _loadCurrentTrip(DocumentSnapshot snapshot) {
-      if(snapshot != null) {
-        DateTime date = DateTime.now();
+  Future<void> _loadCurrentTrip() async {
+    DocumentSnapshot snapshot = await shoppingTripCollection.doc(tripUUID).get();
         Map<String, Item> items = <String, Item>{};
-        date = (snapshot['date'] as Timestamp).toDate();
-        //print(raw_date);
-        (snapshot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
-          uid_name[uid.toString()] = name.toString();
-        });
         ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
           items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
           items[name].isExpanded = false;
             //add each item to the panel (for expandable items presented to user)
           //frontend_list[name] = new Item_front_end(name, items[name]);
         });
-
-          context.read<ShoppingTrip>().initializeTripFromDB(snapshot['uuid'],
-              (snapshot.data() as Map<String, dynamic>)['title'], date,
-              (snapshot.data() as Map<String, dynamic>)['description'],
-              (snapshot.data() as Map<String, dynamic>)['host'],
-              uid_name, items);
-      }
+    context.read<ShoppingTrip>().setItems(items);
+    return;
   }
 
   Future<void> _queryCurrentTrip() async {
-
       DocumentSnapshot tempShot = await shoppingTripCollection.doc(tripUUID).get();
       DateTime date = DateTime.now();
       Map<String, Item> items = <String, Item>{};
@@ -372,6 +360,8 @@ class _EditListsScreenState extends State<EditListScreen> {
     //full_list.add(host_uuid);
     return Masterlist(context);
 
+    //
+
   }
 
   Widget Masterlist(BuildContext context){
@@ -401,131 +391,132 @@ class _EditListsScreenState extends State<EditListScreen> {
         ],
       ),
 
-      body: Container(
-        child: Column(
-          //padding: const EdgeInsets.all(25),
-          children: [
-            SizedBox(
-              height: 20,
-            ),
+      body:
+               Container(
+                  child: Column(
+                    //padding: const EdgeInsets.all(25),
+                    children: [
+                      SizedBox(
+                        height: 20,
+                      ),
 
-            Row(
-              children: [
-                SizedBox(width: 10.0,),
-                Text(
-                  'Host - $hostFirstName',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                SizedBox(width: 10.0,),
-                Text(
-                  'Beneficiaries -',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                  ),
-                ),
-                SizedBox(width: 10.0,),
-                Row(
-                  children: [
-                    for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
-                      Text(
-                        '$name  ',
-                        style: TextStyle(
+                      Row(
+                        children: [
+                          SizedBox(width: 10.0,),
+                          Text(
+                            'Host - $hostFirstName',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          SizedBox(width: 10.0,),
+                          Text(
+                            'Beneficiaries -',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                          SizedBox(width: 10.0,),
+                          Row(
+                            children: [
+                              for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+                                Text(
+                                  '$name  ',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          Spacer(),
+                          IconButton(icon: Icon(Icons.add_circle),),
+                        ],
+                      ),
+                      //SizedBox(height: 10),
+                      SizedBox(
+                        height: 40,
+                        width: double.maxFinite,
+                        child: Divider(
                           color: Colors.black,
-                          fontSize: 15,
+                          thickness: 1.5,
+                          indent: 75,
+                          endIndent: 75,
                         ),
                       ),
-                  ],
-                ),
-                Spacer(),
-                IconButton(icon: Icon(Icons.add_circle),),
-              ],
-            ),
-            //SizedBox(height: 10),
-            SizedBox(
-              height: 40,
-              width: double.maxFinite,
-              child: Divider(
-                color: Colors.black,
-                thickness: 1.5,
-                indent: 75,
-                endIndent: 75,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  child: Text(
-                    'Add Item',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                    ),
-                  ),
-                ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            child: Text(
+                              'Add Item',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
 
-                Container(
-                    child: IconButton(
-                      icon: const Icon(Icons.add_circle),
-                      onPressed: () {
-                        setState(() {
-                          isAdd = true;
-                        });
-                      },
-                    )
-                ),
-              ],
-            ),
-            if(isAdd)
-              create_item(),
-            //single_item(grocery_list[1]),
-            _buildPanel(),
-            SizedBox(height: 10.0,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              //comment
-                SizedBox(width: 40.0,),
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, PersonalListScreen.id);
-                    },
-                    title: "Personal List",
-                  ),
-                ),
-                Spacer(),
-                if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
-                  Container(
-                    height: 70,
-                    width: 150,
-                    child: RoundedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, CheckoutScreen.id);
-                      },
-                      title: "Checkout",
-                    ),
-                  ),
-                  ],
-                SizedBox(width: 40.0,),
-              ],
-            ),
-          ],
-        ),
-      ),
+                          Container(
+                              child: IconButton(
+                                icon: const Icon(Icons.add_circle),
+                                onPressed: () {
+                                  setState(() {
+                                    isAdd = true;
+                                  });
+                                },
+                              )
+                          ),
+                        ],
+                      ),
+                      if(isAdd)
+                        create_item(),
+                      //single_item(grocery_list[1]),
+                      _buildPanel(),
+                      SizedBox(height: 10.0,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          //comment
+                          SizedBox(width: 40.0,),
+                          Container(
+                            height: 70,
+                            width: 150,
+                            child: RoundedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, PersonalListScreen.id);
+                              },
+                              title: "Personal List",
+                            ),
+                          ),
+                          Spacer(),
+                          if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
+                            Container(
+                              height: 70,
+                              width: 150,
+                              child: RoundedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, CheckoutScreen.id);
+                                },
+                                title: "Checkout",
+                              ),
+                            ),
+                          ],
+                          SizedBox(width: 40.0,),
+                        ],
+                      ),
+                    ],
+                  )
+              ),
     );
   }
 }

@@ -106,7 +106,9 @@ class ShoppingTrip with ChangeNotifier{
     updateBeneficiaryDB();
     notifyListeners();
   }
-
+  setItems(Map<String,Item> items){
+    _items = items;
+  }
   // user adds an item for first time
   addItem(String name, [int quantity=0]) {
     _items[name] = Item(name, quantity, _beneficiaries);

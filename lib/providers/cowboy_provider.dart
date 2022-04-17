@@ -10,7 +10,7 @@ class Cowboy with ChangeNotifier {
   String _firstName = '';
   String _lastName = '';
   String _email = '';
-  List<String> _shoppingTrips = <String>[];
+  Map<String,String> _shoppingTrips = {};
   Map<String, String> _friends = <String, String>{}; // uuid to first name
   List<String> _requests = <String>[]; // uuid to first_last
 
@@ -34,7 +34,7 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(_uuid).update({'email': _email});
   }
   // to initialize fields after empty constructor has been called by provider init
-  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, Map<String, String> friends, List<String> requests) {
+  fillFields(String uuid, String firstName, String lastName, String email, Map<String,String> shoppingTrips, Map<String, String> friends, List<String> requests) {
     this._uuid = uuid;
     this._firstName = firstName;
     this._lastName = lastName;
@@ -80,13 +80,14 @@ class Cowboy with ChangeNotifier {
   String get firstName => _firstName;
   String get lastName => _lastName;
   String get email => _email;
-  List<String> get shoppingTrips => _shoppingTrips;
+  Map<String,String> get shoppingTrips => _shoppingTrips;
   Map<String, String> get friends => _friends;
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String trip_uuid) {
-    _shoppingTrips.add(trip_uuid);
+  addTrip(String trip_uuid, String title,  DateTime date,String desc) {
+    String entry = title+ "|~|" + date.toString() + "|~|" + desc.toString();
+    _shoppingTrips[trip_uuid] = entry;
     updateCowboyTrips();
     notifyListeners();
   }
@@ -135,9 +136,11 @@ class Cowboy with ChangeNotifier {
     notifyListeners();
   }
 
-  addTripToBene(String bene_uuid, String trip_uuid){
-    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
+  addTripToBene(String bene_uuid, String trip_uuid, String title, DateTime date, String desc ){
+    String entry = title+ "|~|" + date.toString() + "|~|" + desc;
+    userCollection.doc(bene_uuid).update({'shopping_trips.${trip_uuid}': entry});
   }
+  //change this to overwrite
   RemoveTripFromBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
   }
