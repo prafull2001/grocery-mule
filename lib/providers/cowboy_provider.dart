@@ -161,9 +161,11 @@ class Cowboy with ChangeNotifier {
     notifyListeners();
   }
   // removes friend, notifies listeners, and updates database
-  removeFriend(String friend_uuid) {
-    _friends.remove(friend_uuid);
-    updateCowboyFriendsRemove(friend_uuid);
+  removeFriend(String friendUUID) {
+    print('friends: $_friends');
+    _friends.remove(friendUUID);
+    print('friends again: $_friends');
+    updateCowboyFriendsRemove(friendUUID);
     notifyListeners();
   }
   updateCowboyRequestsRemove(String friendUUID) {
@@ -175,7 +177,9 @@ class Cowboy with ChangeNotifier {
     () async {
       amigos = await fetchFriendFriends(friendUUID);
     };
+    print(amigos);
     amigos.remove(_uuid);
+    print(amigos);
     userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
