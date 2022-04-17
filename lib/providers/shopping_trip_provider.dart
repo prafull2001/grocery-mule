@@ -47,7 +47,6 @@ class ShoppingTrip with ChangeNotifier{
   Map<String,String> get beneficiaries => _beneficiaries;
   Map<String, Item> get items => _items;
   String get host => _host;
-
   // metadata editing methods
   editTripTitle(String title) {
     _title = title;
@@ -76,10 +75,11 @@ class ShoppingTrip with ChangeNotifier{
     notifyListeners();
   }
   // when metadata update fields are called from first screen, this method should be called
-  updateTripMetadata(String title, DateTime date, String description) {
+  updateTripMetadata(String title, DateTime date, String description, Map<String, String> beneficiary) {
     _title = title;
     _date = date;
     _description = description;
+    _beneficiaries = beneficiary;
     updateTripMetadataDB();
     notifyListeners();
   }
@@ -106,7 +106,9 @@ class ShoppingTrip with ChangeNotifier{
     updateBeneficiaryDB();
     notifyListeners();
   }
-
+  setItems(Map<String,Item> items){
+    _items = items;
+  }
   // user adds an item for first time
   addItem(String name, [int quantity=0]) {
     _items[name] = Item(name, quantity, _beneficiaries);
@@ -151,6 +153,7 @@ class ShoppingTrip with ChangeNotifier{
   }
 
   deleteTripDB(){
+    print(_uuid);
     tripCollection.doc(_uuid).delete();
     notifyListeners();
   }
@@ -159,6 +162,7 @@ class ShoppingTrip with ChangeNotifier{
     tripCollection.doc(_uuid).update({'title': _title});
     tripCollection.doc(_uuid).update({'date': _date});
     tripCollection.doc(_uuid).update({'description': _description});
+
   }
   // updates after a beneficiary has been added
   updateBeneficiaryDB() {

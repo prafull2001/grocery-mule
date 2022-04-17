@@ -52,7 +52,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     }
 
     // error checking should be done, update coming fields as if they are 100% correct
-    List<
+    
     context.read<Cowboy>().fillFields(snapshot.get('uuid'), snapshot.get('first_name'), snapshot.get('last_name'), snapshot.get('email'), shoppingTrips, friends, requests)
   }
   Stream<DocumentSnapshot> _getCowboy() {

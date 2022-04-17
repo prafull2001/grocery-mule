@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 const cream = Color(0xffFFE9D0);
+const light_orange = Color(0xFFFF8A65);
 const orange = Color(0xffFF6E40);
 const red = Color(0xFFEF5350);
+const beige = Color(0xFFb6a8a0);
 const dark_beige = Color(0xff97877E);
 const darker_beige = Color(0xff49413D);
 
@@ -19,7 +21,7 @@ const kMessageTextFieldDecoration = InputDecoration(
 
 const kMessageContainerDecoration = BoxDecoration(
   border: Border(
-    top: BorderSide(color: Colors.lightBlueAccent, width: 2.0),
+    top: BorderSide(color: darker_beige, width: 2.0),
   ),
 );
 

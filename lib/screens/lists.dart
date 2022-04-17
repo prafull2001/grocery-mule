@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
@@ -40,37 +40,37 @@ class _ListsScreenState extends State<ListsScreen> {
 
   Future<void> _loadCurrentCowboy() async {
     final DocumentSnapshot snapshot = await _queryCowboy();
-      if(snapshot != null) {
-        List<String> shoppingTrips = <String>[];
-        Map<String, String> friends = <String, String>{};
-        List<String> requests = <String>[];
-        // extrapolating data into provider
-        if(!((snapshot.data() as Map<String, dynamic>)['shopping_trips'] as List<dynamic>).isEmpty) {
-          ((snapshot.data() as Map<String, dynamic>)['shopping_trips'] as List<
-              dynamic>).forEach((dynamicElement) {
-            shoppingTrips.add(dynamicElement.toString());
-          });
-        }else{
-          shoppingTrips.add('dummy');
-        }
-        if(!(snapshot['friends'] as Map<String, dynamic>).isEmpty) {
-          (snapshot['friends'] as Map<String, dynamic>).forEach((dynamicKey,
-              dynamicValue) {
-            friends[dynamicKey.toString()] = dynamicValue.toString();
-          });
-        }
-        if(!(snapshot['requests'] as List<dynamic>).isEmpty) {
-          (snapshot['requests'] as List<dynamic>).forEach((dynamicElement) {
-            requests.add(dynamicElement.toString());
-          });
-        }
-
-          // reads and calls method
-          context.read<Cowboy>().fillFields(snapshot['uuid'].toString(), snapshot['first_name'].toString(), snapshot['last_name'].toString(), snapshot['email'].toString(), shoppingTrips, friends, requests);
-        print(context.read<Cowboy>().shoppingTrips);
-      }
+    readInData(snapshot);
   }
+  void readInData(DocumentSnapshot snapshot){
+      Map<String,String> shoppingTrips = {};
+      Map<String, String> friends = <String, String>{};
+      List<String> requests = <String>[];
+      // extrapolating data into provider
+      if(!(snapshot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
+        (snapshot['shopping_trips'] as Map<String, dynamic>)
+            .forEach((uid,entry) {
+          String fields = entry.toString().trim();
+          shoppingTrips[uid] = fields;
+        });
+      }
+      if(!(snapshot['friends'] as Map<String, dynamic>).isEmpty) {
+        (snapshot['friends'] as Map<String, dynamic>).forEach((dynamicKey,
+            dynamicValue) {
+          friends[dynamicKey.toString()] = dynamicValue.toString();
+        });
+      }
+      if(!(snapshot['requests'] as List<dynamic>).isEmpty) {
+        (snapshot['requests'] as List<dynamic>).forEach((dynamicElement) {
+          requests.add(dynamicElement.toString());
+        });
+      }
 
+      // reads and calls method
+      context.read<Cowboy>().fillFields(snapshot['uuid'].toString(), snapshot['first_name'].toString(), snapshot['last_name'].toString(), snapshot['email'].toString(), shoppingTrips, friends, requests);
+      print(context.read<Cowboy>().shoppingTrips);
+
+  }
   Future<DocumentSnapshot> _queryCowboy() async {
     if(curUser != null) {
       DocumentSnapshot tempShot;
@@ -79,14 +79,15 @@ class _ListsScreenState extends State<ListsScreen> {
 
          //print('L TYPE: '+docSnapshot.data['']);
       });
-
       return tempShot;
     } else {
       return null;
     }
   }
 
-  final  Stream<QuerySnapshot<Map<String, dynamic>>> _list =  FirebaseFirestore.instance.collection('shopping_trips_test').snapshots();
+  String getUidByIndex(int index){
+    return context.watch<Cowboy>().shoppingTrips.keys.toList()[index];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +97,15 @@ class _ListsScreenState extends State<ListsScreen> {
         child: Scaffold(
           appBar: AppBar(
             centerTitle: true,
-            title: const Text('Grocery Lists'),
-            backgroundColor: const Color(0xff97877E),
+            title: Text('Howdy ${context.read<Cowboy>().firstName}!', style: TextStyle(fontSize: 24, color: Colors.black),),
+            backgroundColor: light_orange,
+            systemOverlayStyle: SystemUiOverlayStyle(
+              statusBarBrightness: Brightness.light,
+            ),
+            iconTheme: IconThemeData(
+              color: darker_beige,
+            ),
+            elevation: 0,
           ),
           drawer: Drawer(
             child: ListView(
@@ -105,7 +113,7 @@ class _ListsScreenState extends State<ListsScreen> {
               children: [
                 const DrawerHeader(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFbc5100),
+                    color: dark_beige,
                   ),
                   child: Text(
                     'Menu Options',
@@ -136,6 +144,7 @@ class _ListsScreenState extends State<ListsScreen> {
                     var currentUser = FirebaseAuth.instance.currentUser;
                     if (currentUser != null) {
                       //clearUserField();
+                      context.read<Cowboy>().clearData();
                       await _auth.signOut();
                       print('User signed out');
                     }
@@ -150,39 +159,31 @@ class _ListsScreenState extends State<ListsScreen> {
             ),
           ),
      body:
-          FutureBuilder(
-            future: Cowsnapshot,
-            builder: (context, AsyncSnapshot<void> futSnap) {
-              if (futSnap.hasError) {
-                return Text('Something went wrong FutureBuilder');
-              }
-              if (futSnap.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              }
-              return StreamBuilder <QuerySnapshot<Map<String, dynamic>>>(
-                  stream: FirebaseFirestore.instance.collection(
-                      'shopping_trips_test').where('uuid', whereIn: context
-                      .watch<Cowboy>().shoppingTrips)
-                      .orderBy('date',descending: true)
-                      .snapshots(),
-                  builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+
+     StreamBuilder <DocumentSnapshot<Object>>(
+                  stream: userCollection.doc(curUser.uid).snapshots(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot<Object>> snapshot) {
                     if (snapshot.hasError) {
                       return Text('Something went wrong StreamBuilder');
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator();
                     }
+                    readInData(snapshot.data);
+
                     return SafeArea(
                       child: Scrollbar(
                         isAlwaysShown: true,
                         child: GridView.builder(
                           padding: EdgeInsets.all(8),
-                          itemCount: snapshot.data.docs.length,
+                          itemCount:  context.watch<Cowboy>().shoppingTrips.length,
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
                               mainAxisSpacing: 10,
                               crossAxisSpacing: 7),
                           itemBuilder: (context, int index) {
+                            List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|');
+                            print(fields[1]);
                             return Container(
                               width: 80,
                               height: 80,
@@ -199,21 +200,17 @@ class _ListsScreenState extends State<ListsScreen> {
                               ),
                                 child: ListTile(
                                 title: Text(
-                                  '\n${snapshot.data.docs[index]['title']}\n'
-                                      '${snapshot.data
-                                      .docs[index]['description']}\n\n'
-                                      '${(snapshot.data
-                                      .docs[index]['date'] as Timestamp)
+                                  '\n${fields[0]}\n'
+                                      '${fields[2]}\n\n'
+                                      '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                       .toDate()
                                       .month}' +
                                       '/' +
-                                      '${(snapshot.data
-                                          .docs[index]['date'] as Timestamp)
+                                      '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                           .toDate()
                                           .day}' +
                                       '/' +
-                                      '${(snapshot.data
-                                          .docs[index]['date'] as Timestamp)
+                                      '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                           .toDate()
                                           .year}',
                                   style: TextStyle(
@@ -222,8 +219,7 @@ class _ListsScreenState extends State<ListsScreen> {
                                   ),
                                 ),
                                 onTap: () async {
-                                  String tripUUID = snapshot.data
-                                      .docs[index]['uuid'];
+                                  String tripUUID = getUidByIndex(index);
                                   await Navigator.push(context,
                                       MaterialPageRoute(builder: (context) =>
                                           EditListScreen(tripUUID)));
@@ -235,9 +231,8 @@ class _ListsScreenState extends State<ListsScreen> {
                       ),
                     );
                   }
-              );
-            },
-          ),
+              ),
+
 
           floatingActionButton: Container(
             height: 80,

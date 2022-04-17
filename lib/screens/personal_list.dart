@@ -39,7 +39,7 @@ class _PersonalListScreen extends State<PersonalListScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Personal List'),
-        backgroundColor: const Color(0xFFbc5100),
+        backgroundColor: light_orange,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
@@ -80,8 +80,6 @@ class _PersonalListScreen extends State<PersonalListScreen> {
                   ],
                 ),
               ]
-
-
           ]
         ),
       ),
@@ -96,7 +94,7 @@ class _PersonalListScreen extends State<PersonalListScreen> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: Theme.of(context).primaryColorDark,
+        color: dark_beige,
       ),
       child: Column(
         children: [

@@ -10,7 +10,7 @@ class Cowboy with ChangeNotifier {
   String _firstName = '';
   String _lastName = '';
   String _email = '';
-  List<String> _shoppingTrips = <String>[];
+  Map<String,String> _shoppingTrips = {};
   Map<String, String> _friends = <String, String>{}; // uuid to first name
   Map<String, String> _requests = <String, String>{}; // uuid to first_last
 
@@ -34,7 +34,7 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(_uuid).update({'email': _email});
   }
   // to initialize fields from StreamBuilder
-  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, Map<String, String> friends, Map<String, String> requests) {
+  fillFields(String uuid, String firstName, String lastName, String email, Map<String, String> shoppingTrips, Map<String, String> friends, Map<String, String> requests) {
     this._uuid = uuid;
     this._firstName = firstName;
     this._lastName = lastName;
@@ -73,23 +73,20 @@ class Cowboy with ChangeNotifier {
     this._email = email;
     notifyListeners();
   }
-  clearUserField(){
-    _friends.clear();
-    _shoppingTrips.clear();
-    _requests.clear();
-  }
+
   // getters since '_' identifier makes fields private
   String get uuid => _uuid;
   String get firstName => _firstName;
   String get lastName => _lastName;
   String get email => _email;
-  List<String> get shoppingTrips => _shoppingTrips;
+  Map<String,String> get shoppingTrips => _shoppingTrips;
   Map<String, String> get friends => _friends;
   Map<String, String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String trip_uuid) {
-    _shoppingTrips.add(trip_uuid);
+  addTrip(String trip_uuid, String title,  DateTime date,String desc) {
+    String entry = title+ "|~|" + date.toString() + "|~|" + desc.toString();
+    _shoppingTrips[trip_uuid] = entry;
     updateCowboyTrips();
     notifyListeners();
   }
@@ -104,6 +101,11 @@ class Cowboy with ChangeNotifier {
     //delete trip from the shopping trip collection
   }
 
+  clearData(){
+    _shoppingTrips.clear();
+     _friends.clear(); // uuid to first name
+     _requests.clear();
+  }
   // removes friend from requests, adds friend, notifies listeners, updates database
   addFriend(String friend_uuid, String friend_name) {
     _requests.remove(friend_uuid);
@@ -133,8 +135,13 @@ class Cowboy with ChangeNotifier {
     notifyListeners();
   }
 
-  addTripToBene(String bene_uuid, String trip_uuid){
-    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
+  addTripToBene(String bene_uuid, String trip_uuid, String title, DateTime date, String desc ){
+    String entry = title+ "|~|" + date.toString() + "|~|" + desc;
+    userCollection.doc(bene_uuid).update({'shopping_trips.${trip_uuid}': entry});
+  }
+  //change this to overwrite
+  RemoveTripFromBene(String bene_uuid, String trip_uuid){
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
   }
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {
