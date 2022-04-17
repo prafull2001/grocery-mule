@@ -72,6 +72,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       _tripTitleController = TextEditingController()..text = cur_trip.title;
       _tripDescriptionController = TextEditingController()..text = cur_trip.description;
       newList = false;
+      selected_friend = context.read<ShoppingTrip>().beneficiaries.keys.toList();
     }else{
       clear_provider();
     }
@@ -173,32 +174,45 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
         for(var friend in selected_friend) {
           context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
-          context.read<Cowboy>().addTripToBene(friend,context.read<ShoppingTrip>().uuid );
+          context.read<Cowboy>().addTripToBene(friend,
+              context.read<ShoppingTrip>().uuid,
+              context.read<ShoppingTrip>().title,
+              context.read<ShoppingTrip>().date,
+              context.read<ShoppingTrip>().description
+          );
                //addTripToBene(String bene_uuid, String trip_uuid)
         }
-
-        // context.read<ShoppingTrip>().addBeneficiary('NpGPpb8B0Te8OZyywLr69f3WEwn1','Praf');
-        // context.read<ShoppingTrip>().addBeneficiary('yTWmoo2Qskf3wFcbxaJYUt9qrZM2','Dhruv');
-
-        context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid);
+        context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid,
+            context.read<ShoppingTrip>().title,
+            context.read<ShoppingTrip>().date,
+            context.read<ShoppingTrip>().description
+            );
         print(context.read<Cowboy>().shoppingTrips);
       } else {
+        Map<String,String> new_bene_list = {};
         //check if any bene needs to be removed
         context.read<ShoppingTrip>().beneficiaries.forEach((uid, name) {
           if(!selected_friend.contains(uid)){
-            context.read<ShoppingTrip>().removeBeneficiary(uid);
+            //below doesn't work
             context.read<Cowboy>().RemoveTripFromBene(uid,context.read<ShoppingTrip>().uuid);
+            //context.read<ShoppingTrip>().removeBeneficiary(uid);
+          }else{
+            new_bene_list[uid] = name;
           }
         });
+        context.read<ShoppingTrip>().setBeneficiary(new_bene_list);
         //check if new bene need to be added
         for(var friend in selected_friend) {
           if(!context.read<ShoppingTrip>().beneficiaries.containsKey(friend)) {
             context.read<ShoppingTrip>().addBeneficiary(friend, context
                 .read<Cowboy>()
                 .friends[friend]);
-            context.read<Cowboy>().addTripToBene(friend, context
-                .read<ShoppingTrip>()
-                .uuid);
+            context.read<Cowboy>().addTripToBene(friend,
+                context.read<ShoppingTrip>().uuid,
+                context.read<ShoppingTrip>().title,
+                context.read<ShoppingTrip>().date,
+                context.read<ShoppingTrip>().description
+            );
 
           }
           //addTripToBene(String bene_uuid, String trip_uuid)
@@ -209,6 +223,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().description,
             context.read<ShoppingTrip>().beneficiaries,
         );
+        String entry = context.read<ShoppingTrip>().title
+            + "|~|" + context.read<ShoppingTrip>().date.toString()
+            + "|~|" + context.read<ShoppingTrip>().description;
+        context.read<Cowboy>().updateTripForAll(context.read<ShoppingTrip>().uuid, entry, context.read<ShoppingTrip>().beneficiaries.keys.toList());
+
         // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
       }
   }
@@ -404,11 +423,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     onPressed: () async {
                       if(context.read<ShoppingTrip>().title != '') {
                         await updateGridView(newList);
-                        Navigator.pop(context);
                         setState(() {});
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) =>
-                                EditListScreen(context.read<ShoppingTrip>().uuid)));
+                        Navigator.pop(context);
+                        if(newList) {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) =>
+                                  EditListScreen(context
+                                      .read<ShoppingTrip>()
+                                      .uuid)));
+                        }
                       } else {
                         // print("triggered");
                         showDialog(

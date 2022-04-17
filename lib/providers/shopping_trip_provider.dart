@@ -83,7 +83,9 @@ class ShoppingTrip with ChangeNotifier{
     updateTripMetadataDB();
     notifyListeners();
   }
-
+  setBeneficiary(Map<String,String> new_bene_list){
+    _beneficiaries = new_bene_list;
+  }
   // adds beneficiary, notifies listeners, updates database
   addBeneficiary(String beneficiary_uuid, String name) {
     _beneficiaries[beneficiary_uuid] = name;
@@ -106,7 +108,9 @@ class ShoppingTrip with ChangeNotifier{
     updateBeneficiaryDB();
     notifyListeners();
   }
-
+  setItems(Map<String,Item> items){
+    _items = items;
+  }
   // user adds an item for first time
   addItem(String name, [int quantity=0]) {
     _items[name] = Item(name, quantity, _beneficiaries);
