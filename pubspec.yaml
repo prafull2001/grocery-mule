@@ -21,6 +21,10 @@ dependencies:
   provider: ^5.0.0
   fluttertoast: ^8.0.8
   multi_select_flutter: ^4.1.2
+  introduction_screen: ^3.0.1
+  dots_indicator: ^2.1.0
+  shared_preferences: ^2.0.13
+  after_layout: ^1.1.0
 
 dev_dependencies:
   flutter_test:
