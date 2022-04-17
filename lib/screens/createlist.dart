@@ -227,6 +227,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             + "|~|" + context.read<ShoppingTrip>().date.toString()
             + "|~|" + context.read<ShoppingTrip>().description;
         context.read<Cowboy>().updateTripForAll(context.read<ShoppingTrip>().uuid, entry, context.read<ShoppingTrip>().beneficiaries.keys.toList());
+
         // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
       }
   }

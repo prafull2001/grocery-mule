@@ -171,15 +171,13 @@ class Cowboy with ChangeNotifier {
   updateCowboyRequestsRemove(String friendUUID) {
     userCollection.doc(_uuid).update({'requests': _requests});
   }
-  updateCowboyFriendsRemove(String friendUUID) {
+  updateCowboyFriendsRemove(String friendUUID) async {
     userCollection.doc(_uuid).update({'friends': _friends});
     Map<String, String> amigos = {};
-    () async {
-      amigos = await fetchFriendFriends(friendUUID);
-    };
-    print(amigos);
+    amigos = await fetchFriendFriends(friendUUID);
+    print('amigos: $amigos');
     amigos.remove(_uuid);
-    print(amigos);
+    print('amigos: $amigos');
     userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
@@ -193,8 +191,6 @@ class Cowboy with ChangeNotifier {
     shoppingTrips.remove(trip_uuid);
     userCollection.doc(bene_uuid).update({'shopping_trips': shoppingTrips});
   }
-
-  // only called from lists.dart
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {
     // _requests.add(friendUUID);

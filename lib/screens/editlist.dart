@@ -360,8 +360,6 @@ class _EditListsScreenState extends State<EditListScreen> {
     //full_list.add(host_uuid);
     return Masterlist(context);
 
-    //
-
   }
 
   Widget Masterlist(BuildContext context){
