@@ -101,6 +101,42 @@ class Cowboy with ChangeNotifier {
     //delete trip from the shopping trip collection
   }
 
+  updateTripForAll(String uuid, String entry, List<String> beneList){
+    //for the host
+    _shoppingTrips[uuid] = entry;
+    updateCowboyTrips();
+    beneList.forEach((bene) async {
+      Map<String,String> shoppingTrips = await fetchBeneTrip( bene);
+      shoppingTrips[uuid] = entry;
+      print(entry);
+      userCollection.doc(bene).update({'shopping_trips': shoppingTrips});
+    });
+  }
+
+  Future<Map<String, String>> fetchBeneTrip(String bene) async {
+    DocumentSnapshot beneShot = await userCollection.doc(bene).get();
+    Map<String,String> shoppingTrips = {};
+    if(!(beneShot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
+      (beneShot['shopping_trips'] as Map<String, dynamic>)
+          .forEach((uid,entry) {
+        String fields = entry.toString().trim();
+        shoppingTrips[uid.trim()] = fields;
+      });
+    }
+    return shoppingTrips;
+  }
+  Future<Map<String, String>> fetchFriendFriends(String friend_uuid) async {
+    DocumentSnapshot friendShot = await userCollection.doc(friend_uuid).get();
+    Map<String,String> amigos = {};
+    if(!(friendShot['friends'] as Map<String, dynamic>).isEmpty) {
+      (friendShot['friends'] as Map<String, dynamic>)
+          .forEach((uid,entry) {
+        String fields = entry.toString().trim();
+        amigos[uid.trim()] = fields;
+      });
+    }
+    return amigos;
+  }
   clearData(){
     _shoppingTrips.clear();
      _friends.clear(); // uuid to first name
@@ -118,40 +154,29 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(_uuid).update({'friends': _friends});
     userCollection.doc(friendUUID).update({'friends.${_uuid}': (_email+'|~|'+_firstName+' '+_lastName)});
   }
+
+  removeFriendRequest(String friendUUID) {
+    _requests.remove(friendUUID);
+    updateCowboyRequestsRemove(friendUUID);
+    notifyListeners();
+  }
   // removes friend, notifies listeners, and updates database
   removeFriend(String friend_uuid) {
     _friends.remove(friend_uuid);
     updateCowboyFriendsRemove(friend_uuid);
     notifyListeners();
   }
-  removeFriendRequest(String friendUUID) {
-    _requests.remove(friendUUID);
-    updateCowboyRequestsRemove(friendUUID);
-    notifyListeners();
-  }
-  updateCowboyFriendsRemove(String friend_uuid) {
-    userCollection.doc(_uuid).update({'friends': _friends});
-    userCollection.doc(friend_uuid).update({'friends': FieldValue.arrayRemove([_uuid])});
-  }
-  // adds friend request, notifies listeners, and updates database
-  sendFriendRequest(String friendUUID) {
-    // _requests.add(friendUUID);
-    updateCowboyRequestsAdd(friendUUID);
-    // notifyListeners();
-  }
-  // removes friend request, notifies listeners, and updates database
-  updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
-  }
   updateCowboyRequestsRemove(String friendUUID) {
-    print('requests remove db called with uuid: '+friendUUID);
-    userCollection.doc(_uuid).update({'requests': FieldValue.arrayRemove([friendUUID])});
+    userCollection.doc(_uuid).update({'requests': _requests});
   }
-
-  // updates from database
-  updateCowboyRequests(Map<String, String> newRequests) {
-    _requests = newRequests;
-    notifyListeners();
+  updateCowboyFriendsRemove(String friendUUID) {
+    userCollection.doc(_uuid).update({'friends': _friends});
+    Map<String, String> amigos = {};
+    () async {
+      amigos = await fetchFriendFriends(friendUUID);
+    };
+    amigos.remove(_uuid);
+    userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
   addTripToBene(String bene_uuid, String trip_uuid, String title, DateTime date, String desc ){
@@ -159,7 +184,20 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(bene_uuid).update({'shopping_trips.${trip_uuid}': entry});
   }
   //change this to overwrite
-  RemoveTripFromBene(String bene_uuid, String trip_uuid){
-    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
+  RemoveTripFromBene(String bene_uuid, String trip_uuid) async {
+    Map<String,String> shoppingTrips = await fetchBeneTrip(bene_uuid);
+    shoppingTrips.remove(trip_uuid);
+    userCollection.doc(bene_uuid).update({'shopping_trips': shoppingTrips});
+  }
+
+  // only called from lists.dart
+  // adds friend request, notifies listeners, and updates database
+  sendFriendRequest(String friendUUID) {
+    // _requests.add(friendUUID);
+    updateCowboyRequestsAdd(friendUUID);
+    // notifyListeners();
+  }
+  updateCowboyRequestsAdd(String friendUUID) {
+    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
   }
 }

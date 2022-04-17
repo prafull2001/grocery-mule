@@ -86,6 +86,7 @@ class _ListsScreenState extends State<ListsScreen> {
   }
 
   String getUidByIndex(int index){
+    print(context.watch<Cowboy>().shoppingTrips.keys.toList());
     return context.watch<Cowboy>().shoppingTrips.keys.toList()[index];
   }
 
@@ -200,8 +201,8 @@ class _ListsScreenState extends State<ListsScreen> {
                               ),
                                 child: ListTile(
                                 title: Text(
-                                  '\n${fields[0]}\n'
-                                      '${fields[2]}\n\n'
+                                  '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|')[0]}\n'
+                                      '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|')[2]}\n\n'
                                       '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                       .toDate()
                                       .month}' +
@@ -219,7 +220,7 @@ class _ListsScreenState extends State<ListsScreen> {
                                   ),
                                 ),
                                 onTap: () async {
-                                  String tripUUID = getUidByIndex(index);
+                                  String tripUUID = context.read<Cowboy>().shoppingTrips.keys.toList()[index];
                                   await Navigator.push(context,
                                       MaterialPageRoute(builder: (context) =>
                                           EditListScreen(tripUUID)));
