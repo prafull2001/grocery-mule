@@ -43,15 +43,15 @@ class _ListsScreenState extends State<ListsScreen> {
     readInData(snapshot);
   }
   void readInData(DocumentSnapshot snapshot){
-      Map<String,String> shoppingTrips = {};
+      Map<String, String> shoppingTrips = {};
       Map<String, String> friends = <String, String>{};
-      List<String> requests = <String>[];
+      Map<String, String> requests = <String, String>{};
       // extrapolating data into provider
       if(!(snapshot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
         (snapshot['shopping_trips'] as Map<String, dynamic>)
             .forEach((uid,entry) {
           String fields = entry.toString().trim();
-          shoppingTrips[uid] = fields;
+          shoppingTrips[uid.trim()] = fields;
         });
       }
       if(!(snapshot['friends'] as Map<String, dynamic>).isEmpty) {
@@ -60,9 +60,9 @@ class _ListsScreenState extends State<ListsScreen> {
           friends[dynamicKey.toString()] = dynamicValue.toString();
         });
       }
-      if(!(snapshot['requests'] as List<dynamic>).isEmpty) {
-        (snapshot['requests'] as List<dynamic>).forEach((dynamicElement) {
-          requests.add(dynamicElement.toString());
+      if(!(snapshot['requests'] as Map<String, dynamic>).isEmpty) {
+        (snapshot['requests'] as Map<String, dynamic>).forEach((key, value) {
+          requests[key.trim()] = value.toString().trim();
         });
       }
 

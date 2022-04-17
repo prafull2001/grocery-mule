@@ -42,7 +42,7 @@ class Cowboy with ChangeNotifier {
     this._shoppingTrips = shoppingTrips;
     this._friends = friends;
     this._requests = requests;
-    notifyListeners();
+    // notifyListeners();
   }
   // to initialize account creation
   initializeCowboy(String uuid, String firstName, String lastName, String email) {
@@ -107,16 +107,16 @@ class Cowboy with ChangeNotifier {
      _requests.clear();
   }
   // removes friend from requests, adds friend, notifies listeners, updates database
-  addFriend(String friend_uuid, String friend_name) {
+  addFriend(String friend_uuid, String friend_string) {
     _requests.remove(friend_uuid);
-    _friends[friend_uuid] = friend_name;
+    _friends[friend_uuid] = friend_string;
     updateCowboyRequestsRemove(friend_uuid);
     addBothCowboyFriends(friend_uuid);
     notifyListeners();
   }
   addBothCowboyFriends(String friendUUID) {
     userCollection.doc(_uuid).update({'friends': _friends});
-    userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
+    userCollection.doc(friendUUID).update({'friends.${_uuid}': (_email+'|~|'+_firstName+' '+_lastName)});
   }
   // removes friend, notifies listeners, and updates database
   removeFriend(String friend_uuid) {
@@ -124,9 +124,28 @@ class Cowboy with ChangeNotifier {
     updateCowboyFriendsRemove(friend_uuid);
     notifyListeners();
   }
+  removeFriendRequest(String friendUUID) {
+    _requests.remove(friendUUID);
+    updateCowboyRequestsRemove(friendUUID);
+    notifyListeners();
+  }
   updateCowboyFriendsRemove(String friend_uuid) {
     userCollection.doc(_uuid).update({'friends': _friends});
     userCollection.doc(friend_uuid).update({'friends': FieldValue.arrayRemove([_uuid])});
+  }
+  // adds friend request, notifies listeners, and updates database
+  sendFriendRequest(String friendUUID) {
+    // _requests.add(friendUUID);
+    updateCowboyRequestsAdd(friendUUID);
+    // notifyListeners();
+  }
+  // removes friend request, notifies listeners, and updates database
+  updateCowboyRequestsAdd(String friendUUID) {
+    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
+  }
+  updateCowboyRequestsRemove(String friendUUID) {
+    print('requests remove db called with uuid: '+friendUUID);
+    userCollection.doc(_uuid).update({'requests': FieldValue.arrayRemove([friendUUID])});
   }
 
   // updates from database
@@ -142,24 +161,5 @@ class Cowboy with ChangeNotifier {
   //change this to overwrite
   RemoveTripFromBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
-  }
-  // adds friend request, notifies listeners, and updates database
-  sendFriendRequest(String friendUUID) {
-    // _requests.add(friendUUID);
-    updateCowboyRequestsAdd(friendUUID);
-    // notifyListeners();
-  }
-  // removes friend request, notifies listeners, and updates database
-  removeFriendRequest(String friendUUID) {
-    _requests.remove(friendUUID);
-    updateCowboyRequestsRemove(friendUUID);
-    notifyListeners();
-  }
-  updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
-  }
-  updateCowboyRequestsRemove(String friendUUID) {
-    print('requests remove db called with uuid: '+friendUUID);
-    userCollection.doc(_uuid).update({'requests': FieldValue.arrayRemove([friendUUID])});
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/services.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +20,6 @@ class FriendScreen extends StatefulWidget {
 class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderStateMixin {
   String searchQuery;
   int num_requests;
-  Stream<QuerySnapshot> friendData;
   List<Cowboy> searchResults; // search results
   Widget searchResultsWidget; // widget to display upon search
   Icon searchIcon; // changes between 'X' and search icon while searching
@@ -37,6 +34,10 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   }
 
   loadCowboyProvider(DocumentSnapshot snapshot) {
+    if(snapshot==null) {
+      print('snapshot null');
+      return;
+    }
     if(snapshot.data() == null) {
       print('snapshot data null');
       return;
@@ -52,11 +53,57 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     }
 
     // error checking should be done, update coming fields as if they are 100% correct
-    
-    context.read<Cowboy>().fillFields(snapshot.get('uuid'), snapshot.get('first_name'), snapshot.get('last_name'), snapshot.get('email'), shoppingTrips, friends, requests)
+    Map<String, String> trips = {};
+    Map<String, String> friends = <String, String>{};
+    Map<String, String> requests = <String, String>{};
+    if(!(snapshot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
+      (snapshot['shopping_trips'] as Map<String, dynamic>).forEach((uid,entry) {
+        String fields = entry.toString().trim();
+        trips[uid.trim()] = fields;
+      });
+    }
+    if(!(snapshot['friends'] as Map<String, dynamic>).isEmpty) {
+      (snapshot['friends'] as Map<String, dynamic>).forEach((dynamicKey,
+          dynamicValue) {
+        friends[dynamicKey.toString()] = dynamicValue.toString();
+      });
+    }
+    if(!(snapshot['requests'] as Map<String, dynamic>).isEmpty) {
+      (snapshot['requests'] as Map<String, dynamic>).forEach((key, value) {
+        requests[key.trim()] = value.toString().trim();
+      });
+    }
+
+    context.read<Cowboy>().fillFields(snapshot.get('uuid'), snapshot.get('first_name'), snapshot.get('last_name'), snapshot.get('email'), trips, friends, requests);
   }
   Stream<DocumentSnapshot> _getCowboy() {
     return userCollection.doc(context.read<Cowboy>().uuid).snapshots();
+  }
+
+  List<List<String>> _loadDisplayNames() {
+    List<String> uuids = context.read<Cowboy>().requests.keys.toList();
+    List<String> pairs = context.read<Cowboy>().requests.values.toList();
+    List<List<String>> dispnames = [];
+    for(int i=0; i < pairs.length; i++) {
+      List<String> split = pairs[i].split('|~|');
+      if(split.length<2) continue;
+      // extra step to ensure that split gets truncated to 2 spaces and put in reverse order
+      dispnames.add([uuids[i], split[1], split[0]]);
+    }
+    return dispnames;
+  }
+
+  List<List<String>> _loadFriendNames() {
+    List<String> uuids = context.read<Cowboy>().friends.keys.toList();
+    List<String> pairs = context.read<Cowboy>().friends.values.toList();
+    List<List<String>> dispnames = [];
+    for(int i=0; i < pairs.length; i++) {
+      List<String> split = pairs[i].split('|~|');
+      if(split.length<2) continue;
+      // extra step to ensure that split gets truncated to 2 spaces and put in reverse order
+      dispnames.add([uuids[i], split[1], split[0]]);
+    }
+    return dispnames;
   }
 
   String lengthify(String str) {
@@ -151,17 +198,13 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                   tooltip: 'search',
                 ),
                 StreamBuilder<DocumentSnapshot>(
-                  stream: _getCowboy().snapshots(),
+                  stream: _getCowboy(),
                   builder: (context, snapshot) {
-                    Map<String, String> reqs = {};
-                    if((snapshot.data.get('requests') as Map<dynamic, dynamic>).isNotEmpty) {
-                      (snapshot.data.get('requests') as Map<dynamic, dynamic>).forEach((key, value) {
-                        reqs[key.toString()] = value.toString().trim();
-                      });
-                    }
+                    loadCowboyProvider(snapshot.data);
+                    List<List<String>> displaynames = _loadDisplayNames();
                     return Badge(
                       // TODO add live update on number // old VVVVVV
-                      badgeContent: Text(reqs.length.toString()), // context.watch<Cowboy>().requests.length.toString()
+                      badgeContent: Text(context.watch<Cowboy>().requests.length.toString()), // context.watch<Cowboy>().requests.length.toString()
                       child: TextButton(
                         child: Icon(Icons.notifications),
                         style: ButtonStyle(
@@ -190,7 +233,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                         ),
                                         ListView.separated(
                                             shrinkWrap: true,
-                                            itemCount: reqs.length,
+                                            itemCount: context.watch<Cowboy>().requests.length,
                                             controller: ScrollController(),
                                             itemBuilder: (BuildContext context, int index) {
                                               return Container(
@@ -198,7 +241,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                                 child: Row(
                                                   children: [
                                                     Text(
-                                                      lengthify(snapdata[index]['first_name']+snapdata[index]['last_name'])+'\n'+lengthify(snapdata[index]['email']),
+                                                      lengthify(displaynames[index][1])+'\n'+lengthify(displaynames[index][2]),
                                                       //lengthify(friendRequests[index].firstName+' '+friendRequests[index].lastName)+'\n'+lengthify(friendRequests[index].email),
                                                       //        8       16      24   29 // trim characters 27, 28, 29 to be '...'
                                                       //lengthify('asdfjkl;asdfjkl;asdfjkl;asdfj')+'\n'+lengthify('asdfjkl;asdfjkl;asdfjkl;asdfjkl;'),
@@ -210,7 +253,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                                       width: 35.0,
                                                       child: TextButton(
                                                         onPressed: () {
-                                                          context.read<Cowboy>().addFriend(snapdata[index]['uuid'], snapdata[index]['first_name']);
+                                                          context.read<Cowboy>().addFriend(displaynames[index][0], displaynames[index][2]+'|~|'+displaynames[index][1]);
                                                           Navigator.pop(context);
                                                         },
                                                         style: ButtonStyle(
@@ -228,7 +271,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                                       width: 35.0,
                                                       child: TextButton(
                                                         onPressed: () {
-                                                          context.read<Cowboy>().removeFriendRequest(snapdata[index]['uuid']);
+                                                          context.read<Cowboy>().removeFriendRequest(displaynames[index][0]);
                                                           Navigator.pop(context);
                                                         },
                                                         style: ButtonStyle(
@@ -417,18 +460,17 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
               child: Text('Friends', style: TextStyle(fontSize: 24.0),),
             )],
             Container(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: getFriendData(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> listsnapshot) {
-                  List<QueryDocumentSnapshot> snapshot_data = <QueryDocumentSnapshot>[];
-                  if (listsnapshot.hasData) {
-                    snapshot_data = listsnapshot.data.docs;
-                  }
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: _getCowboy(),
+                builder: (context, snapshot) {
+                  loadCowboyProvider(snapshot.data);
+                  List<List<String>> displaynames = [[]];
+                  displaynames = _loadFriendNames();
                   return ListView.separated(
                     padding: const EdgeInsets.all(2.0),
                     // scrollDirection: Axis.vertical,
                     shrinkWrap: true,
-                    itemCount: snapshot_data.length,
+                    itemCount: context.read<Cowboy>().friends.length,
                     controller: ScrollController(),
                     itemBuilder: (BuildContext context, int index) {
                       return GestureDetector(
@@ -450,14 +492,14 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    snapshot_data[index]['first_name']+' '+snapshot_data[index]['last_name'],
+                                    displaynames[index][1],
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                   SizedBox(height: 1.0,),
-                                  Text(snapshot_data[index]['email']),
+                                  Text(displaynames[index][2]),
                                 ],
                               ),
                               Spacer(),
@@ -501,8 +543,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                                   foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
                                                 ),
                                                 onPressed: () {
-                                                  print('nefarious adiosing amigo deeds: ${snapshot_data[index]['uuid']}');
-                                                  context.read<Cowboy>().removeFriend(snapshot_data[index]['uuid']);
+                                                  context.read<Cowboy>().removeFriend(displaynames[index][0]);
                                                   Navigator.pop(context);
                                                 },
                                               ),
