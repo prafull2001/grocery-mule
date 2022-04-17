@@ -189,14 +189,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             );
         print(context.read<Cowboy>().shoppingTrips);
       } else {
+        Map<String,String> new_bene_list = {};
         //check if any bene needs to be removed
         context.read<ShoppingTrip>().beneficiaries.forEach((uid, name) {
           if(!selected_friend.contains(uid)){
-            context.read<ShoppingTrip>().removeBeneficiary(uid);
             //below doesn't work
             context.read<Cowboy>().RemoveTripFromBene(uid,context.read<ShoppingTrip>().uuid);
+            //context.read<ShoppingTrip>().removeBeneficiary(uid);
+          }else{
+            new_bene_list[uid] = name;
           }
         });
+        context.read<ShoppingTrip>().setBeneficiary(new_bene_list);
         //check if new bene need to be added
         for(var friend in selected_friend) {
           if(!context.read<ShoppingTrip>().beneficiaries.containsKey(friend)) {
@@ -219,6 +223,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().description,
             context.read<ShoppingTrip>().beneficiaries,
         );
+        String entry = context.read<ShoppingTrip>().title
+            + "|~|" + context.read<ShoppingTrip>().date.toString()
+            + "|~|" + context.read<ShoppingTrip>().description;
+        context.read<Cowboy>().updateTripForAll(context.read<ShoppingTrip>().uuid, entry, context.read<ShoppingTrip>().beneficiaries.keys.toList());
         // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
       }
   }

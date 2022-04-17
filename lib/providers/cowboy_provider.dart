@@ -102,6 +102,30 @@ class Cowboy with ChangeNotifier {
     //delete trip from the shopping trip collection
   }
 
+  updateTripForAll(String uuid, String entry, List<String> beneList){
+    //for the host
+    _shoppingTrips[uuid] = entry;
+    updateCowboyTrips();
+    beneList.forEach((bene) async {
+      Map<String,String> shoppingTrips = await fetchBeneTrip( bene);
+      shoppingTrips[uuid] = entry;
+      print(entry);
+      userCollection.doc(bene).update({'shopping_trips': shoppingTrips});
+    });
+  }
+
+  Future<Map<String, String>> fetchBeneTrip(String bene) async {
+    DocumentSnapshot beneShot = await userCollection.doc(bene).get();
+    Map<String,String> shoppingTrips = {};
+    if(!(beneShot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
+      (beneShot['shopping_trips'] as Map<String, dynamic>)
+          .forEach((uid,entry) {
+        String fields = entry.toString().trim();
+        shoppingTrips[uid] = fields;
+      });
+    }
+    return shoppingTrips;
+  }
   clearData(){
     _shoppingTrips.clear();
      _friends.clear(); // uuid to first name
@@ -141,8 +165,10 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(bene_uuid).update({'shopping_trips.${trip_uuid}': entry});
   }
   //change this to overwrite
-  RemoveTripFromBene(String bene_uuid, String trip_uuid){
-    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
+  RemoveTripFromBene(String bene_uuid, String trip_uuid) async {
+    Map<String,String> shoppingTrips = await fetchBeneTrip(bene_uuid);
+    shoppingTrips.remove(trip_uuid);
+    userCollection.doc(bene_uuid).update({'shopping_trips': shoppingTrips});
   }
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {

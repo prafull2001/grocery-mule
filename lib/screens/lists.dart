@@ -201,8 +201,8 @@ class _ListsScreenState extends State<ListsScreen> {
                               ),
                                 child: ListTile(
                                 title: Text(
-                                  '\n${fields[0]}\n'
-                                      '${fields[2]}\n\n'
+                                  '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|')[0]}\n'
+                                      '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|')[2]}\n\n'
                                       '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                       .toDate()
                                       .month}' +
