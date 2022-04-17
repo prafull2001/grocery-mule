@@ -22,7 +22,11 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   Widget _buildImage(String assetName, [double width = 350]) {
-    return Image.asset('images/$assetName', width: width);
+    return Image.asset('images/$assetName', width: width, scale: 0.9,);
+  }
+
+  Widget _buildFirstImage(String assetName, [double width = 350]) {
+    return Image.asset('images/$assetName', width: width, scale: 3,);
   }
 
   @override
@@ -55,43 +59,46 @@ class _IntroScreenState extends State<IntroScreen> {
             'Let\'s go right away!',
             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+          ),
           onPressed: () => _onIntroEnd(context),
         ),
       ),
       pages: [
         PageViewModel(
-          title: "Welcome!",
+          title: "Create an Account",
           body:
-          "Welcome to GroceryMule! Create an account to get started.",
-          image: _buildImage('logo.png'),
+          "We\'re happy to see you. Create a GroceryMule account to start shopping easier.",
+          image: _buildFirstImage('logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Add some friends",
           body:
           "Head over to the Cowamigos tab to search and add friends",
-          image: _buildImage('logo.png'),
+          image: _buildImage('friends.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Create a list",
           body:
           "Create a list by pressing the + sign at the bottom right",
-          image: _buildImage('logo.png'),
+          image: _buildImage('list.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Add items",
           body:
           "Add some items to your list and click the \'Personal List\' to see the items you\'ve added",
-          image: _buildImage('logo.png'),
+          image: _buildImage('items.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Checkout",
           body:
           "When you\'re done shopping, add send payment requests with the touch of a button!",
-          image: _buildImage('logo.png'),
+          image: _buildImage('checkout.png'),
           decoration: pageDecoration,
         ),
       ],
@@ -101,10 +108,10 @@ class _IntroScreenState extends State<IntroScreen> {
       nextFlex: 0,
       showBackButton: true,
       //rtl: true, // Display as right-to-left
-      back: const Icon(Icons.arrow_back),
+      back: const Icon(Icons.arrow_back, color: Colors.orange),
       skip: const Text('Skip', style: TextStyle(fontWeight: FontWeight.w600)),
-      next: const Icon(Icons.arrow_forward),
-      done: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
+      next: const Icon(Icons.arrow_forward, color: Colors.orange),
+      done: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange)),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
       controlsPadding: kIsWeb
