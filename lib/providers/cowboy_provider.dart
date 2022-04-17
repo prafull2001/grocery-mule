@@ -12,7 +12,7 @@ class Cowboy with ChangeNotifier {
   String _email = '';
   List<String> _shoppingTrips = <String>[];
   Map<String, String> _friends = <String, String>{}; // uuid to first name
-  List<String> _requests = <String>[]; // uuid to first_last
+  Map<String, String> _requests = <String, String>{}; // uuid to first_last
 
   // to call after user fields are updated
   fillUpdatedInfo(String firstName, String lastName, String email) {
@@ -33,8 +33,8 @@ class Cowboy with ChangeNotifier {
   updateCowboyEmail() {
     userCollection.doc(_uuid).update({'email': _email});
   }
-  // to initialize fields after empty constructor has been called by provider init
-  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, Map<String, String> friends, List<String> requests) {
+  // to initialize fields from StreamBuilder
+  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, Map<String, String> friends, Map<String, String> requests) {
     this._uuid = uuid;
     this._firstName = firstName;
     this._lastName = lastName;
@@ -42,8 +42,7 @@ class Cowboy with ChangeNotifier {
     this._shoppingTrips = shoppingTrips;
     this._friends = friends;
     this._requests = requests;
-    // updateCowboyAll();
-    //notifyListeners();
+    notifyListeners();
   }
   // to initialize account creation
   initializeCowboy(String uuid, String firstName, String lastName, String email) {
@@ -86,7 +85,7 @@ class Cowboy with ChangeNotifier {
   String get email => _email;
   List<String> get shoppingTrips => _shoppingTrips;
   Map<String, String> get friends => _friends;
-  List<String> get requests => _requests;
+  Map<String, String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
   addTrip(String trip_uuid) {
@@ -129,7 +128,7 @@ class Cowboy with ChangeNotifier {
   }
 
   // updates from database
-  updateCowboyRequests(List<String> newRequests) {
+  updateCowboyRequests(Map<String, String> newRequests) {
     _requests = newRequests;
     notifyListeners();
   }

@@ -154,7 +154,7 @@ class _ListsScreenState extends State<ListsScreen> {
             future: Cowsnapshot,
             builder: (context, AsyncSnapshot<void> futSnap) {
               if (futSnap.hasError) {
-                return Text('Something went wrong');
+                return Text('Something went wrong FutureBuilder');
               }
               if (futSnap.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
@@ -167,7 +167,7 @@ class _ListsScreenState extends State<ListsScreen> {
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
                     if (snapshot.hasError) {
-                      return Text('Something went wrong');
+                      return Text('Something went wrong StreamBuilder');
                     }
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator();
