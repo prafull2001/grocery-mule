@@ -183,6 +183,7 @@ class _ListsScreenState extends State<ListsScreen> {
                               crossAxisSpacing: 7),
                           itemBuilder: (context, int index) {
                             List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|');
+                            print(fields[1]);
                             return Container(
                               width: 80,
                               height: 80,
@@ -200,16 +201,16 @@ class _ListsScreenState extends State<ListsScreen> {
                                 child: ListTile(
                                 title: Text(
                                   '\n${fields[0]}\n'
-                                      '${fields[1]}\n\n'
-                                      '${(Timestamp.fromDate(DateTime.parse(fields[2])))
+                                      '${fields[2]}\n\n'
+                                      '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                       .toDate()
                                       .month}' +
                                       '/' +
-                                      '${(Timestamp.fromDate(DateTime.parse(fields[2])))
+                                      '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                           .toDate()
                                           .day}' +
                                       '/' +
-                                      '${(Timestamp.fromDate(DateTime.parse(fields[2])))
+                                      '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                           .toDate()
                                           .year}',
                                   style: TextStyle(
