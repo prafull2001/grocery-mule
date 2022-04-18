@@ -98,7 +98,7 @@ class _ListsScreenState extends State<ListsScreen> {
         child: Scaffold(
           appBar: AppBar(
             centerTitle: true,
-            title: Text('Howdy ${context.read<Cowboy>().firstName}!', style: TextStyle(fontSize: 24, color: Colors.black),),
+            title: Text('Howdy ${curUser.displayName.split(" ")[0]}!', style: TextStyle(fontSize: 24, color: Colors.black),),
             backgroundColor: light_orange,
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarBrightness: Brightness.light,

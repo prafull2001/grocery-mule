@@ -51,7 +51,7 @@ class Cowboy with ChangeNotifier {
     this._lastName = lastName;
     this._email = email;
     intializeCowboyDB();
-    notifyListeners();
+    //notifyListeners();
   }
   // initialize cowboy in database for first time
   intializeCowboyDB() {

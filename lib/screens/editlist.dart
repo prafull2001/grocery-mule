@@ -203,7 +203,7 @@ class _EditListsScreenState extends State<EditListScreen> {
           children: [
             Container(
               child: Text(
-                '$name',
+                '${name.split("|~|")[1].split(" ")[0]}',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 20,
@@ -402,7 +402,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                         children: [
                           SizedBox(width: 10.0,),
                           Text(
-                            'Host - $hostFirstName',
+                            'Host - ${context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host].split("|~|")[1].split(' ')[0]}',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
@@ -428,13 +428,14 @@ class _EditListsScreenState extends State<EditListScreen> {
                             children: [
                               for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
                                 Text(
-                                  '$name  ',
+                                  '${name.split("|~|")[1].split(" ")[0]} ',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                   ),
                                 ),
                             ],
+
                           ),
                           Spacer(),
                           IconButton(icon: Icon(Icons.add_circle),),

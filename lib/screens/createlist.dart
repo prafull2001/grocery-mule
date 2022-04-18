@@ -79,9 +79,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     // full_list = trip.beneficiaries;
     //end test code
     super.initState();
-
+    print(context.read<Cowboy>().friends['nW7NnPdQGcXtj1775nrLdB1igjG2'].split("|~|")[1].split(" ")[0]);
     friend_bene = context.read<Cowboy>().friends.keys
-        .map((uid) => MultiSelectItem<String>(uid,context.read<Cowboy>().friends[uid]))
+        .map((uid) => MultiSelectItem<String>(uid,context.read<Cowboy>().friends[uid].split("|~|")[1].split(" ")[0]))
         .toList();
 
 
