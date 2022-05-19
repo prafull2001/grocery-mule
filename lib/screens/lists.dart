@@ -163,9 +163,9 @@ class _ListsScreenState extends State<ListsScreen> {
           ),
      body:
 
-     StreamBuilder <DocumentSnapshot<Object>>(
+     StreamBuilder <DocumentSnapshot<Object?>>(
                   stream: userCollection.doc(curUser!.uid).snapshots(),
-                  builder: (context, AsyncSnapshot<DocumentSnapshot<Object>> snapshot) {
+                  builder: (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
                     if (snapshot.hasError) {
                       return Text('Something went wrong StreamBuilder');
                     }
