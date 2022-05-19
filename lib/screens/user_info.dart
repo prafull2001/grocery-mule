@@ -14,12 +14,12 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 class _UserInfoScreenScreenState extends State<UserInfoScreen> {
-  String email;
-  String firstName;
-  String lastName;
+  String? email;
+  String? firstName;
+  String? lastName;
 
   FirebaseAuth auth = FirebaseAuth.instance;
-  final User curUser = FirebaseAuth.instance.currentUser;
+  final User? curUser = FirebaseAuth.instance.currentUser;
 
 
   @override
@@ -28,13 +28,13 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
-          future: userCollection.doc(curUser.uid).get(),
+          future: userCollection.doc(curUser!.uid).get(),
           builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
-            String prevEmail;
-            String prevFirst;
-            String prevLast;
+            String? prevEmail;
+            String? prevFirst;
+            String? prevLast;
             if (snapshot.connectionState == ConnectionState.done) {
-              Map<String, dynamic> data = snapshot.data.data() as Map<String, dynamic>;
+              Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
               prevEmail = data['email'];
               prevFirst = data['first_name'];
               prevLast = data['last_name'];
@@ -90,7 +90,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         onPressed: ()
                         async {
                           try {
-                            context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email);
+                            context.read<Cowboy>().fillUpdatedInfo(firstName!, lastName!, email!);
                             print('moving to lists screen');
                             Navigator.pop(context);
                           }  catch (e) {

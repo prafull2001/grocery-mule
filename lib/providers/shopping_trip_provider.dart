@@ -13,29 +13,29 @@ class ShoppingTrip with ChangeNotifier{
   String _host = ''; // host uuid
   Map<String,String> _beneficiaries = {};
   Map<String, Item> _items = <String, Item>{}; // name to item
-  Receipt _receipt;
+  late Receipt _receipt;
 
   // from user creation screen for metadata
-  Future<void> initializeTrip(String title, DateTime date, String description, Map<String,String> uid_name, String host) async {
+  Future<void> initializeTrip(String title, DateTime date, String description, Map<String,String?> uid_name, String host) async {
     var uuider = Uuid();
     _uuid = uuider.v4();
     _title = title;
     _date = date;
     _description = description;
     _host = host;
-    _beneficiaries = uid_name;
+    _beneficiaries = uid_name as Map<String, String>;
     print(_date);
     await initializeTripDB();
     notifyListeners();
   }
   // takes in formatted data from snapshot to directly update the provider
-  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, Map<String,String> beneficiaries, Map<String, Item> items) {
+  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, Map<String,String?> beneficiaries, Map<String, Item> items) {
     _uuid = uuid;
     _title = title;
     _date = date;
     _description = description;
     _host = host;
-    _beneficiaries = beneficiaries;
+    _beneficiaries = beneficiaries as Map<String, String>;
     _items = items;
     notifyListeners();
   }
@@ -119,7 +119,7 @@ class ShoppingTrip with ChangeNotifier{
   }
   // adds item from database?
   addItemDirect(Item item) {
-    _items[item.name] = item;
+    _items[item.name!] = item;
     // TODO if you only call this method from pulling from database, remove this line
   }
   // edits individual item within list, notifies listeners, updates database
@@ -187,10 +187,10 @@ class ShoppingTrip with ChangeNotifier{
 }
 
 class Item {
-  String name;
-  int quantity;
+  String? name;
+  int? quantity;
   Map<String, int> subitems = <String, int>{}; // uuid to individual quantity needed
-  bool isExpanded;
+  late bool isExpanded;
   Item(this.name, this.quantity, Map<String,String> beneficiaries) {
     subitems = <String, int>{};
     beneficiaries.forEach((uid,name) {
@@ -220,10 +220,11 @@ class Item {
   }
 
   incrementBeneficiary(String beneficiary) {
-    subitems[beneficiary]++;
+    subitems[beneficiary] = subitems[beneficiary]! + 1;
+
   }
   decrementBeneficiary(String beneficiary) {
-    subitems[beneficiary]--;
+    subitems[beneficiary] = subitems[beneficiary]! - 1;
   }
 
   Map<String,dynamic> toMap() {
@@ -247,7 +248,7 @@ class ReceiptItem {
   String name;
   double price;
   int quantity;
-  double total_price;
+  double? total_price;
 
   ReceiptItem(this.name, this.price, this.quantity) {
     total_price = price*quantity;

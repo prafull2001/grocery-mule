@@ -14,8 +14,8 @@ class LoginScreen extends StatefulWidget {
 
 
 class _LoginScreenState extends State<LoginScreen> {
-  String email;
-  String password;
+  late String email;
+  late String password;
   final _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
@@ -79,10 +79,10 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async{
                 try {
                   final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
-                  if (user != null && user.user.emailVerified){
+                  if (user != null && user.user!.emailVerified){
                     debugPrint('User signed in');
                     Navigator.pushNamed(context, ListsScreen.id);
-                  } else if (!(user.user.emailVerified)){
+                  } else if (!(user.user!.emailVerified)){
                     await Navigator.pushNamed(context, ConfirmEmailScreen.id);
                     Navigator.pushNamed(context, ListsScreen.id);
                   }
@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text(e.message),
+                          title: Text(e.message!),
                           actions: [
                             TextButton(
                               child: Text("OK"),

@@ -18,11 +18,11 @@ class FriendScreen extends StatefulWidget {
 }
 
 class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderStateMixin {
-  String searchQuery;
-  int num_requests;
-  List<Cowboy> searchResults; // search results
-  Widget searchResultsWidget; // widget to display upon search
-  Icon searchIcon; // changes between 'X' and search icon while searching
+  String? searchQuery;
+  int? num_requests;
+  List<Cowboy>? searchResults; // search results
+  Widget? searchResultsWidget; // widget to display upon search
+  late Icon searchIcon; // changes between 'X' and search icon while searching
   var searchTextController = TextEditingController();
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     searchIcon = Icon(Icons.search);
   }
 
-  loadCowboyProvider(DocumentSnapshot snapshot) {
+  loadCowboyProvider(DocumentSnapshot? snapshot) {
     if(snapshot==null) {
       print('snapshot null');
       return;
@@ -176,7 +176,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                 ),
                 IconButton(
                   onPressed: () {
-                    if(searchQuery.isNotEmpty) {
+                    if(searchQuery!.isNotEmpty) {
                       setState(() {
                         // requestsent = false;
                         if(searchIcon.icon == Icons.search) {
@@ -597,24 +597,24 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   }
 
   fillSearchResults() {
-    _querySearchResults().then((QuerySnapshot snapshot) {
+    _querySearchResults().then((QuerySnapshot? snapshot) {
       if(snapshot == null) {
         print('snapshot was null in fillSearchResults');
         return;
       }
       Map<String, dynamic> result = <String, dynamic>{};
-      result = snapshot.docs[0].data();
+      result = snapshot.docs[0].data() as Map<String, dynamic>;
       Cowboy friendboy = Cowboy();
       friendboy.initializeCowboyFriend(result['uuid'].toString(), result['first_name'].toString(), result['last_name'].toString(), result['email'].toString());
       print('cowboy: '+friendboy.firstName);
-      searchResults.add(friendboy);
-      print('listboy length: '+searchResults.length.toString());
+      searchResults!.add(friendboy);
+      print('listboy length: '+searchResults!.length.toString());
       setState(() {
         searchResultsWidget = searchResultsList();
       });
     });
   }
-  Future<QuerySnapshot> _querySearchResults() async {
+  Future<QuerySnapshot?> _querySearchResults() async {
     // print('query: '+searchQuery);
     if(searchQuery != '') {
       Future<QuerySnapshot> tempShot = userCollection.where('email', isEqualTo: searchQuery).get();
@@ -626,12 +626,12 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   }
   Widget searchResultsList() {
     if(searchResults != null) {
-      if (searchResults.length == 0) {
+      if (searchResults!.length == 0) {
         return SizedBox(height: 0.0,);
       }
       return ListView.separated(
         shrinkWrap: true,
-        itemCount: searchResults.length,
+        itemCount: searchResults!.length,
         controller: ScrollController(),
         scrollDirection: Axis.vertical,
         itemBuilder: (BuildContext context, int index) {
@@ -645,9 +645,9 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(searchResults[index].firstName+' '+searchResults[index].lastName, style: TextStyle(fontSize: 20),),
+                    Text(searchResults![index].firstName+' '+searchResults![index].lastName, style: TextStyle(fontSize: 20),),
                     SizedBox(height: 1.0,),
-                    Text(searchResults[index].email),
+                    Text(searchResults![index].email),
                   ],
                 ),
                 Spacer(),
@@ -656,7 +656,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                     child: Icon(Icons.add, size: 35.0, color: Colors.black,),
                     onPressed: () {
                       // TODO give some sort of message that request has been sent
-                      context.read<Cowboy>().sendFriendRequest(searchResults[index].uuid);
+                      context.read<Cowboy>().sendFriendRequest(searchResults![index].uuid);
                       setState(() {
                         searchTextController.clear();
                         searchResults = <Cowboy>[];

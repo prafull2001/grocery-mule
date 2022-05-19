@@ -21,7 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:after_layout/after_layout.dart';
 import 'dart:io';
 
-bool seen_intro; // global that updates with show_home's value upon startup
+late bool seen_intro; // global that updates with show_home's value upon startup
 
 // check if user has been shown the intro screen
 Future<Null> checkFirstSeen() async {
@@ -50,7 +50,7 @@ void main() async {
   if (!seen_intro) { // if user hasn't seen intro, show it
     _defaultHome = new IntroScreen();
   } else {
-    final User curUser = FirebaseAuth.instance.currentUser;
+    final User? curUser = FirebaseAuth.instance.currentUser;
     if(curUser == null) {
       _defaultHome = new WelcomeScreen();
     } else {

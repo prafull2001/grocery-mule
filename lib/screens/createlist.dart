@@ -20,18 +20,18 @@ typedef StringVoidFunc = void Function(String,int);
 
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
-  final User curUser = FirebaseAuth.instance.currentUser;
+  final User? curUser = FirebaseAuth.instance.currentUser;
   static String id = 'create_list_screen';
-  String trip_uuid;
-  String initTitle;
-  String initDescription;
-  DateTime initDate;
-  bool newList;
+  String? trip_uuid;
+  late String initTitle;
+  late String initDescription;
+  DateTime? initDate;
+  bool? newList;
   //createList has the ids
   //when createList has a list that's already filled
   //keep a field of the original id, but generate a new id
   //in the return variable
-  CreateListScreen(bool newList, [String trip_id = null]) {
+  CreateListScreen(bool newList, [String? trip_id = null]) {
     this.newList = newList;
     trip_uuid = trip_id;
   }
@@ -42,21 +42,21 @@ class CreateListScreen extends StatefulWidget {
 
 class _CreateListsScreenState extends State<CreateListScreen> {
   final _auth = FirebaseAuth.instance;
-  final User curUser = FirebaseAuth.instance.currentUser;
-  bool newList;
-  String trip_uuid;
+  final User? curUser = FirebaseAuth.instance.currentUser;
+  bool? newList;
+  String? trip_uuid;
   //////////////////////
   var _tripTitleController;
   CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
   var _tripDescriptionController;
-  final String hostUUID = FirebaseAuth.instance.currentUser.uid;
-  String hostFirstName = FirebaseAuth.instance.currentUser.displayName;
+  final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
+  String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
   //Map<String,Item_front_end> frontend_list = {}; // name to frontend item
   bool isAdd = false;
   bool delete_list = false;
   bool invite_guest = false;
-  ShoppingTrip cur_trip;
-  Map<String,String> uid_name = {};
+  late ShoppingTrip cur_trip;
+  Map<String,String?> uid_name = {};
   List<MultiSelectItem<String>> friend_bene = [];
   List<String> selected_friend = [];
 
@@ -79,9 +79,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     // full_list = trip.beneficiaries;
     //end test code
     super.initState();
-    print(context.read<Cowboy>().friends['nW7NnPdQGcXtj1775nrLdB1igjG2'].split("|~|")[1].split(" ")[0]);
+    print(context.read<Cowboy>().friends['nW7NnPdQGcXtj1775nrLdB1igjG2']!.split("|~|")[1].split(" ")[0]);
     friend_bene = context.read<Cowboy>().friends.keys
-        .map((uid) => MultiSelectItem<String>(uid,context.read<Cowboy>().friends[uid].split("|~|")[1].split(" ")[0]))
+        .map((uid) => MultiSelectItem<String>(uid,context.read<Cowboy>().friends[uid]!.split("|~|")[1].split(" ")[0]))
         .toList();
 
 
@@ -96,9 +96,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   }
 
   void _loadCurrentTrip() {
-    _queryCurrentTrip().then((DocumentSnapshot snapshot) {
+    _queryCurrentTrip().then((DocumentSnapshot? snapshot) {
       if(snapshot != null) {
-        DateTime date = DateTime.now();
+        DateTime? date = DateTime.now();
         List<String> beneficiaries = <String>[];
         Map<String, Item> items = <String, Item>{};
         date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
@@ -107,14 +107,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         });
         ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
           items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-          items[name].isExpanded = false;
+          items[name]!.isExpanded = false;
           //add each item to the panel (for expandable items presented to user)
           //frontend_list[name] = new Item_front_end(name, items[name]);
         });
 
         setState(() {
           cur_trip.initializeTripFromDB(snapshot['uuid'],
-              (snapshot.data() as Map<String, dynamic>)['title'], date,
+              (snapshot.data() as Map<String, dynamic>)['title'], date!,
               (snapshot.data() as Map<String, dynamic>)['description'],
               (snapshot.data() as Map<String, dynamic>)['host'],
               uid_name, items);
@@ -129,11 +129,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     });
   }
 
-  Future<DocumentSnapshot> _queryCurrentTrip() async {
+  Future<DocumentSnapshot?> _queryCurrentTrip() async {
     if(trip_uuid != '') {
-      DocumentSnapshot tempShot;
+      DocumentSnapshot? tempShot;
       await shoppingTripCollection.doc(trip_uuid).get().then((docSnapshot) => tempShot=docSnapshot);
-      print(tempShot.data());
+      print(tempShot!.data());
       return tempShot;
     } else {
       return null;
@@ -141,19 +141,19 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: context.read<ShoppingTrip>().date,
         firstDate: DateTime(2022),
         lastDate: DateTime(2050),
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           return Theme(
             data: ThemeData.light().copyWith(
               colorScheme: ColorScheme.light().copyWith(
                 primary: dark_beige,
               ),
             ),
-            child: child,
+            child: child!,
           );
         }
     );
@@ -170,10 +170,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().date,
             context.read<ShoppingTrip>().description,
             uid_name,
-            curUser.uid);
-        context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
+            curUser!.uid);
+        context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName!);
         for(var friend in selected_friend) {
-          context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
+          context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]!);
           context.read<Cowboy>().addTripToBene(friend,
               context.read<ShoppingTrip>().uuid,
               context.read<ShoppingTrip>().title,
@@ -206,7 +206,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           if(!context.read<ShoppingTrip>().beneficiaries.containsKey(friend)) {
             context.read<ShoppingTrip>().addBeneficiary(friend, context
                 .read<Cowboy>()
-                .friends[friend]);
+                .friends[friend]!);
             context.read<Cowboy>().addTripToBene(friend,
                 context.read<ShoppingTrip>().uuid,
                 context.read<ShoppingTrip>().title,
@@ -238,7 +238,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: (newList)? const Text(
+        title: newList!? const Text(
           'Create List',
           style: TextStyle(color: Colors.black),
         ):
@@ -388,7 +388,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   ),
                 ),
                 onConfirm: (results) {
-                  selected_friend = results;
+                  selected_friend = results as List<String>;
                   print(selected_friend);
                 },
               ),
@@ -407,7 +407,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child: (newList)? Text(
+                    child: newList!? Text(
                       'Create List',
                       style: TextStyle(fontSize: 18, color: Colors.black),
                     ):Text(
@@ -422,10 +422,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     ),
                     onPressed: () async {
                       if(context.read<ShoppingTrip>().title != '') {
-                        await updateGridView(newList);
+                        await updateGridView(newList!);
                         setState(() {});
                         Navigator.pop(context);
-                        if(newList) {
+                        if(newList!) {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) =>
                                   EditListScreen(context
@@ -476,7 +476,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                     onPressed: () async {
                       await check_delete(context);
                       if(delete_list) {
-                        if(!newList) {
+                        if(!newList!) {
                           print('delete');
                           context.read<ShoppingTrip>().deleteTripDB();
                           context.read<Cowboy>().removeTrip(context.read<ShoppingTrip>().uuid);

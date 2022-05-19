@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
 import 'package:grocery_mule/constants.dart';
@@ -23,17 +25,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     // TODO: implement initState
     super.initState();
   }
-  String email;
-  String password;
-  String firstName;
-  String lastName;
+  String? email;
+  String? password;
+  late String firstName;
+  late String lastName;
   FirebaseAuth auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
 
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      final GoogleSignInAccount googleUser = await (_googleSignIn.signIn() as FutureOr<GoogleSignInAccount>);
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
@@ -42,23 +44,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
       );
       UserCredential res = await auth.signInWithCredential(credential);
 
-      String full_name = res.user.displayName;
+      String full_name = res.user!.displayName!;
       List<String> name_array = full_name.split(" ");
       firstName = name_array[0];
       lastName = name_array[1];
-      email = res.user.email;
-      if (res.additionalUserInfo.isNewUser) {
+      email = res.user!.email;
+      if (res.additionalUserInfo!.isNewUser) {
         print("new user");
         //final new_res = await signInWithGoogle();
 
-        context.read<Cowboy>().initializeCowboy(res.user.uid, firstName, lastName, email);
+        context.read<Cowboy>().initializeCowboy(res.user!.uid, firstName, lastName, email!);
         //User logging in for the first time
         // Redirect user to tutorial
       }
       return res;
     } catch (e) {
-      print("Sign In Error:" + e.toString());
       //return await signInWithGoogle();
+      throw Exception("Sign In Error: " + e.toString());
     }
   }
 
@@ -94,13 +96,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
               title: 'Log In',
               onPressed: (){
                 Navigator.pushNamed(context, LoginScreen.id);
-              },
+              }, color: Colors.lightBlue,
             ),
             RoundedButton(
               title: 'Register',
               onPressed: (){
                 Navigator.pushNamed(context, RegistrationScreen.id);
-              },
+              }, color: Colors.lightBlue,
             ),
             RoundedButton(
                 title: 'Sign in with Google',

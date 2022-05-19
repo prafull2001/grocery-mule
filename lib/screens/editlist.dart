@@ -18,12 +18,12 @@ typedef StringVoidFunc = void Function(String,int);
 
 class EditListScreen extends StatefulWidget {
   static String id = 'edit_list_screen';
-  String tripUUID;
-  User curUser = FirebaseAuth.instance.currentUser;
-  final String hostUUID = FirebaseAuth.instance.currentUser.uid;
+  String? tripUUID;
+  User? curUser = FirebaseAuth.instance.currentUser;
+  final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
 
   // simple constructor, just takes in tripUUID
-  EditListScreen(String tripUUID) {
+  EditListScreen(String? tripUUID) {
     this.tripUUID = tripUUID;
   }
 
@@ -35,13 +35,13 @@ class EditListScreen extends StatefulWidget {
 class _EditListsScreenState extends State<EditListScreen> {
   var _tripTitleController;
   var _tripDescriptionController;
-  User curUser = FirebaseAuth.instance.currentUser;
-  String tripUUID;
+  User? curUser = FirebaseAuth.instance.currentUser;
+  String? tripUUID;
   CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
-  List<String> full_list; // host and beneficiaries
+  List<String>? full_list; // host and beneficiaries
   bool isAdd = false;
   bool invite_guest = false;
-  String hostFirstName;
+  String? hostFirstName;
   Map<String,String> uid_name = {};
   static bool reload = true;
   @override
@@ -81,7 +81,7 @@ class _EditListsScreenState extends State<EditListScreen> {
         Map<String, Item> items = <String, Item>{};
         ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
           items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-          items[name].isExpanded = false;
+          items[name]!.isExpanded = false;
             //add each item to the panel (for expandable items presented to user)
           //frontend_list[name] = new Item_front_end(name, items[name]);
         });
@@ -100,7 +100,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       });
       ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
         items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-        items[name].isExpanded = false;
+        items[name]!.isExpanded = false;
         //add each item to the panel (for expandable items presented to user)
         //frontend_list[name] = new Item_front_end(name, items[name]);
       });
@@ -114,7 +114,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   }
 
 
-  void auto_collapse(Item ignore){
+  void auto_collapse(Item? ignore){
     context.read<ShoppingTrip>().items.values.forEach((item) {
       setState(() {
         if(item != ignore)
@@ -126,7 +126,7 @@ class _EditListsScreenState extends State<EditListScreen> {
 
 
   Widget simple_item(Item item){
-    String name = item.name;
+    String name = item.name!;
     int quantity = 0;
     item.subitems.forEach((name, count) {
       quantity = quantity + count;
@@ -195,7 +195,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     );
   }
   Widget indie_item(String uid, int number,StringVoidFunc callback){
-    String name = uid_name[uid];
+    String name = uid_name[uid]!;
     return Container(
       color: beige,
       child: Row(
@@ -218,10 +218,10 @@ class _EditListsScreenState extends State<EditListScreen> {
                 initialValue: number,
                 controller: TextEditingController(),
                 onIncrement: (num newlyIncrementedValue) {
-                  callback(uid,newlyIncrementedValue);
+                  callback(uid,newlyIncrementedValue as int);
                 },
                 onDecrement: (num newlyDecrementedValue) {
-                  callback(uid,newlyDecrementedValue);
+                  callback(uid,newlyDecrementedValue as int);
                 },
               ),
               height: 60,
@@ -238,7 +238,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     void updateUsrQuantity(String person, int number){
       setState(() {
         item.subitems[person] = number;
-        context.read<ShoppingTrip>().editItem(item.name,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
+        context.read<ShoppingTrip>().editItem(item.name!,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
         // TODO update database here for quant
       });
     };
@@ -261,7 +261,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     return ExpansionPanelList(
       expansionCallback: (int index, bool isExpanded) {
         setState(() {
-          context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]].isExpanded = !isExpanded;
+          context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]!.isExpanded = !isExpanded;
           auto_collapse(context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]);
         });
       },
@@ -402,7 +402,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                         children: [
                           SizedBox(width: 10.0,),
                           Text(
-                            'Host - ${context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host].split("|~|")[1].split(' ')[0]}',
+                            'Host - ${context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]!.split("|~|")[1].split(' ')[0]}',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
@@ -438,7 +438,7 @@ class _EditListsScreenState extends State<EditListScreen> {
 
                           ),
                           Spacer(),
-                          IconButton(icon: Icon(Icons.add_circle),),
+                          IconButton(icon: Icon(Icons.add_circle), onPressed: () {  },),
                         ],
                       ),
                       //SizedBox(height: 10),
@@ -494,7 +494,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                               onPressed: () {
                                 Navigator.pushNamed(context, PersonalListScreen.id);
                               },
-                              title: "Personal List",
+                              title: "Personal List", color: Colors.blueAccent,
                             ),
                           ),
                           Spacer(),
@@ -506,7 +506,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                                 onPressed: () {
                                   Navigator.pushNamed(context, CheckoutScreen.id);
                                 },
-                                title: "Checkout",
+                                title: "Checkout", color: Colors.blueAccent,
                               ),
                             ),
                           ],

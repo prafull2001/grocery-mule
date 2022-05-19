@@ -14,20 +14,20 @@ class PersonalListScreen extends StatefulWidget {
 }
 
 class _PersonalListScreen extends State<PersonalListScreen> {
-  String hostFirstName;
-  Map<String, Item> list_items;
-  Map<String, int> item_list;
-  Map<String, int> cleaned_list;
+  String? hostFirstName;
+  late Map<String, Item> list_items;
+  Map<String, int>? item_list;
+  late Map<String, int?> cleaned_list;
 
   @override
   void initState() {
     hostFirstName = context.read<Cowboy>().firstName;
     list_items = context.read<ShoppingTrip>().items;
-    cleaned_list = <String, int>{};
+    cleaned_list = <String, int?>{};
 
     list_items.forEach((key, item) {
       Item curItem = item;
-      if(item.subitems[context.read<Cowboy>().uuid] > 0) {
+      if(item.subitems[context.read<Cowboy>().uuid]! > 0) {
         cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid];
       }
     });
@@ -86,9 +86,9 @@ class _PersonalListScreen extends State<PersonalListScreen> {
     );
   }
 
-  Widget simple_item(String item_name, int item_quantity){
+  Widget simple_item(String item_name, int? item_quantity){
     String name = item_name;
-    int quantity = item_quantity;
+    int? quantity = item_quantity;
 
 
     return Container(

@@ -15,10 +15,10 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  String email;
-  String password;
-  String firstName;
-  String lastName;
+  late String email;
+  late String password;
+  late String firstName;
+  late String lastName;
   FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
@@ -114,7 +114,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     );
                     if (userCredential != null){
                       print(email + ' ' + firstName + ' ' + lastName);
-                      context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
+                      context.read<Cowboy>().initializeCowboy(userCredential.user!.uid, firstName, lastName, email);
                       await Navigator.pushNamed(context, ConfirmEmailScreen.id);
                       // await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
                       Navigator.pop(context);
@@ -126,7 +126,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text(e.message),
+                          title: Text(e.message!),
                           actions: [
                             TextButton(
                               child: Text("OK"),

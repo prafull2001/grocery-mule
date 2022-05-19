@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +18,7 @@ import 'dart:math';
 
 class ListsScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
-  final User curUser = FirebaseAuth.instance.currentUser;
+  final User? curUser = FirebaseAuth.instance.currentUser;
   static String id = 'lists_screen';
 
   @override
@@ -27,9 +29,9 @@ class ListsScreen extends StatefulWidget {
 class _ListsScreenState extends State<ListsScreen> {
 
   final _auth = FirebaseAuth.instance;
-  final User curUser = FirebaseAuth.instance.currentUser;
+  final User? curUser = FirebaseAuth.instance.currentUser;
   CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
-  Future<void> Cowsnapshot;
+  Future<void>? Cowsnapshot;
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _ListsScreenState extends State<ListsScreen> {
   }
 
   Future<void> _loadCurrentCowboy() async {
-    final DocumentSnapshot snapshot = await _queryCowboy();
+    final DocumentSnapshot snapshot = await (_queryCowboy() as FutureOr<DocumentSnapshot<Object>>);
     readInData(snapshot);
   }
   void readInData(DocumentSnapshot snapshot){
@@ -71,10 +73,10 @@ class _ListsScreenState extends State<ListsScreen> {
       print(context.read<Cowboy>().shoppingTrips);
 
   }
-  Future<DocumentSnapshot> _queryCowboy() async {
+  Future<DocumentSnapshot?> _queryCowboy() async {
     if(curUser != null) {
-      DocumentSnapshot tempShot;
-      await userCollection.doc(curUser.uid).get().then((docSnapshot) {
+      DocumentSnapshot? tempShot;
+      await userCollection.doc(curUser!.uid).get().then((docSnapshot) {
         tempShot=docSnapshot;
 
          //print('L TYPE: '+docSnapshot.data['']);
@@ -98,7 +100,7 @@ class _ListsScreenState extends State<ListsScreen> {
         child: Scaffold(
           appBar: AppBar(
             centerTitle: true,
-            title: Text('Howdy ${curUser.displayName.split(" ")[0]}!', style: TextStyle(fontSize: 24, color: Colors.black),),
+            title: Text('Howdy ${curUser!.displayName!.split(" ")[0]}!', style: TextStyle(fontSize: 24, color: Colors.black),),
             backgroundColor: light_orange,
             systemOverlayStyle: SystemUiOverlayStyle(
               statusBarBrightness: Brightness.light,
@@ -162,7 +164,7 @@ class _ListsScreenState extends State<ListsScreen> {
      body:
 
      StreamBuilder <DocumentSnapshot<Object>>(
-                  stream: userCollection.doc(curUser.uid).snapshots(),
+                  stream: userCollection.doc(curUser!.uid).snapshots(),
                   builder: (context, AsyncSnapshot<DocumentSnapshot<Object>> snapshot) {
                     if (snapshot.hasError) {
                       return Text('Something went wrong StreamBuilder');
@@ -170,7 +172,7 @@ class _ListsScreenState extends State<ListsScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator();
                     }
-                    readInData(snapshot.data);
+                    readInData(snapshot.data!);
 
                     return SafeArea(
                       child: Scrollbar(
@@ -183,7 +185,7 @@ class _ListsScreenState extends State<ListsScreen> {
                               mainAxisSpacing: 10,
                               crossAxisSpacing: 7),
                           itemBuilder: (context, int index) {
-                            List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|');
+                            List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|');
                             print(fields[1]);
                             return Container(
                               width: 80,
@@ -201,8 +203,8 @@ class _ListsScreenState extends State<ListsScreen> {
                               ),
                                 child: ListTile(
                                 title: Text(
-                                  '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|')[0]}\n'
-                                      '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|')[2]}\n\n'
+                                  '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[0]}\n'
+                                      '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[2]}\n\n'
                                       '${(Timestamp.fromDate(DateTime.parse(fields[1])))
                                       .toDate()
                                       .month}' +
