@@ -41,8 +41,8 @@ class _ListsScreenState extends State<ListsScreen> {
   }
 
   Future<void> _loadCurrentCowboy() async {
-    final DocumentSnapshot snapshot = await (_queryCowboy() as FutureOr<DocumentSnapshot<Object>>);
-    readInData(snapshot);
+    final DocumentSnapshot<Object?>? snapshot = await (_queryCowboy() as Future<DocumentSnapshot<Object?>?>);
+    readInData(snapshot!);
   }
   void readInData(DocumentSnapshot snapshot){
       Map<String, String> shoppingTrips = {};
@@ -70,7 +70,7 @@ class _ListsScreenState extends State<ListsScreen> {
 
       // reads and calls method
       context.read<Cowboy>().fillFields(snapshot['uuid'].toString(), snapshot['first_name'].toString(), snapshot['last_name'].toString(), snapshot['email'].toString(), shoppingTrips, friends, requests);
-      print(context.read<Cowboy>().shoppingTrips);
+      //print(context.read<Cowboy>().shoppingTrips);
 
   }
   Future<DocumentSnapshot?> _queryCowboy() async {
@@ -88,13 +88,13 @@ class _ListsScreenState extends State<ListsScreen> {
   }
 
   String getUidByIndex(int index){
-    print(context.watch<Cowboy>().shoppingTrips.keys.toList());
+    //print(context.watch<Cowboy>().shoppingTrips.keys.toList());
     return context.watch<Cowboy>().shoppingTrips.keys.toList()[index];
   }
 
   @override
   Widget build(BuildContext context) {
-    print(context.watch<Cowboy>().shoppingTrips);
+    //print(context.watch<Cowboy>().shoppingTrips);
     return WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
@@ -186,7 +186,7 @@ class _ListsScreenState extends State<ListsScreen> {
                               crossAxisSpacing: 7),
                           itemBuilder: (context, int index) {
                             List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|');
-                            print(fields[1]);
+                            //print(fields[1]);
                             return Container(
                               width: 80,
                               height: 80,

@@ -25,6 +25,7 @@ class EditListScreen extends StatefulWidget {
   // simple constructor, just takes in tripUUID
   EditListScreen(String? tripUUID) {
     this.tripUUID = tripUUID;
+    print('tripUUID found fine');
   }
 
   @override
@@ -36,20 +37,22 @@ class _EditListsScreenState extends State<EditListScreen> {
   var _tripTitleController;
   var _tripDescriptionController;
   User? curUser = FirebaseAuth.instance.currentUser;
-  String? tripUUID;
+  late String tripUUID;
   CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
-  List<String>? full_list; // host and beneficiaries
   bool isAdd = false;
   bool invite_guest = false;
-  String? hostFirstName;
+  late String hostFirstName;
   Map<String,String> uid_name = {};
   static bool reload = true;
   @override
   void initState() {
     setState(() {});
-    tripUUID = widget.tripUUID;
+    tripUUID = widget.tripUUID!;
+    print('tripUUID set fine');
     hostFirstName = context.read<Cowboy>().firstName;
     _queryCurrentTrip();
+
+    // null value problem here???
 
     // TODO: implement initState
     _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
@@ -76,18 +79,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     ),
   ];
 
-  Future<void> _loadCurrentTrip() async {
-    DocumentSnapshot snapshot = await shoppingTripCollection.doc(tripUUID).get();
-        Map<String, Item> items = <String, Item>{};
-        ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
-          items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-          items[name]!.isExpanded = false;
-            //add each item to the panel (for expandable items presented to user)
-          //frontend_list[name] = new Item_front_end(name, items[name]);
-        });
-    context.read<ShoppingTrip>().setItems(items);
-    return;
-  }
+
 
   Future<void> _queryCurrentTrip() async {
       DocumentSnapshot tempShot = await shoppingTripCollection.doc(tripUUID).get();
@@ -101,6 +93,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
         items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
         items[name]!.isExpanded = false;
+        print('expandability set fine');
         //add each item to the panel (for expandable items presented to user)
         //frontend_list[name] = new Item_front_end(name, items[name]);
       });
@@ -126,7 +119,9 @@ class _EditListsScreenState extends State<EditListScreen> {
 
 
   Widget simple_item(Item item){
+    print('trying to get simple_item');
     String name = item.name!;
+    print('simple_item name set fine');
     int quantity = 0;
     item.subitems.forEach((name, count) {
       quantity = quantity + count;
@@ -196,6 +191,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   }
   Widget indie_item(String uid, int number,StringVoidFunc callback){
     String name = uid_name[uid]!;
+    print('indie_item set fine');
     return Container(
       color: beige,
       child: Row(
@@ -357,9 +353,7 @@ class _EditListsScreenState extends State<EditListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //full_list.add(host_uuid);
     return Masterlist(context);
-
   }
 
   Widget Masterlist(BuildContext context){
