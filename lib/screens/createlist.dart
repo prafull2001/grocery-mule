@@ -23,9 +23,8 @@ class CreateListScreen extends StatefulWidget {
   final User? curUser = FirebaseAuth.instance.currentUser;
   static String id = 'create_list_screen';
   String? trip_uuid;
-  late String initTitle;
-  late String initDescription;
-  DateTime? initDate;
+  late String initTitle = '';
+  late String initDescription = '';
   bool? newList;
   //createList has the ids
   //when createList has a list that's already filled
@@ -238,7 +237,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: newList!? const Text(
+        title: (newList!)? const Text(
           'Create List',
           style: TextStyle(color: Colors.black),
         ):

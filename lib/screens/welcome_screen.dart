@@ -35,12 +35,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
 
   Future<UserCredential> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount googleUser = await (_googleSignIn.signIn() as FutureOr<GoogleSignInAccount>);
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAccount? googleUser = await (_googleSignIn.signIn() as Future<GoogleSignInAccount?>);
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
       );
       UserCredential res = await auth.signInWithCredential(credential);
 
