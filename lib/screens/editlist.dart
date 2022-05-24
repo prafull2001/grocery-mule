@@ -25,7 +25,9 @@ class EditListScreen extends StatefulWidget {
   // simple constructor, just takes in tripUUID
   EditListScreen(String? tripUUID) {
     this.tripUUID = tripUUID;
-    print('tripUUID found fine');
+    if (this.tripUUID == null) {
+      throw Exception('editlist.dart: Invalid tripUUID was passed');
+    }
   }
 
   @override
@@ -44,11 +46,12 @@ class _EditListsScreenState extends State<EditListScreen> {
   late String hostFirstName;
   Map<String,String> uid_name = {};
   static bool reload = true;
+  List<String> beneficiary_names = [];
+
   @override
   void initState() {
     setState(() {});
     tripUUID = widget.tripUUID!;
-    print('tripUUID set fine');
     hostFirstName = context.read<Cowboy>().firstName;
     _queryCurrentTrip();
 
@@ -62,22 +65,26 @@ class _EditListsScreenState extends State<EditListScreen> {
       reload = false;
       (context as Element).reassemble();
     }
+
+    // for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+    //   Text(
+    //     '${name.split("|~|")[1].split(" ")[0]} ',
+    //     style: TextStyle(
+    //       color: Colors.black,
+    //       fontSize: 15,
+    //     ),
+    //   )
+
+    // for(String name in context.read<ShoppingTrip>().beneficiaries.values) {
+    //   String bene_name = name.split("|~|")[1].split(" ")[0];
+    //   beneficiary_names.add(bene_name);
+    // }
+    //
+    // print(beneficiary_names);
+
   }
 
-  int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  List<Widget> _widgetOptions = <Widget>[
-    //Masterlist(context),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
-  ];
+
 
 
 
@@ -396,7 +403,10 @@ class _EditListsScreenState extends State<EditListScreen> {
                         children: [
                           SizedBox(width: 10.0,),
                           Text(
-                            'Host - ${context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]!.split("|~|")[1].split(' ')[0]}',
+
+                            //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                            // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                            'Host - ${context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries[cur_trip.host]?.split("|~|")[1].split(' ')[0])}',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
@@ -420,7 +430,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                           SizedBox(width: 10.0,),
                           Row(
                             children: [
-                              for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+                              for(String name in context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries.values))
                                 Text(
                                   '${name.split("|~|")[1].split(" ")[0]} ',
                                   style: TextStyle(
