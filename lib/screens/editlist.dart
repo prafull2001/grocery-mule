@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
@@ -19,13 +18,16 @@ typedef StringVoidFunc = void Function(String,int);
 
 class EditListScreen extends StatefulWidget {
   static String id = 'edit_list_screen';
-  String tripUUID;
-  User curUser = FirebaseAuth.instance.currentUser;
-  final String hostUUID = FirebaseAuth.instance.currentUser.uid;
+  String? tripUUID;
+  User? curUser = FirebaseAuth.instance.currentUser;
+  final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
 
   // simple constructor, just takes in tripUUID
-  EditListScreen(String tripUUID) {
+  EditListScreen(String? tripUUID) {
     this.tripUUID = tripUUID;
+    if (this.tripUUID == null) {
+      throw Exception('editlist.dart: Invalid tripUUID was passed');
+    }
   }
 
   @override
@@ -36,21 +38,24 @@ class EditListScreen extends StatefulWidget {
 class _EditListsScreenState extends State<EditListScreen> {
   var _tripTitleController;
   var _tripDescriptionController;
-  User curUser = FirebaseAuth.instance.currentUser;
-  String tripUUID;
+  User? curUser = FirebaseAuth.instance.currentUser;
+  late String tripUUID;
   CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
-  List<String> full_list; // host and beneficiaries
   bool isAdd = false;
   bool invite_guest = false;
-  String hostFirstName;
+  late String hostFirstName;
   Map<String,String> uid_name = {};
   static bool reload = true;
+  List<String> beneficiary_names = [];
+
   @override
   void initState() {
     setState(() {});
-    tripUUID = widget.tripUUID;
+    tripUUID = widget.tripUUID!;
     hostFirstName = context.read<Cowboy>().firstName;
     _queryCurrentTrip();
+
+    // null value problem here???
 
     // TODO: implement initState
     _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
@@ -60,64 +65,56 @@ class _EditListsScreenState extends State<EditListScreen> {
       reload = false;
       (context as Element).reassemble();
     }
+
+    // for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+    //   Text(
+    //     '${name.split("|~|")[1].split(" ")[0]} ',
+    //     style: TextStyle(
+    //       color: Colors.black,
+    //       fontSize: 15,
+    //     ),
+    //   )
+
+    // for(String name in context.read<ShoppingTrip>().beneficiaries.values) {
+    //   String bene_name = name.split("|~|")[1].split(" ")[0];
+    //   beneficiary_names.add(bene_name);
+    // }
+    //
+    // print(beneficiary_names);
+
   }
 
-  int _selectedIndex = 0;
-  static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  List<Widget> _widgetOptions = <Widget>[
-    //Masterlist(context),
-    Text(
-      'Index 1: Business',
-      style: optionStyle,
-    ),
-    Text(
-      'Index 2: School',
-      style: optionStyle,
-    ),
-  ];
 
-  Future<void> _loadCurrentTrip() async {
-    DocumentSnapshot snapshot = await shoppingTripCollection.doc(tripUUID).get();
-        Map<String, Item> items = <String, Item>{};
-        ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
-          items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-          items[name].isExpanded = false;
-            //add each item to the panel (for expandable items presented to user)
-          //frontend_list[name] = new Item_front_end(name, items[name]);
-        });
-    context.read<ShoppingTrip>().setItems(items);
+
+
+
+  Future<void> _queryCurrentTrip() async {
+    DocumentSnapshot tempShot = await shoppingTripCollection.doc(tripUUID).get();
+    DateTime date = DateTime.now();
+    Map<String, Item> items = <String, Item>{};
+    date = (tempShot['date'] as Timestamp).toDate();
+    //print(raw_date);
+    (tempShot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
+      uid_name[uid.toString()] = name.toString();
+    });
+    ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
+      items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
+      items[name]!.isExpanded = false;
+      print('expandability set fine');
+      //add each item to the panel (for expandable items presented to user)
+      //frontend_list[name] = new Item_front_end(name, items[name]);
+    });
+
+    context.read<ShoppingTrip>().initializeTripFromDB(tempShot['uuid'],
+        (tempShot.data() as Map<String, dynamic>)['title'], date,
+        (tempShot.data() as Map<String, dynamic>)['description'],
+        (tempShot.data() as Map<String, dynamic>)['host'],
+        uid_name, items);
     return;
   }
 
-  Future<void> _queryCurrentTrip() async {
-      DocumentSnapshot tempShot = await shoppingTripCollection.doc(tripUUID).get();
-      DateTime date = DateTime.now();
-      Map<String, Item> items = <String, Item>{};
-      date = (tempShot['date'] as Timestamp).toDate();
-      //print(raw_date);
-      (tempShot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
-        uid_name[uid.toString()] = name.toString();
-      });
-      ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
-        items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-        items[name].isExpanded = false;
-        //add each item to the panel (for expandable items presented to user)
-        //frontend_list[name] = new Item_front_end(name, items[name]);
-      });
 
-      context.read<ShoppingTrip>().initializeTripFromDB(tempShot['uuid'],
-          (tempShot.data() as Map<String, dynamic>)['title'], date,
-          (tempShot.data() as Map<String, dynamic>)['description'],
-          (tempShot.data() as Map<String, dynamic>)['host'],
-          uid_name, items);
-
-
-      return;
-  }
-
-
-  void auto_collapse(Item ignore){
+  void auto_collapse(Item? ignore){
     context.read<ShoppingTrip>().items.values.forEach((item) {
       setState(() {
         if(item != ignore)
@@ -129,7 +126,9 @@ class _EditListsScreenState extends State<EditListScreen> {
 
 
   Widget simple_item(Item item){
-    String name = item.name;
+    print('trying to get simple_item');
+    String name = item.name!;
+    print('simple_item name set fine');
     int quantity = 0;
     item.subitems.forEach((name, count) {
       quantity = quantity + count;
@@ -164,8 +163,8 @@ class _EditListsScreenState extends State<EditListScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-            shape: BoxShape.rectangle,
-            color: dark_beige,
+          shape: BoxShape.rectangle,
+          color: dark_beige,
         ),
 
         child: (
@@ -197,9 +196,9 @@ class _EditListsScreenState extends State<EditListScreen> {
       background: Container(color: red),
     );
   }
-
   Widget indie_item(String uid, int number,StringVoidFunc callback){
-    String name = uid_name[uid];
+    String name = uid_name[uid]!;
+    print('indie_item set fine');
     return Container(
       color: beige,
       child: Row(
@@ -222,10 +221,10 @@ class _EditListsScreenState extends State<EditListScreen> {
                 initialValue: number,
                 controller: TextEditingController(),
                 onIncrement: (num newlyIncrementedValue) {
-                  callback(uid,newlyIncrementedValue);
+                  callback(uid,newlyIncrementedValue as int);
                 },
                 onDecrement: (num newlyDecrementedValue) {
-                  callback(uid,newlyDecrementedValue);
+                  callback(uid,newlyDecrementedValue as int);
                 },
               ),
               height: 60,
@@ -242,14 +241,14 @@ class _EditListsScreenState extends State<EditListScreen> {
     void updateUsrQuantity(String person, int number){
       setState(() {
         item.subitems[person] = number;
-        context.read<ShoppingTrip>().editItem(item.name,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
+        context.read<ShoppingTrip>().editItem(item.name!,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
         // TODO update database here for quant
       });
     };
     return Container(
       decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: beige,
+        shape: BoxShape.rectangle,
+        color: beige,
       ),
 
       child: Column(
@@ -265,21 +264,21 @@ class _EditListsScreenState extends State<EditListScreen> {
     return ExpansionPanelList(
       expansionCallback: (int index, bool isExpanded) {
         setState(() {
-          context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]].isExpanded = !isExpanded;
+          context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]!.isExpanded = !isExpanded;
           auto_collapse(context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]);
         });
       },
       children:
       context.watch<ShoppingTrip>().items.values.toList().map((item) {
-            return ExpansionPanel(
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return simple_item(item);
-              },
-              body:
-              expanded_item(item),
-              isExpanded: item.isExpanded,
-            );
-          }).toList(),
+        return ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return simple_item(item);
+          },
+          body:
+          expanded_item(item),
+          isExpanded: item.isExpanded,
+        );
+      }).toList(),
     );
   }
 
@@ -288,8 +287,8 @@ class _EditListsScreenState extends State<EditListScreen> {
     auto_collapse(null);
     return Container(
       decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: beige,
+        shape: BoxShape.rectangle,
+        color: beige,
       ),
 
       child: (
@@ -354,34 +353,17 @@ class _EditListsScreenState extends State<EditListScreen> {
   void handleClick(int item) {
     switch (item) {
       case 1:
-      Navigator.push(context,MaterialPageRoute(builder: (context) => CreateListScreen(false,context.read<ShoppingTrip>().uuid)));
-      setState(() {});
+        Navigator.push(context,MaterialPageRoute(builder: (context) => CreateListScreen(false,context.read<ShoppingTrip>().uuid)));
+        setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    //full_list.add(host_uuid);
-    while(context.watch<ShoppingTrip>().host == null){
-      return CircularProgressIndicator();
-    }
     return Masterlist(context);
-
   }
 
   Widget Masterlist(BuildContext context){
-    String host_name;
-    List<String> bene_list = [];
-
-
-
-    if(context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host] != null){
-      host_name = context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host].split("|~|")[1].split(" ")[0];
-      context.read<ShoppingTrip>().beneficiaries.values.forEach((longName) {
-        bene_list.add(longName.split("|~|")[1].split(" ")[0]);
-      });
-    }
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -409,132 +391,135 @@ class _EditListsScreenState extends State<EditListScreen> {
       ),
 
       body:
-               Container(
-                  child: Column(
-                    //padding: const EdgeInsets.all(25),
-                    children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-
-                      Row(
-                        children: [
-                          SizedBox(width: 10.0,),
-                          Text(
-                            'Host - ${host_name}',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(width: 10.0,),
-                          Text(
-                            'Beneficiaries -',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          Row(
-                            children: [
-                              for(String name in bene_list)
-                                Text(
-                                  '${name}',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                            ],
-
-                          ),
-                          Spacer(),
-                          IconButton(icon: Icon(Icons.add_circle),),
-                        ],
-                      ),
-                      //SizedBox(height: 10),
-                      SizedBox(
-                        height: 40,
-                        width: double.maxFinite,
-                        child: Divider(
-                          color: Colors.black,
-                          thickness: 1.5,
-                          indent: 75,
-                          endIndent: 75,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            child: Text(
-                              'Add Item',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-
-                          Container(
-                              child: IconButton(
-                                icon: const Icon(Icons.add_circle),
-                                onPressed: () {
-                                  setState(() {
-                                    isAdd = true;
-                                  });
-                                },
-                              )
-                          ),
-                        ],
-                      ),
-                      if(isAdd)
-                        create_item(),
-                      //single_item(grocery_list[1]),
-                      _buildPanel(),
-                      SizedBox(height: 10.0,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          //comment
-                          SizedBox(width: 40.0,),
-                          Container(
-                            height: 70,
-                            width: 150,
-                            child: RoundedButton(
-                              onPressed: () {
-                                Navigator.pushNamed(context, PersonalListScreen.id);
-                              },
-                              title: "Personal List",
-                            ),
-                          ),
-                          Spacer(),
-                          if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
-                            Container(
-                              height: 70,
-                              width: 150,
-                              child: RoundedButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(context, CheckoutScreen.id);
-                                },
-                                title: "Checkout",
-                              ),
-                            ),
-                          ],
-                          SizedBox(width: 40.0,),
-                        ],
-                      ),
-                    ],
-                  )
+      Container(
+          child: Column(
+            //padding: const EdgeInsets.all(25),
+            children: [
+              SizedBox(
+                height: 20,
               ),
+
+              Row(
+                children: [
+                  SizedBox(width: 10.0,),
+                  Text(
+
+                    //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                    // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                    'Host - ${context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries[cur_trip.host]?.split("|~|")[1].split(' ')[0])}',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  SizedBox(width: 10.0,),
+                  Text(
+                    'Beneficiaries -',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                  SizedBox(width: 10.0,),
+                  Row(
+                    children: [
+                      for(String name in context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries.values))
+                        Text(
+                          '${name.split("|~|")[1].split(" ")[0]} ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                          ),
+                        ),
+                    ],
+
+                  ),
+                  Spacer(),
+                  IconButton(icon: Icon(Icons.add_circle), onPressed: () {  },),
+                ],
+              ),
+              //SizedBox(height: 10),
+              SizedBox(
+                height: 40,
+                width: double.maxFinite,
+                child: Divider(
+                  color: Colors.black,
+                  thickness: 1.5,
+                  indent: 75,
+                  endIndent: 75,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    child: Text(
+                      'Add Item',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+
+                  Container(
+                      child: IconButton(
+                        icon: const Icon(Icons.add_circle),
+                        onPressed: () {
+                          setState(() {
+                            isAdd = true;
+                          });
+                        },
+                      )
+                  ),
+                ],
+              ),
+              if(isAdd)
+                create_item(),
+              //single_item(grocery_list[1]),
+              _buildPanel(),
+              SizedBox(height: 10.0,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  //comment
+                  SizedBox(width: 40.0,),
+                  Container(
+                    height: 70,
+                    width: 150,
+                    child: RoundedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, PersonalListScreen.id);
+                      },
+                      title: "Personal List", color: Colors.blueAccent,
+                    ),
+                  ),
+                  Spacer(),
+                  if(context.read<ShoppingTrip>().host == context.read<Cowboy>().uuid)...[
+                    Container(
+                      height: 70,
+                      width: 150,
+                      child: RoundedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, CheckoutScreen.id);
+                        },
+                        title: "Checkout", color: Colors.blueAccent,
+                      ),
+                    ),
+                  ],
+                  SizedBox(width: 40.0,),
+                ],
+              ),
+            ],
+          )
+      ),
     );
   }
 }

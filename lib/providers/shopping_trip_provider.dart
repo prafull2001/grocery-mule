@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,7 +13,7 @@ class ShoppingTrip with ChangeNotifier{
   String _host = ''; // host uuid
   Map<String,String> _beneficiaries = {};
   Map<String, Item> _items = <String, Item>{}; // name to item
-  Receipt _receipt;
+  late Receipt _receipt;
 
   // from user creation screen for metadata
   Future<void> initializeTrip(String title, DateTime date, String description, Map<String,String> uid_name, String host) async {
@@ -188,10 +187,10 @@ class ShoppingTrip with ChangeNotifier{
 }
 
 class Item {
-  String name;
-  int quantity;
+  late String name;
+  late int quantity;
   Map<String, int> subitems = <String, int>{}; // uuid to individual quantity needed
-  bool isExpanded;
+  late bool isExpanded;
   Item(this.name, this.quantity, Map<String,String> beneficiaries) {
     subitems = <String, int>{};
     beneficiaries.forEach((uid,name) {
@@ -220,13 +219,6 @@ class Item {
     subitems.remove(beneficiary);
   }
 
-  incrementBeneficiary(String beneficiary) {
-    subitems[beneficiary]++;
-  }
-  decrementBeneficiary(String beneficiary) {
-    subitems[beneficiary]--;
-  }
-
   Map<String,dynamic> toMap() {
     return {
       "name": name,
@@ -248,7 +240,7 @@ class ReceiptItem {
   String name;
   double price;
   int quantity;
-  double total_price;
+  late double total_price;
 
   ReceiptItem(this.name, this.price, this.quantity) {
     total_price = price*quantity;
