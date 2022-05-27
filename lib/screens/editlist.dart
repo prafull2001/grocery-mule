@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
@@ -110,6 +111,8 @@ class _EditListsScreenState extends State<EditListScreen> {
           (tempShot.data() as Map<String, dynamic>)['description'],
           (tempShot.data() as Map<String, dynamic>)['host'],
           uid_name, items);
+
+
       return;
   }
 
@@ -194,6 +197,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       background: Container(color: red),
     );
   }
+
   Widget indie_item(String uid, int number,StringVoidFunc callback){
     String name = uid_name[uid];
     return Container(
@@ -358,11 +362,26 @@ class _EditListsScreenState extends State<EditListScreen> {
   @override
   Widget build(BuildContext context) {
     //full_list.add(host_uuid);
+    while(context.watch<ShoppingTrip>().host == null){
+      return CircularProgressIndicator();
+    }
     return Masterlist(context);
 
   }
 
   Widget Masterlist(BuildContext context){
+    String host_name;
+    List<String> bene_list = [];
+
+
+
+    if(context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host] != null){
+      host_name = context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host].split("|~|")[1].split(" ")[0];
+      context.read<ShoppingTrip>().beneficiaries.values.forEach((longName) {
+        bene_list.add(longName.split("|~|")[1].split(" ")[0]);
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -402,7 +421,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                         children: [
                           SizedBox(width: 10.0,),
                           Text(
-                            'Host - ${context.read<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host].split("|~|")[1].split(' ')[0]}',
+                            'Host - ${host_name}',
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20,
@@ -426,9 +445,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                           SizedBox(width: 10.0,),
                           Row(
                             children: [
-                              for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
+                              for(String name in bene_list)
                                 Text(
-                                  '${name.split("|~|")[1].split(" ")[0]} ',
+                                  '${name}',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 15,

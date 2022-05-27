@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -68,7 +69,7 @@ class _ListsScreenState extends State<ListsScreen> {
 
       // reads and calls method
       context.read<Cowboy>().fillFields(snapshot['uuid'].toString(), snapshot['first_name'].toString(), snapshot['last_name'].toString(), snapshot['email'].toString(), shoppingTrips, friends, requests);
-      print(context.read<Cowboy>().shoppingTrips);
+      //print(context.read<Cowboy>().shoppingTrips);
 
   }
   Future<DocumentSnapshot> _queryCowboy() async {
@@ -86,13 +87,13 @@ class _ListsScreenState extends State<ListsScreen> {
   }
 
   String getUidByIndex(int index){
-    print(context.watch<Cowboy>().shoppingTrips.keys.toList());
+    //print(context.watch<Cowboy>().shoppingTrips.keys.toList());
     return context.watch<Cowboy>().shoppingTrips.keys.toList()[index];
   }
 
   @override
   Widget build(BuildContext context) {
-    print(context.watch<Cowboy>().shoppingTrips);
+    //print(context.watch<Cowboy>().shoppingTrips);
     return WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
@@ -147,7 +148,7 @@ class _ListsScreenState extends State<ListsScreen> {
                       //clearUserField();
                       context.read<Cowboy>().clearData();
                       await _auth.signOut();
-                      print('User signed out');
+                      // print('User signed out');
                     }
                     //Navigator.pop(context);
                     Navigator.of(context).popUntil((route){
@@ -184,7 +185,7 @@ class _ListsScreenState extends State<ListsScreen> {
                               crossAxisSpacing: 7),
                           itemBuilder: (context, int index) {
                             List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)].split('|~|');
-                            print(fields[1]);
+                            //print(fields[1]);
                             return Container(
                               width: 80,
                               height: 80,
