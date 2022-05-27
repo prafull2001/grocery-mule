@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
@@ -15,12 +14,12 @@ class UserInfoScreen extends StatefulWidget {
 }
 
 class _UserInfoScreenScreenState extends State<UserInfoScreen> {
-  String email;
-  String firstName;
-  String lastName;
+  late String email;
+  late String firstName;
+  late String lastName;
 
   FirebaseAuth auth = FirebaseAuth.instance;
-  final User curUser = FirebaseAuth.instance.currentUser;
+  final User? curUser = FirebaseAuth.instance.currentUser;
 
 
   @override
@@ -29,13 +28,13 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
-          future: userCollection.doc(curUser.uid).get(),
+          future: userCollection.doc(curUser?.uid).get(),
           builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot){
             String prevEmail;
             String prevFirst;
             String prevLast;
             if (snapshot.connectionState == ConnectionState.done) {
-              Map<String, dynamic> data = snapshot.data.data() as Map<String, dynamic>;
+              Map<String, dynamic> data = snapshot.data?.data() as Map<String, dynamic>;
               prevEmail = data['email'];
               prevFirst = data['first_name'];
               prevLast = data['last_name'];
