@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
@@ -15,10 +14,10 @@ class PersonalListScreen extends StatefulWidget {
 }
 
 class _PersonalListScreen extends State<PersonalListScreen> {
-  String hostFirstName;
-  Map<String, Item> list_items;
-  Map<String, int> item_list;
-  Map<String, int> cleaned_list;
+  late String hostFirstName;
+  late Map<String, Item> list_items;
+  late Map<String, int> item_list;
+  late Map<String, int> cleaned_list;
 
   @override
   void initState() {
@@ -28,8 +27,13 @@ class _PersonalListScreen extends State<PersonalListScreen> {
 
     list_items.forEach((key, item) {
       Item curItem = item;
-      if(item.subitems[context.read<Cowboy>().uuid] > 0) {
-        cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid];
+      if(item.subitems[context.read<Cowboy>().uuid]! > 0) {
+        if(item.subitems[context.read<Cowboy>().uuid] == null) {
+          throw Exception("personal_list.dart: subitem empty");
+        } else {
+          cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid]!;
+        }
+
       }
     });
   }
