@@ -127,7 +127,7 @@ class _EditListsScreenState extends State<EditListScreen> {
 
   Widget simple_item(Item item){
     print('trying to get simple_item');
-    String name = item.name!;
+    String name = item.name;
     print('simple_item name set fine');
     int quantity = 0;
     item.subitems.forEach((name, count) {
@@ -241,7 +241,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     void updateUsrQuantity(String person, int number){
       setState(() {
         item.subitems[person] = number;
-        context.read<ShoppingTrip>().editItem(item.name!,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
+        context.read<ShoppingTrip>().editItem(item.name,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
         // TODO update database here for quant
       });
     };
