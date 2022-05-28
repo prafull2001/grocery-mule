@@ -45,8 +45,8 @@ class Cowboy with ChangeNotifier {
     // notifyListeners();
   }
   // to initialize account creation
-  initializeCowboy(String uuid, String firstName, String lastName, String email) {
-    this._uuid = uuid;
+  initializeCowboy(String? uuid, String firstName, String lastName, String email) {
+    this._uuid = uuid!;
     this._firstName = firstName;
     this._lastName = lastName;
     this._email = email;
