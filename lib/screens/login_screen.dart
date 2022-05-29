@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
@@ -15,8 +14,8 @@ class LoginScreen extends StatefulWidget {
 
 
 class _LoginScreenState extends State<LoginScreen> {
-  String email;
-  String password;
+  late String email;
+  late String password;
   final _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
@@ -79,11 +78,13 @@ class _LoginScreenState extends State<LoginScreen> {
               color: Colors.lightBlue,
               onPressed: () async{
                 try {
-                  final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
-                  if (user != null && user.user.emailVerified){
+
+                  final userCreds = await _auth.signInWithEmailAndPassword(email: email, password: password);
+                  bool? status = userCreds.user?.emailVerified;
+                  if (status! == true){
                     debugPrint('User signed in');
                     Navigator.pushNamed(context, ListsScreen.id);
-                  } else if (!(user.user.emailVerified)){
+                  } else if (status == false){
                     await Navigator.pushNamed(context, ConfirmEmailScreen.id);
                     Navigator.pushNamed(context, ListsScreen.id);
                   }
@@ -92,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text(e.message),
+                          title: Text(e.message!),
                           actions: [
                             TextButton(
                               child: Text("OK"),
