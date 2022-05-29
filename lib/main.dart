@@ -19,7 +19,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:after_layout/after_layout.dart';
 import 'dart:io';
 
 bool seen_intro; // global that updates with show_home's value upon startup
