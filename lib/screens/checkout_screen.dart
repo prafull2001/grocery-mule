@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
@@ -16,11 +15,11 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreen extends State<CheckoutScreen> {
-  Map<String, Item> list_items;
-  Map<String, int> item_list;
-  Map<String, Map<String,int>> aggre_cleaned_list;
+  late Map<String, Item> list_items;
+  late Map<String, int> item_list;
+  late Map<String, Map<String,int>> aggre_cleaned_list;
   //map each bene uuid to their own map
-  @override
+  //@override
   void initState() {
     list_items = context.read<ShoppingTrip>().items;
     aggre_cleaned_list = {};
@@ -30,8 +29,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     list_items.forEach((key, item) {
       //iterate through each subitem in the item
       context.read<ShoppingTrip>().beneficiaries.keys.forEach((uuid) {
-        if(item.subitems[uuid] > 0) {
-          aggre_cleaned_list[uuid][key] = item.subitems[uuid];
+        if(item.subitems[uuid]! > 0) {
+          aggre_cleaned_list[uuid]![key] = item.subitems[uuid]!;
         }
       });
     });
@@ -85,7 +84,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     );
   }
   Widget personalList(String uuid){
-    String name =  context.read<ShoppingTrip>().beneficiaries[uuid];
+    String name =  context.read<ShoppingTrip>().beneficiaries[uuid]!.split('|~|')[1].split(' ')[0];
+
     return Column(
         children: <Widget>[
           Row(
@@ -99,8 +99,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
               ),
             ],
           ),
-          if(aggre_cleaned_list[uuid].isNotEmpty)...[
-          for (var entry in aggre_cleaned_list[uuid].entries)
+          if(aggre_cleaned_list[uuid]!.isNotEmpty)...[
+          for (var entry in aggre_cleaned_list[uuid]!.entries)
             simple_item(entry.key, entry.value),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -113,6 +113,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                     onPressed: () {
                     },
                     title: "Paypal",
+                    color: Colors.amber,
                   ),
                 ),
 
