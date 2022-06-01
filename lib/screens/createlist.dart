@@ -1,4 +1,4 @@
-// @dart=2.9
+// @dart = 2.9
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,11 +23,11 @@ class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   final User curUser = FirebaseAuth.instance.currentUser;
   static String id = 'create_list_screen';
-  String trip_uuid;
-  String initTitle;
-  String initDescription;
-  DateTime initDate;
-  bool newList;
+   String trip_uuid;
+   String initTitle;
+   String initDescription;
+   DateTime initDate;
+   bool newList;
   //createList has the ids
   //when createList has a list that's already filled
   //keep a field of the original id, but generate a new id
@@ -44,8 +44,8 @@ class CreateListScreen extends StatefulWidget {
 class _CreateListsScreenState extends State<CreateListScreen> {
   final _auth = FirebaseAuth.instance;
   final User curUser = FirebaseAuth.instance.currentUser;
-  bool newList;
-  String trip_uuid;
+   bool newList;
+   String trip_uuid;
   //////////////////////
   var _tripTitleController;
   CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
@@ -56,7 +56,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   bool isAdd = false;
   bool delete_list = false;
   bool invite_guest = false;
-  ShoppingTrip cur_trip;
+   ShoppingTrip cur_trip;
   Map<String,String> uid_name = {};
   List<MultiSelectItem<String>> friend_bene = [];
   List<String> selected_friend = [];
@@ -81,9 +81,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     //end test code
     super.initState();
     // print(context.read<Cowboy>().friends['nW7NnPdQGcXtj1775nrLdB1igjG2'].split("|~|")[1].split(" ")[0]);
+    /*
     friend_bene = context.read<Cowboy>().friends.keys
         .map((uid) => MultiSelectItem<String>(uid,context.read<Cowboy>().friends[uid].split("|~|")[1].split(" ")[0]))
         .toList();
+
+     */
 
 
   }
@@ -174,7 +177,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             curUser.uid);
         context.read<ShoppingTrip>().addBeneficiary(hostUUID,hostFirstName);
         for(var friend in selected_friend) {
-          context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
+          //context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
           context.read<Cowboy>().addTripToBene(friend,
               context.read<ShoppingTrip>().uuid,
               context.read<ShoppingTrip>().title,
@@ -205,9 +208,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         //check if new bene need to be added
         for(var friend in selected_friend) {
           if(!context.read<ShoppingTrip>().beneficiaries.containsKey(friend)) {
-            context.read<ShoppingTrip>().addBeneficiary(friend, context
-                .read<Cowboy>()
-                .friends[friend]);
+            //context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
             context.read<Cowboy>().addTripToBene(friend,
                 context.read<ShoppingTrip>().uuid,
                 context.read<ShoppingTrip>().title,

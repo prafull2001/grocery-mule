@@ -30,7 +30,8 @@ class _ListsScreenState extends State<ListsScreen> {
 
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
   Future<void>? Cowsnapshot;
 
   @override
@@ -45,26 +46,26 @@ class _ListsScreenState extends State<ListsScreen> {
     readInData(snapshot!);
   }
   void readInData(DocumentSnapshot snapshot){
-    Map<String, String> shoppingTrips = {};
-    Map<String, String> friends = <String, String>{};
-    Map<String, String> requests = <String, String>{};
+    List<String> shoppingTrips = [];
+
+    List<String> friends = [];
+    List<String> requests = [];
     // extrapolating data into provider
-    if(!(snapshot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
-      (snapshot['shopping_trips'] as Map<String, dynamic>)
-          .forEach((uid,entry) {
-        String fields = entry.toString().trim();
-        shoppingTrips[uid.trim()] = fields;
+    if(!(snapshot['shopping_trips'] as List<dynamic>).isEmpty) {
+      (snapshot['shopping_trips'] as List<dynamic>)
+          .forEach((uid) {
+            if(!shoppingTrips.contains(uid))
+              shoppingTrips.add(uid.trim());
       });
     }
-    if(!(snapshot['friends'] as Map<String, dynamic>).isEmpty) {
-      (snapshot['friends'] as Map<String, dynamic>).forEach((dynamicKey,
-          dynamicValue) {
-        friends[dynamicKey.toString()] = dynamicValue.toString();
+    if(!(snapshot['friends'] as List<dynamic>).isEmpty) {
+      (snapshot['friends'] as List<dynamic>).forEach((dynamicKey) {
+        friends.add(dynamicKey.toString());
       });
     }
-    if(!(snapshot['requests'] as Map<String, dynamic>).isEmpty) {
-      (snapshot['requests'] as Map<String, dynamic>).forEach((key, value) {
-        requests[key.trim()] = value.toString().trim();
+    if(!(snapshot['requests'] as List<dynamic>).isEmpty) {
+      (snapshot['requests'] as List<dynamic>).forEach((key) {
+        requests.add(key.toString().trim());
       });
     }
 
@@ -87,11 +88,107 @@ class _ListsScreenState extends State<ListsScreen> {
     }
   }
 
-  String getUidByIndex(int index){
-    //print(context.watch<Cowboy>().shoppingTrips.keys.toList());
-    return context.watch<Cowboy>().shoppingTrips.keys.toList()[index];
-  }
 
+  /*
+  Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          color: const Color(0xFFf57f17),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFffab91),
+              blurRadius: 3,
+              offset: Offset(3, 6), // Shadow position
+            ),
+          ],
+        ),
+        child: ListTile(
+
+          title: Text(
+            '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[0]}\n'
+                '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[2]}\n\n'
+                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
+                .toDate()
+                .month}' +
+                '/' +
+                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
+                    .toDate()
+                    .day}' +
+                '/' +
+                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
+                    .toDate()
+                    .year}',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 15,
+            ),
+          ),
+          onTap: () async {
+            String tripUUID = context.read<Cowboy>().shoppingTrips.keys.toList()[index];
+            await Navigator.push(context,
+                MaterialPageRoute(builder: (context) =>
+                    EditListScreen(tripUUID)));
+          },
+        ),
+      ),
+   */
+  Widget renderList(String tripId){
+    return StreamBuilder<DocumentSnapshot>(
+      stream: tripCollection.doc(tripId).snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading");
+          }
+          return Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: const Color(0xFFf57f17),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFffab91),
+                blurRadius: 3,
+                offset: Offset(3, 6), // Shadow position
+              ),
+            ],
+          ),
+          child: ListTile(
+
+            title: Text(
+              '\n${snapshot.data!['title']}\n'
+                  '${snapshot.data!['description']}\n\n'
+                  '${(snapshot.data!['date'] as Timestamp)
+                  .toDate()
+                  .month}' +
+                  '/' +
+                  '${(snapshot.data!['date'] as Timestamp)
+                      .toDate()
+                      .day}' +
+                  '/' +
+                  '${(snapshot.data!['date'] as Timestamp)
+                      .toDate()
+                      .year}',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 15,
+              ),
+            ),
+            onTap: () async {
+              await Navigator.push(context,
+                  MaterialPageRoute(builder: (context) =>
+                      EditListScreen(tripId)));
+            },
+          ),
+        );
+      }
+    );
+  }
   @override
   Widget build(BuildContext context) {
     //print(context.watch<Cowboy>().shoppingTrips);
@@ -185,50 +282,8 @@ class _ListsScreenState extends State<ListsScreen> {
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 7),
                     itemBuilder: (context, int index) {
-                      List<String> fields = context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|');
-                      //print(fields[1]);
-                      return Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFf57f17),
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFffab91),
-                              blurRadius: 3,
-                              offset: Offset(3, 6), // Shadow position
-                            ),
-                          ],
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[0]}\n'
-                                '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[2]}\n\n'
-                                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
-                                .toDate()
-                                .month}' +
-                                '/' +
-                                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
-                                    .toDate()
-                                    .day}' +
-                                '/' +
-                                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
-                                    .toDate()
-                                    .year}',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 15,
-                            ),
-                          ),
-                          onTap: () async {
-                            String tripUUID = context.read<Cowboy>().shoppingTrips.keys.toList()[index];
-                            await Navigator.push(context,
-                                MaterialPageRoute(builder: (context) =>
-                                    EditListScreen(tripUUID)));
-                          },
-                        ),
-                      );
+
+                      return renderList(context.watch<Cowboy>().shoppingTrips[index]);
                     },
                   ),
                 ),

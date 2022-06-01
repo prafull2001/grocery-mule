@@ -52,7 +52,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     email = credential.user!.email!;
     if(credential.additionalUserInfo!.isNewUser){
       //create new document for the new user
-      context.read<Cowboy>().initializeCowboy(credential.user!.uid, firstName, lastName, email!);
+      context.read<Cowboy>().initializeCowboy(credential.user!.uid, firstName, lastName, email);
     }
     return;
   }

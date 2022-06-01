@@ -54,24 +54,22 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     }
 
     // error checking should be done, update coming fields as if they are 100% correct
-    Map<String, String> trips = {};
-    Map<String, String> friends = <String, String>{};
-    Map<String, String> requests = <String, String>{};
-    if(!(snapshot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
-      (snapshot['shopping_trips'] as Map<String, dynamic>).forEach((uid,entry) {
-        String fields = entry.toString().trim();
-        trips[uid.trim()] = fields;
+    List<String> trips = [];
+    List<String> friends = [];
+    List<String> requests = [];
+    if(!(snapshot['shopping_trips'] as List<dynamic>).isEmpty) {
+      (snapshot['shopping_trips'] as List<dynamic>).forEach((uid) {
+        trips.add(uid.trim());
       });
     }
-    if(!(snapshot['friends'] as Map<String, dynamic>).isEmpty) {
-      (snapshot['friends'] as Map<String, dynamic>).forEach((dynamicKey,
-          dynamicValue) {
-        friends[dynamicKey.toString()] = dynamicValue.toString();
+    if(!(snapshot['friends'] as List<dynamic>).isEmpty) {
+      (snapshot['friends'] as List<dynamic>).forEach((dynamicKey) {
+        friends.add(dynamicKey.toString().trim());
       });
     }
-    if(!(snapshot['requests'] as Map<String, dynamic>).isEmpty) {
-      (snapshot['requests'] as Map<String, dynamic>).forEach((key, value) {
-        requests[key.trim()] = value.toString().trim();
+    if(!(snapshot['requests'] as List<dynamic>).isEmpty) {
+      (snapshot['requests'] as List<dynamic>).forEach((key) {
+        requests.add(key.toString().trim());
       });
     }
 
@@ -82,8 +80,8 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   }
 
   List<List<String>> _loadDisplayNames() {
-    List<String> uuids = context.read<Cowboy>().requests.keys.toList();
-    List<String> pairs = context.read<Cowboy>().requests.values.toList();
+    List<String> uuids = context.read<Cowboy>().requests;
+    List<String> pairs = context.read<Cowboy>().requests;
     List<List<String>> dispnames = [];
     for(int i=0; i < pairs.length; i++) {
       List<String> split = pairs[i].split('|~|');
@@ -95,8 +93,8 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
   }
 
   List<List<String>> _loadFriendNames() {
-    List<String> uuids = context.read<Cowboy>().friends.keys.toList();
-    List<String> pairs = context.read<Cowboy>().friends.values.toList();
+    List<String> uuids = context.read<Cowboy>().friends;
+    List<String> pairs = context.read<Cowboy>().friends;
     List<List<String>> dispnames = [];
     for(int i=0; i < pairs.length; i++) {
       List<String> split = pairs[i].split('|~|');
@@ -456,10 +454,12 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
               ],
             ),
             SizedBox(height: 12.0,),
-            if(context.watch<Cowboy>().friends.values.length != 0)...[SizedBox(
+            /*if(context.watch<Cowboy>().friends.values.length != 0)...[SizedBox(
               height: 36.0,
               child: Text('Friends', style: TextStyle(fontSize: 24.0),),
             )],
+
+             */
             Container(
               child: StreamBuilder<DocumentSnapshot>(
                 stream: _getCowboy(),
