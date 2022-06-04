@@ -87,6 +87,7 @@ void main() async {
             PersonalListScreen.id: (context) => PersonalListScreen(),
             CheckoutScreen.id: (context) => CheckoutScreen(),
             IntroScreen.id: (context) => IntroScreen(),
+
           },
         ),
       ),

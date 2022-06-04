@@ -25,7 +25,86 @@ class ListsScreen extends StatefulWidget {
   _ListsScreenState createState() => _ListsScreenState();
 }
 
+class ShoppingTripQuery extends StatefulWidget {
+  final _auth = FirebaseAuth.instance;
+  late String listUUID;
 
+  ShoppingTripQuery(String listUUID){
+    this.listUUID = listUUID;
+  }
+
+  @override
+  _ShoppingTripQueryState createState() => _ShoppingTripQueryState();
+}
+
+class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
+  final CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
+  late String listUUID;
+
+  @override
+  void initState(){
+    listUUID = widget.listUUID;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return StreamBuilder<DocumentSnapshot>(
+        stream: shoppingTripCollection.doc(listUUID).snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading");
+          }
+          return Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: const Color(0xFFf57f17),
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFffab91),
+                  blurRadius: 3,
+                  offset: Offset(3, 6), // Shadow position
+                ),
+              ],
+            ),
+            child: ListTile(
+
+              title: Text(
+                '\n${snapshot.data!['title']}\n'
+                    '${snapshot.data!['description']}\n\n'
+                    '${(snapshot.data!['date'] as Timestamp)
+                    .toDate()
+                    .month}' +
+                    '/' +
+                    '${(snapshot.data!['date'] as Timestamp)
+                        .toDate()
+                        .day}' +
+                    '/' +
+                    '${(snapshot.data!['date'] as Timestamp)
+                        .toDate()
+                        .year}',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 15,
+                ),
+              ),
+              onTap: () async {
+                await Navigator.push(context,
+                    MaterialPageRoute(builder: (context) =>
+                        EditListScreen(listUUID)));
+              },
+            ),
+          );
+        }
+    );
+  }
+
+}
 class _ListsScreenState extends State<ListsScreen> {
 
   final _auth = FirebaseAuth.instance;
@@ -134,61 +213,7 @@ class _ListsScreenState extends State<ListsScreen> {
         ),
       ),
    */
-  Widget renderList(String tripId){
-    return StreamBuilder<DocumentSnapshot>(
-      stream: tripCollection.doc(tripId).snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
-          }
-          return Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: const Color(0xFFf57f17),
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFffab91),
-                blurRadius: 3,
-                offset: Offset(3, 6), // Shadow position
-              ),
-            ],
-          ),
-          child: ListTile(
 
-            title: Text(
-              '\n${snapshot.data!['title']}\n'
-                  '${snapshot.data!['description']}\n\n'
-                  '${(snapshot.data!['date'] as Timestamp)
-                  .toDate()
-                  .month}' +
-                  '/' +
-                  '${(snapshot.data!['date'] as Timestamp)
-                      .toDate()
-                      .day}' +
-                  '/' +
-                  '${(snapshot.data!['date'] as Timestamp)
-                      .toDate()
-                      .year}',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 15,
-              ),
-            ),
-            onTap: () async {
-              await Navigator.push(context,
-                  MaterialPageRoute(builder: (context) =>
-                      EditListScreen(tripId)));
-            },
-          ),
-        );
-      }
-    );
-  }
   @override
   Widget build(BuildContext context) {
     //print(context.watch<Cowboy>().shoppingTrips);
@@ -283,7 +308,7 @@ class _ListsScreenState extends State<ListsScreen> {
                         crossAxisSpacing: 7),
                     itemBuilder: (context, int index) {
 
-                      return renderList(context.watch<Cowboy>().shoppingTrips[index]);
+                      return new ShoppingTripQuery(context.watch<Cowboy>().shoppingTrips[index]);//renderList(context.watch<Cowboy>().shoppingTrips[index]);
                     },
                   ),
                 ),
