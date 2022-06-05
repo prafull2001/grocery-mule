@@ -2,7 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
+final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
 
 // shopping trip provider
 class ShoppingTrip with ChangeNotifier{
@@ -11,25 +11,30 @@ class ShoppingTrip with ChangeNotifier{
   DateTime _date = DateTime.now();
   String _description = '';
   String _host = ''; // host uuid
-  Map<String,String> _beneficiaries = {};
+  List<String> _beneficiaries = [];
   Map<String, Item> _items = <String, Item>{}; // name to item
   late Receipt _receipt;
 
   // from user creation screen for metadata
-  Future<void> initializeTrip(String title, DateTime date, String description, Map<String,String> uid_name, String host) async {
+  Future<void> initializeTrip(String title, DateTime date, String description, List<String> bene_list, String host) async {
     var uuider = Uuid();
     _uuid = uuider.v4();
     _title = title;
     _date = date;
     _description = description;
     _host = host;
-    _beneficiaries = uid_name;
+    _beneficiaries = bene_list;
     print(_date);
     await initializeTripDB();
+    await initializeSubCollection();
     notifyListeners();
   }
+
+  Future<void> initializeSubCollection() async {
+    await tripCollection.doc(_uuid).collection("items").doc("dummy").set({});
+  }
   // takes in formatted data from snapshot to directly update the provider
-  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, Map<String,String> beneficiaries, Map<String, Item> items) {
+  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, List<String> beneficiaries, Map<String, Item> items) {
     _uuid = uuid;
     _title = title;
     _date = date;
@@ -44,7 +49,7 @@ class ShoppingTrip with ChangeNotifier{
   String get title => _title;
   DateTime get date => _date;
   String get description => _description;
-  Map<String,String> get beneficiaries => _beneficiaries;
+  List<String> get beneficiaries => _beneficiaries;
   Map<String, Item> get items => _items;
   String get host => _host;
   // metadata editing methods
@@ -75,7 +80,7 @@ class ShoppingTrip with ChangeNotifier{
     notifyListeners();
   }
   // when metadata update fields are called from first screen, this method should be called
-  updateTripMetadata(String title, DateTime date, String description, Map<String, String> beneficiary) {
+  updateTripMetadata(String title, DateTime date, String description, List<String> beneficiary) {
     _title = title;
     _date = date;
     _description = description;
@@ -83,12 +88,12 @@ class ShoppingTrip with ChangeNotifier{
     updateTripMetadataDB();
     notifyListeners();
   }
-  setBeneficiary(Map<String,String> new_bene_list){
+  setBeneficiary(List<String> new_bene_list){
     _beneficiaries = new_bene_list;
   }
   // adds beneficiary, notifies listeners, updates database
-  addBeneficiary(String beneficiary_uuid, String name) {
-    _beneficiaries[beneficiary_uuid] = name;
+  addBeneficiary(String beneficiary_uuid) {
+    _beneficiaries.add(beneficiary_uuid);
     if(_items.isNotEmpty) {
       _items.forEach((name, item) {
         item.addBeneficiary(beneficiary_uuid);
@@ -191,9 +196,9 @@ class Item {
   late int quantity;
   Map<String, int> subitems = <String, int>{}; // uuid to individual quantity needed
   late bool isExpanded;
-  Item(this.name, this.quantity, Map<String,String> beneficiaries) {
+  Item(this.name, this.quantity, List<String> beneficiaries) {
     subitems = <String, int>{};
-    beneficiaries.forEach((uid,name) {
+    beneficiaries.forEach((uid) {
       subitems[uid] = 0;
     });
 

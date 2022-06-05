@@ -7,6 +7,7 @@ import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
+import 'package:grocery_mule/dev/migration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/screens/user_info.dart';
@@ -38,7 +39,7 @@ class ShoppingTripQuery extends StatefulWidget {
 }
 
 class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
-  final CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
+  final CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
   late String listUUID;
 
   @override
@@ -112,7 +113,7 @@ class _ListsScreenState extends State<ListsScreen> {
   CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
   CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
   Future<void>? Cowsnapshot;
-
+  List<String> dev = ["NYxh0dZXDya9VAdSYnOeWkY2wv83","yTWmoo2Qskf3wFcbxaJYUt9qrZM2","nW7NnPdQGcXtj1775nrLdB1igjG2"];
   @override
   void initState() {
     // TODO: implement initState
@@ -167,52 +168,6 @@ class _ListsScreenState extends State<ListsScreen> {
     }
   }
 
-
-  /*
-  Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          color: const Color(0xFFf57f17),
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFffab91),
-              blurRadius: 3,
-              offset: Offset(3, 6), // Shadow position
-            ),
-          ],
-        ),
-        child: ListTile(
-
-          title: Text(
-            '\n${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[0]}\n'
-                '${context.watch<Cowboy>().shoppingTrips[getUidByIndex(index)]!.split('|~|')[2]}\n\n'
-                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
-                .toDate()
-                .month}' +
-                '/' +
-                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
-                    .toDate()
-                    .day}' +
-                '/' +
-                '${(Timestamp.fromDate(DateTime.parse(fields[1])))
-                    .toDate()
-                    .year}',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 15,
-            ),
-          ),
-          onTap: () async {
-            String tripUUID = context.read<Cowboy>().shoppingTrips.keys.toList()[index];
-            await Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>
-                    EditListScreen(tripUUID)));
-          },
-        ),
-      ),
-   */
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +233,14 @@ class _ListsScreenState extends State<ListsScreen> {
                     return route.settings.name == WelcomeScreen.id;
                   });
                   Navigator.pushNamed(context, WelcomeScreen.id);
+                },
+              ),
+              if(dev.contains(context.watch<Cowboy>().uuid))
+              ListTile(
+                title: const Text('Dev only'),
+                onTap: () {
+                  //Navigator.pop(context);
+                  Navigator.pushNamed(context, Migration.id);
                 },
               ),
             ],

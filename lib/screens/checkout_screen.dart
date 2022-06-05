@@ -23,12 +23,12 @@ class _CheckoutScreen extends State<CheckoutScreen> {
   void initState() {
     list_items = context.read<ShoppingTrip>().items;
     aggre_cleaned_list = {};
-    context.read<ShoppingTrip>().beneficiaries.keys.forEach((uuid){
+    context.read<ShoppingTrip>().beneficiaries.forEach((uuid){
       aggre_cleaned_list[uuid] = {};
     });
     list_items.forEach((key, item) {
       //iterate through each subitem in the item
-      context.read<ShoppingTrip>().beneficiaries.keys.forEach((uuid) {
+      context.read<ShoppingTrip>().beneficiaries.forEach((uuid) {
         if(item.subitems[uuid]! > 0) {
           aggre_cleaned_list[uuid]![key] = item.subitems[uuid]!;
         }
@@ -84,7 +84,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     );
   }
   Widget personalList(String uuid){
-    String name =  context.read<ShoppingTrip>().beneficiaries[uuid]!.split('|~|')[1].split(' ')[0];
+    String name =  "FUUUUck";//context.read<ShoppingTrip>().beneficiaries[uuid]!.split('|~|')[1].split(' ')[0];
 
     return Column(
         children: <Widget>[

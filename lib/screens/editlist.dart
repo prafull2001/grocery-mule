@@ -44,9 +44,8 @@ class _EditListsScreenState extends State<EditListScreen> {
   bool isAdd = false;
   bool invite_guest = false;
   late String hostFirstName;
-  Map<String,String> uid_name = {};
+  List<String> bene_uid = [];
   static bool reload = true;
-  List<String> beneficiary_names = [];
 
   @override
   void initState() {
@@ -66,22 +65,6 @@ class _EditListsScreenState extends State<EditListScreen> {
       (context as Element).reassemble();
     }
 
-    // for(String name in context.watch<ShoppingTrip>().beneficiaries.values)
-    //   Text(
-    //     '${name.split("|~|")[1].split(" ")[0]} ',
-    //     style: TextStyle(
-    //       color: Colors.black,
-    //       fontSize: 15,
-    //     ),
-    //   )
-
-    // for(String name in context.read<ShoppingTrip>().beneficiaries.values) {
-    //   String bene_name = name.split("|~|")[1].split(" ")[0];
-    //   beneficiary_names.add(bene_name);
-    // }
-    //
-    // print(beneficiary_names);
-
   }
 
 
@@ -94,8 +77,8 @@ class _EditListsScreenState extends State<EditListScreen> {
     Map<String, Item> items = <String, Item>{};
     date = (tempShot['date'] as Timestamp).toDate();
     //print(raw_date);
-    (tempShot['beneficiaries'] as Map<String,dynamic>).forEach((uid,name) {
-      uid_name[uid.toString()] = name.toString();
+    (tempShot['beneficiaries'] as List<String>).forEach((uid) {
+      bene_uid.add(uid);
     });
     ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
       items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
@@ -109,7 +92,7 @@ class _EditListsScreenState extends State<EditListScreen> {
         (tempShot.data() as Map<String, dynamic>)['title'], date,
         (tempShot.data() as Map<String, dynamic>)['description'],
         (tempShot.data() as Map<String, dynamic>)['host'],
-        uid_name, items);
+        bene_uid, items);
     return;
   }
 
@@ -197,7 +180,7 @@ class _EditListsScreenState extends State<EditListScreen> {
     );
   }
   Widget indie_item(String uid, int number,StringVoidFunc callback){
-    String name = uid_name[uid]!;
+    String name = 'Fuuuuck';//uid_name[uid]!;
     print('indie_item set fine');
     return Container(
       color: beige,
@@ -406,7 +389,7 @@ class _EditListsScreenState extends State<EditListScreen> {
 
                     //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
                     // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                    'Host - ${context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries[cur_trip.host]?.split("|~|")[1].split(' ')[0])}',
+                    'Host - Fucck',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 20,
@@ -430,9 +413,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                   SizedBox(width: 10.0,),
                   Row(
                     children: [
-                      for(String name in context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries.values))
+                      for(String name in context.select((ShoppingTrip cur_trip) => cur_trip.beneficiaries))
                         Text(
-                          '${name.split("|~|")[1].split(" ")[0]} ',
+                          '${name} ',
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 15,

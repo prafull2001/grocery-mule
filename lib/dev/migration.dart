@@ -12,23 +12,39 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
+import '../components/rounded_ button.dart';
+
 class Migration extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   //final User? curUser = FirebaseAuth.instance.currentUser;
-  static String id = 'Migration';
+  static String id = 'migration';
 
   @override
   _MigrationState createState() => _MigrationState();
 }
 
 
+class Cow_user{
+   String email;
+   String firstName;
+   String lastName;
+  //Map<String,String> prevFriends = {};
+  List<String> friends;
+  //Map<String,String> prevRequestss = {};
+  List<String> requests ;
+  //Map<String,String> prevtrips = {};
+  List<String> trips;
+  String user_uuid;
+  Cow_user(this.email, this.firstName, this.lastName, this.friends, this.requests, this.trips, this.user_uuid);
+}
+
 class _MigrationState extends State<Migration> {
   FirebaseAuth auth = FirebaseAuth.instance;
   //change your source & destination here
-  CollectionReference userSource = FirebaseFirestore.instance.collection('updated_users_test');
-  //CollectionReference tripSource = FirebaseFirestore.instance.collection('shopping_trips_test');
-  CollectionReference userdest = FirebaseFirestore.instance.collection('users_02');
-  //CollectionReference tripdest = FirebaseFirestore.instance.collection('shopping_trip_02');
+  //CollectionReference userSource = FirebaseFirestore.instance.collection('updated_users_test');
+  CollectionReference tripSource = FirebaseFirestore.instance.collection('shopping_trips_test');
+  //CollectionReference userdest = FirebaseFirestore.instance.collection('users_02');
+  CollectionReference tripdest = FirebaseFirestore.instance.collection('shopping_trip_02');
 
   //modify the variables here, ok I get it is not the best way to do it, but I can't be arsed
   late String email;
@@ -46,12 +62,13 @@ class _MigrationState extends State<Migration> {
   //no change needed, maybe the source variable
   Future<void> workFlow() async {
       //first fetch all the documents in one go from source
-    QuerySnapshot collectionSource = await userSource.get();
+    QuerySnapshot collectionSource = await tripSource.get();
     collectionSource.docs.forEach((document) async {
       user_uuid = document['uuid'];
       //only migrate the document if the
       if(!(await isDocExist(user_uuid))) {
         insertData(document);
+        print(user_uuid);
         insertDocToDest();
         cleanFields();
       }
@@ -62,15 +79,15 @@ class _MigrationState extends State<Migration> {
   //This method checks if the source document already exists in the dest colleciton
   //no change needed
   Future<bool> isDocExist(String uuid) async {
-    DocumentSnapshot testDoc = await userdest.doc(uuid).get();
+    DocumentSnapshot testDoc = await tripdest.doc(uuid).get();
     if(testDoc.exists)
       return true;
     return false;
   }
   //read fields from source documents into fields
   //you will have to arrange how the fields map the variable
-  //you can assume uuid is already copied
   void insertData(DocumentSnapshot curDoc){
+    user_uuid = curDoc['uuid'];
     email = curDoc['email'];
     firstName = curDoc['first_name'];
     lastName = curDoc['last_name'];
@@ -84,12 +101,13 @@ class _MigrationState extends State<Migration> {
     (curDoc['shopping_trips'] as Map<String,dynamic>).forEach((uid,name) {
       trips.add(uid);
     });
+    print(email + " " + firstName + " " + lastName);
   }
 
   //create a new document in the dest collection
   //you will have to modify how the data is arranged here
   Future<void> insertDocToDest() async {
-    await userdest.doc(user_uuid).set({
+    await tripdest.doc(user_uuid).set({
       'uuid': user_uuid,
       'first_name': firstName,
       'last_name': lastName,
@@ -109,7 +127,15 @@ class _MigrationState extends State<Migration> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      body: RoundedButton(
+        color: Colors.amber,
+        onPressed:  () async {
+          workFlow();
+        },
+        title: 'migration',
+      ),
+    );
   }
 
 
