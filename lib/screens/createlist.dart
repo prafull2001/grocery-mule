@@ -121,8 +121,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               (snapshot.data() as Map<String, dynamic>)['title'], date,
               (snapshot.data() as Map<String, dynamic>)['description'],
               (snapshot.data() as Map<String, dynamic>)['host'],
-              uid_name, items);
-
+              uid_name);
         });
       }
     });

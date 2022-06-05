@@ -34,13 +34,16 @@ class ShoppingTrip with ChangeNotifier{
     await tripCollection.doc(_uuid).collection("items").doc("dummy").set({});
   }
   // takes in formatted data from snapshot to directly update the provider
-  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, List<String> beneficiaries, Map<String, Item> items) {
+  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, List<String> beneficiaries) {
     _uuid = uuid;
     _title = title;
     _date = date;
     _description = description;
     _host = host;
     _beneficiaries = beneficiaries;
+  }
+
+  initializeItemUIDFromDB(Map<String, Item> items) {
     _items = items;
     notifyListeners();
   }

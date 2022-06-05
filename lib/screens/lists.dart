@@ -154,6 +154,7 @@ class _ListsScreenState extends State<ListsScreen> {
     //print(context.read<Cowboy>().shoppingTrips);
 
   }
+
   Future<DocumentSnapshot?> _queryCowboy() async {
     if(curUser != null) {
       DocumentSnapshot? tempShot;
