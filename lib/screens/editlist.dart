@@ -34,7 +34,7 @@ class EditListScreen extends StatefulWidget {
   _EditListsScreenState createState() => _EditListsScreenState();
 }
 class UserName extends StatefulWidget {
-  late String userUUID;
+  late final String userUUID;
   UserName(String userUUID){
     this.userUUID = userUUID;
   }
@@ -57,7 +57,7 @@ class _UserNameState extends State<UserName>{
             return const Text('Something went wrong');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
+            return const CircularProgressIndicator();
           }
           return Text(
             '${snapshot.data!['first_name']} ',
@@ -71,88 +71,155 @@ class _UserNameState extends State<UserName>{
   }
 }
 
-class _EditListsScreenState extends State<EditListScreen> {
-  var _tripTitleController;
-  var _tripDescriptionController;
-  User? curUser = FirebaseAuth.instance.currentUser;
+class ItemsList extends StatefulWidget {
+  late final String tripUUID;
+  ItemsList(String tripUUID){
+    this.tripUUID = tripUUID;
+  }
+  @override
+  _ItemsListState createState() => _ItemsListState();
+}
+
+
+Map<String,Map<IndividualItem,IndividualItemExpanded>> itemObjList = {};
+class _ItemsListState extends State<ItemsList>{
   late String tripUUID;
-  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
-  bool isAdd = false;
-  bool invite_guest = false;
-  late String hostFirstName;
-  List<String> bene_uid = [];
-  static bool reload = true;
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
 
   @override
-  void initState() {
-    setState(() {});
-    tripUUID = widget.tripUUID!;
-    hostFirstName = context.read<Cowboy>().firstName;
+  void initState(){
+    tripUUID = widget.tripUUID;
+  }
+  @override
+  Widget build(BuildContext context){
+    return StreamBuilder<QuerySnapshot>(
+        stream: tripCollection.doc(tripUUID).collection('items').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> document) {
+          if (document.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (document.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          print("made here");
+          loadItemToProvider(document.data!);
+          print(context.read<ShoppingTrip>().itemUUID);
+          updateitemHash();
+          return
+            ExpansionPanelList(
+            expansionCallback: (int index, bool isExpanded) {
+              setState(() {
+                //it takes the uuid of the item  at the index in the panellist,
+                //Then use the mapping from uuid to the current instance of the IndividualItem object; this object allows us
+                //to flip the isExpanded field of the item that is associated to the uuid
+                itemObjList[context.read<ShoppingTrip>().itemUUID[index]]!.keys.first.isExpanded = !isExpanded;
+                //TODO: rewrite autp_collapse
+                //auto_collapse(context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]);
+              });
+            },
+            children:
+            context.watch<ShoppingTrip>().itemUUID.map((uid) {
+              return ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return itemObjList[uid]!.keys.first;
+                },
+                body:
+                itemObjList[uid]!.values.first,
+                isExpanded: itemObjList[uid]!.keys.first.isExpanded,
+              );
+            }).toList(),
+          );;
 
-    // null value problem here???
 
-    // TODO: implement initState
-    _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
-    _tripDescriptionController = TextEditingController()..text = context.read<ShoppingTrip>().description;
-    super.initState();
-    if(reload){
-      reload = false;
-      (context as Element).reassemble();
-    }
 
+        }
+          );
   }
 
-
-
-
-
-  void _queryCurrentTrip(DocumentSnapshot curTrip)  {
-
-    DateTime date = DateTime.now();
-    date = (curTrip['date'] as Timestamp).toDate();
-    (curTrip['beneficiaries'] as List<dynamic>).forEach((uid) {
-      bene_uid.add(uid.toString());
-    });
-    /*
-    ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
-      items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-      items[name]!.isExpanded = false;
-      //add each item to the panel (for expandable items presented to user)
-      //frontend_list[name] = new Item_front_end(name, items[name]);
-    });
-     */
-    context.read<ShoppingTrip>().initializeTripFromDB(curTrip['uuid'],
-        curTrip['title'], date,
-        curTrip['description'],
-        curTrip['host'],
-        bene_uid);
-  }
-
-
-  void auto_collapse(Item? ignore){
-    context.read<ShoppingTrip>().items.values.forEach((item) {
-      setState(() {
-        if(item != ignore)
-          item.isExpanded = false;
-      });
+  void loadItemToProvider(QuerySnapshot collection){
+    collection.docs.forEach((document) {
+        String itemID = document['uuid'];
+        if(!context.read<ShoppingTrip>().itemUUID.contains(itemID) && itemID!= 'dummy')
+          context.read<ShoppingTrip>().itemUUID.add(itemID);
     });
   }
 
+  //For each new item uid, it is mapped to a collpased item-to-expanded item mapping
+  void updateitemHash(){
+    context.watch<ShoppingTrip>().itemUUID.forEach((uid) {
+      if(!itemObjList.containsKey(uid)) {
+        itemObjList[uid] = Map<IndividualItem,IndividualItemExpanded>();
+        itemObjList[uid]![IndividualItem(context.read<ShoppingTrip>().uuid, uid)] = IndividualItemExpanded(context.read<ShoppingTrip>().uuid, uid);
+        print('made here 2');
+        print(itemObjList[uid]!.keys.first.itemID);
+      }
+    });
+  }
+}
 
 
-  Widget simple_item(Item item){
+class IndividualItem extends StatefulWidget{
+  late Item curItem;
+  late final String itemID;
+  late final String tripID;
+  bool isExpanded = false;
+  IndividualItem(this.tripID, this.itemID);
+  @override
+  _IndividualItemState createState() => _IndividualItemState();
+}
+
+class _IndividualItemState extends State<IndividualItem> {
+  late Item curItem;
+  late final String itemID;
+  late final String tripID;
+  bool isExpanded = false;
+  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  @override
+  void initState(){
+    itemID = widget.itemID;
+    tripID = widget.tripID;
+    curItem = Item.nothing();
+  }
+  @override
+  Widget build(BuildContext context){
+      return StreamBuilder(
+        stream: shoppingTripCollection.doc(tripID).collection('items').doc(itemID).snapshots(),
+          builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.hasError) {
+              return const Text('Something went wrong');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+            loadItem(snapshot.data!);
+            return simple_item();
+
+          }
+      );
+  }
+  //this function loads stream snapshots into item
+  void loadItem(DocumentSnapshot snapshot){
+    curItem.name = snapshot['name'];
+    curItem.quantity = snapshot['quantity'];
+    (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
+        curItem.subitems[uid] = int.parse(value.toString());
+    });
+  }
+
+  Widget simple_item(){
     print('trying to get simple_item');
-    String name = item.name;
+    String name = curItem.name;
     print('simple_item name set fine');
     int quantity = 0;
-    item.subitems.forEach((name, count) {
+    curItem.subitems.forEach((name, count) {
       quantity = quantity + count;
     });
 
     return Dismissible(
       key: Key(name),
       onDismissed: (direction) {
-        context.read<ShoppingTrip>().removeItem(name);
+        context.read<ShoppingTrip>().removeItem(itemID);
+        itemObjList.remove(itemID);
         // Remove the item from the data source.
       },
       confirmDismiss: (DismissDirection direction) async {
@@ -251,12 +318,91 @@ class _EditListsScreenState extends State<EditListScreen> {
 
     );
   }
+}
 
-  Widget expanded_item(Item item){
+class IndividualItemExpanded extends StatefulWidget{
+  late Item curItem;
+  late final String itemID;
+  late final String tripID;
+  IndividualItemExpanded(this.tripID, this.itemID);
+  @override
+  _IndividualItemExpandedState createState() => _IndividualItemExpandedState();
+}
+
+class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
+  late Item curItem;
+  late final String itemID;
+  late final String tripID;
+  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  @override
+  void initState(){
+    itemID = widget.itemID;
+    tripID = widget.tripID;
+    curItem = Item.nothing();
+  }
+  @override
+  Widget build(BuildContext context){
+    return StreamBuilder(
+        stream: shoppingTripCollection.doc(tripID).collection('items').doc(itemID).snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          loadItem(snapshot.data!);
+          return expanded_item();
+
+        }
+    );
+  }
+  //this function loads stream snapshots into item
+  void loadItem(DocumentSnapshot snapshot){
+    curItem.name = snapshot['name'];
+    curItem.quantity = snapshot['quantity'];
+    (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
+      curItem.subitems[uid] = int.parse(value.toString());
+    });
+  }
+
+  Widget indie_item(String uid, int number,StringVoidFunc callback){
+    return Container(
+      color: beige,
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Container(
+              child: UserName(uid),
+              padding: EdgeInsets.all(20),
+            ),
+            Container(
+              child:
+              NumberInputWithIncrementDecrement(
+                initialValue: number,
+                controller: TextEditingController(),
+                onIncrement: (num newlyIncrementedValue) {
+                  callback(uid,newlyIncrementedValue as int);
+                },
+                onDecrement: (num newlyDecrementedValue) {
+                  callback(uid,newlyDecrementedValue as int);
+                },
+              ),
+              height: 60,
+              width: 105,
+
+            ),
+          ]
+      ),
+
+    );
+  }
+
+  Widget expanded_item(){
     void updateUsrQuantity(String person, int number){
       setState(() {
-        item.subitems[person] = number;
-        context.read<ShoppingTrip>().editItem(item.name,item.subitems.values.reduce((sum, element) => sum + element),item.subitems);
+        curItem.subitems[person] = number;
+        context.read<ShoppingTrip>().editItem(itemID,curItem.subitems.values.reduce((sum, element) => sum + element),person,number);
         // TODO update database here for quant
       });
     };
@@ -268,38 +414,89 @@ class _EditListsScreenState extends State<EditListScreen> {
 
       child: Column(
         children: [
-          for(var entry in item.subitems.entries)
+          for(var entry in curItem.subitems.entries)
             indie_item(entry.key,entry.value,updateUsrQuantity)
         ],
       ),
     );
   }
+}
 
-  Widget _buildPanel() {
-    return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]!.isExpanded = !isExpanded;
-          auto_collapse(context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]);
-        });
-      },
-      children:
-      context.watch<ShoppingTrip>().items.values.toList().map((item) {
-        return ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return simple_item(item);
-          },
-          body:
-          expanded_item(item),
-          isExpanded: item.isExpanded,
-        );
-      }).toList(),
-    );
+
+class _EditListsScreenState extends State<EditListScreen> {
+  var _tripTitleController;
+  var _tripDescriptionController;
+  User? curUser = FirebaseAuth.instance.currentUser;
+  late String tripUUID;
+  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  bool isAdd = false;
+  bool invite_guest = false;
+  late String hostFirstName;
+  List<String> bene_uid = [];
+  static bool reload = true;
+
+  @override
+  void initState() {
+    setState(() {});
+    tripUUID = widget.tripUUID!;
+    hostFirstName = context.read<Cowboy>().firstName;
+
+    // null value problem here???
+
+    // TODO: implement initState
+    _tripTitleController = TextEditingController()..text = context.read<ShoppingTrip>().title;
+    _tripDescriptionController = TextEditingController()..text = context.read<ShoppingTrip>().description;
+    super.initState();
+    if(reload){
+      reload = false;
+      (context as Element).reassemble();
+    }
+
   }
+
+
+
+
+
+  void _queryCurrentTrip(DocumentSnapshot curTrip)  {
+
+    DateTime date = DateTime.now();
+    date = (curTrip['date'] as Timestamp).toDate();
+    (curTrip['beneficiaries'] as List<dynamic>).forEach((uid) {
+      if(!bene_uid.contains(uid))
+      bene_uid.add(uid.toString());
+    });
+    /*
+    ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
+      items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
+      items[name]!.isExpanded = false;
+      //add each item to the panel (for expandable items presented to user)
+      //frontend_list[name] = new Item_front_end(name, items[name]);
+    });
+     */
+    context.read<ShoppingTrip>().initializeTripFromDB(curTrip['uuid'],
+        curTrip['title'], date,
+        curTrip['description'],
+        curTrip['host'],
+        bene_uid);
+  }
+
+/*
+  void auto_collapse(Item? ignore){
+    context.read<ShoppingTrip>().items.values.forEach((item) {
+      setState(() {
+        if(item != ignore)
+          item.isExpanded = false;
+      });
+    });
+  }
+ */
+
+
 
   Widget create_item(){
     String food = '';
-    auto_collapse(null);
+    //auto_collapse(null);
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
@@ -508,7 +705,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                   if(isAdd)
                     create_item(),
                   //single_item(grocery_list[1]),
-                  _buildPanel(),
+                  ItemsList(tripUUID),
                   SizedBox(height: 10.0,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

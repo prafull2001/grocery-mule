@@ -21,7 +21,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
   //map each bene uuid to their own map
   //@override
   void initState() {
-    list_items = context.read<ShoppingTrip>().items;
+    list_items = {};//context.read<ShoppingTrip>().items;
     aggre_cleaned_list = {};
     context.read<ShoppingTrip>().beneficiaries.forEach((uuid){
       aggre_cleaned_list[uuid] = {};

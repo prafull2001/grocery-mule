@@ -22,7 +22,7 @@ class _PersonalListScreen extends State<PersonalListScreen> {
   @override
   void initState() {
     hostFirstName = context.read<Cowboy>().firstName;
-    list_items = context.read<ShoppingTrip>().items;
+    list_items = {};//context.read<ShoppingTrip>().items;
     cleaned_list = <String, int>{};
 
     list_items.forEach((key, item) {

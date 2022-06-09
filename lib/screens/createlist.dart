@@ -109,12 +109,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         (snapshot['beneficiaries'] as List<String>).forEach((uid) {
           uid_name.add(uid);
         });
-        ((snapshot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
-          items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-          items[name].isExpanded = false;
-          //add each item to the panel (for expandable items presented to user)
-          //frontend_list[name] = new Item_front_end(name, items[name]);
-        });
+
 
         setState(() {
           cur_trip.initializeTripFromDB(snapshot['uuid'],
