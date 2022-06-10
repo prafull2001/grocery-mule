@@ -137,11 +137,28 @@ class _ItemsListState extends State<ItemsList>{
   }
 
   void loadItemToProvider(QuerySnapshot collection){
+    List<String> rawItemList = [];
     collection.docs.forEach((document) {
         String itemID = document['uuid'];
-        if(!context.read<ShoppingTrip>().itemUUID.contains(itemID) && itemID!= 'dummy')
-          context.read<ShoppingTrip>().itemUUID.add(itemID);
+        if(itemID!= 'dummy')
+          rawItemList.add(itemID);
     });
+    //check if every id from firebase is in local itemUUID
+    rawItemList.forEach((itemID) {
+      if(!context.read<ShoppingTrip>().itemUUID.contains(itemID))
+        context.read<ShoppingTrip>().itemUUID.add(itemID);
+    });
+    List<String> tobeDeleted = [];
+    //check if any local uuid needs to be deleted
+    context.read<ShoppingTrip>().itemUUID.forEach((itemID) {
+      if(!rawItemList.contains(itemID)) {
+        print("should be here");
+        tobeDeleted.add(itemID);
+      }
+    });
+    context
+        .read<ShoppingTrip>()
+        .itemUUID.removeWhere((element) => tobeDeleted.contains(element));
   }
 
   //For each new item uid, it is mapped to a collpased item-to-expanded item mapping
@@ -154,6 +171,15 @@ class _ItemsListState extends State<ItemsList>{
         print(itemObjList[uid]!.keys.first.itemID);
       }
     });
+    //check if any objmapping needs to be removed
+    List<String> tobeDeleted = [];
+    itemObjList.forEach((key, value) {
+      if(!context.read<ShoppingTrip>().itemUUID.contains(key)) {
+        print("should be here1");
+        tobeDeleted.add(key);
+      }
+    });
+    itemObjList.removeWhere((key, value) => tobeDeleted.contains(key));
   }
 }
 
@@ -466,14 +492,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       if(!bene_uid.contains(uid))
       bene_uid.add(uid.toString());
     });
-    /*
-    ((tempShot.data() as Map<String, dynamic>)['items'] as Map<String, dynamic>).forEach((name, dynamicItem) {
-      items[name] = Item.fromMap(dynamicItem as Map<String, dynamic>);
-      items[name]!.isExpanded = false;
-      //add each item to the panel (for expandable items presented to user)
-      //frontend_list[name] = new Item_front_end(name, items[name]);
-    });
-     */
+
     context.read<ShoppingTrip>().initializeTripFromDB(curTrip['uuid'],
         curTrip['title'], date,
         curTrip['description'],
