@@ -27,31 +27,6 @@ class _PersonalListScreen extends State<PersonalListScreen> {
   }
 
 
-  popMap(Map<String, int> cleaned_list, QuerySnapshot doc) {
-    itemSubCollection.get().then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        if(!(doc['uuid'] == 'dummy')){
-          if(doc.exists){
-            try{
-              // iterate map, if uuid matches cur user's and quantity > 0, add item
-              // name and associated quantity to cleaned list
-              Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems']));
-              curSubitems.forEach((key, value) {
-                if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
-                  dynamic curItemName = doc.get(FieldPath(['name']));
-                  cleaned_list[curItemName] = curSubitems[key];
-                }
-              });
-            } on StateError catch(e) {
-              throw ('Nested fields missing!');
-            }
-          }
-
-        }
-      });
-    });
-  }
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -74,8 +49,8 @@ class _PersonalListScreen extends State<PersonalListScreen> {
             Map<String, int> cleaned_list = {};
             itemColQuery.data!.docs.forEach((doc) {
               if(doc['uuid'] != 'dummy'){
-                Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems']));
-                curSubitems.forEach((key, value) {
+                Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems'])); // get map of subitems for cur item
+                curSubitems.forEach((key, value) { // add item name & quantity if user UUIDs match & quantity > 0
                   if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
                     dynamic curItemName = doc.get(FieldPath(['name']));
                     cleaned_list[curItemName] = curSubitems[key];
@@ -83,29 +58,6 @@ class _PersonalListScreen extends State<PersonalListScreen> {
                 });
               }
             });
-
-            /*
-            if(!(document['uuid'] == 'dummy')){
-              if(document.exists){
-                try{
-                  // iterate map, if uuid matches cur user's and quantity > 0, add item
-                  // name and associated quantity to cleaned list
-                  Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems']));
-                  curSubitems.forEach((key, value) {
-                    if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
-                      dynamic curItemName = doc.get(FieldPath(['name']));
-                      cleaned_list[curItemName] = curSubitems[key];
-                    }
-                  });
-                } on StateError catch(e) {
-                  throw ('Nested fields missing!');
-                }
-              }
-
-            }
-
-             */
-
             return Column(
                 children: <Widget>[
                   SizedBox(
@@ -144,7 +96,7 @@ class _PersonalListScreen extends State<PersonalListScreen> {
                     ],
                   ),
                 ]
-                
+
                 ]
             );
           }
