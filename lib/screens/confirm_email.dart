@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
+
+import '../providers/cowboy_provider.dart';
 
 class ConfirmEmailScreen extends StatefulWidget {
   static String id = 'confirm-email';
@@ -86,6 +89,7 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
     await user.reload();
     if (user.emailVerified){
       timer.cancel();
+      print('email was successfully verified!');
       Navigator.pop(context);
     }
   }

@@ -112,11 +112,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         email: email,
                         password: password,
                     );
+                    userCredential.user!.updateDisplayName(firstName);
                     if (userCredential != null){
                       print(email + ' ' + firstName + ' ' + lastName);
                       context.read<Cowboy>().initializeCowboy(userCredential.user?.uid, firstName, lastName, email);
                       await Navigator.pushNamed(context, ConfirmEmailScreen.id);
                       // await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
+
                       Navigator.pop(context);
                       Navigator.pushNamed(context, ListsScreen.id);
                     }
