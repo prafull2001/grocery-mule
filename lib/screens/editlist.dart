@@ -377,6 +377,9 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
+
+          if (!snapshot.hasData)
+            return const CircularProgressIndicator();
           loadItem(snapshot.data!);
           return expanded_item();
 
