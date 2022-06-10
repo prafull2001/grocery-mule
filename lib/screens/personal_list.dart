@@ -16,30 +16,43 @@ class PersonalListScreen extends StatefulWidget {
 class _PersonalListScreen extends State<PersonalListScreen> {
   late String hostFirstName;
   late Map<String, Item> list_items;
-  late Map<String, int> item_list;
-  late Map<String, int> cleaned_list;
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  late CollectionReference itemSubCollection;
 
   @override
-  void initState() {
+  void initState()  {
+    String tripUUID = context.read<ShoppingTrip>().uuid;
+    itemSubCollection = tripCollection.doc(tripUUID).collection('items');
     hostFirstName = context.read<Cowboy>().firstName;
-    list_items = {};//context.read<ShoppingTrip>().items;
-    cleaned_list = <String, int>{};
+  }
 
-    list_items.forEach((key, item) {
-      Item curItem = item;
-      if(item.subitems[context.read<Cowboy>().uuid]! > 0) {
-        if(item.subitems[context.read<Cowboy>().uuid] == null) {
-          throw Exception("personal_list.dart: subitem empty");
-        } else {
-          cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid]!;
+
+  popMap(Map<String, int> cleaned_list, QuerySnapshot doc) {
+    itemSubCollection.get().then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        if(!(doc['uuid'] == 'dummy')){
+          if(doc.exists){
+            try{
+              // iterate map, if uuid matches cur user's and quantity > 0, add item
+              // name and associated quantity to cleaned list
+              Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems']));
+              curSubitems.forEach((key, value) {
+                if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
+                  dynamic curItemName = doc.get(FieldPath(['name']));
+                  cleaned_list[curItemName] = curSubitems[key];
+                }
+              });
+            } on StateError catch(e) {
+              throw ('Nested fields missing!');
+            }
+          }
+
         }
-
-      }
+      });
     });
   }
 
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -48,44 +61,94 @@ class _PersonalListScreen extends State<PersonalListScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 30.0,
-              ),
-              Text(
-                  '$hostFirstName\'s List',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                  ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              if(!(cleaned_list.isEmpty))...[
-                for (var entry in cleaned_list.entries)
-                  simple_item(entry.key, entry.value)
-              ] else ...[
-                SizedBox(
-                  height: 70.0,
-                ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: tripCollection.doc(context.read<ShoppingTrip>().uuid).collection('items').snapshots(),
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> itemColQuery) {
 
-                Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        'Your personal list will appear once you\'ve added items to your list!',
-                        style: TextStyle(
-                          fontSize: 40.0,
-                          fontWeight: FontWeight.w900,
+            if (itemColQuery.hasError) {
+              return const Text('Something went wrong');
+            }
+            if (itemColQuery.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+            Map<String, int> cleaned_list = {};
+            itemColQuery.data!.docs.forEach((doc) {
+              if(doc['uuid'] != 'dummy'){
+                Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems']));
+                curSubitems.forEach((key, value) {
+                  if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
+                    dynamic curItemName = doc.get(FieldPath(['name']));
+                    cleaned_list[curItemName] = curSubitems[key];
+                  }
+                });
+              }
+            });
+
+            /*
+            if(!(document['uuid'] == 'dummy')){
+              if(document.exists){
+                try{
+                  // iterate map, if uuid matches cur user's and quantity > 0, add item
+                  // name and associated quantity to cleaned list
+                  Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems']));
+                  curSubitems.forEach((key, value) {
+                    if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
+                      dynamic curItemName = doc.get(FieldPath(['name']));
+                      cleaned_list[curItemName] = curSubitems[key];
+                    }
+                  });
+                } on StateError catch(e) {
+                  throw ('Nested fields missing!');
+                }
+              }
+
+            }
+
+             */
+
+            return Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Text(
+                    '$hostFirstName\'s List',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 25,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+
+                if(!(cleaned_list.isEmpty))...[
+                  for (var entry in cleaned_list.entries)
+                    simple_item(entry.key, entry.value)
+                ] else ...[
+                  SizedBox(
+                    height: 70.0,
+                  ),
+
+                  Row(
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          'Your personal list will appear once you\'ve added items to your list!',
+                          style: TextStyle(
+                            fontSize: 40.0,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ]
-          ]
+                    ],
+                  ),
+                ]
+                
+                ]
+            );
+          }
+
         ),
       ),
     );

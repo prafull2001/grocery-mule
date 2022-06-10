@@ -16,23 +16,8 @@ import 'createlist.dart';
 
 typedef StringVoidFunc = void Function(String,int);
 
-class EditListScreen extends StatefulWidget {
-  static String id = 'edit_list_screen';
-  String? tripUUID;
-  User? curUser = FirebaseAuth.instance.currentUser;
-  final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
 
-  // simple constructor, just takes in tripUUID
-  EditListScreen(String? tripUUID) {
-    this.tripUUID = tripUUID;
-    if (this.tripUUID == null) {
-      throw Exception('editlist.dart: Invalid tripUUID was passed');
-    }
-  }
 
-  @override
-  _EditListsScreenState createState() => _EditListsScreenState();
-}
 class UserName extends StatefulWidget {
   late final String userUUID;
   UserName(String userUUID){
@@ -41,6 +26,7 @@ class UserName extends StatefulWidget {
   @override
   _UserNameState createState() => _UserNameState();
 }
+
 class _UserNameState extends State<UserName>{
   late String userUUID;
   CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
@@ -94,16 +80,16 @@ class _ItemsListState extends State<ItemsList>{
   Widget build(BuildContext context){
     return StreamBuilder<QuerySnapshot>(
         stream: tripCollection.doc(tripUUID).collection('items').snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> document) {
-          if (document.hasError) {
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> itemColQuery) {
+          if (itemColQuery.hasError) {
             return const Text('Something went wrong');
           }
-          if (document.connectionState == ConnectionState.waiting) {
+          if (itemColQuery.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
-          print("made here");
-          loadItemToProvider(document.data!);
-          print(context.read<ShoppingTrip>().itemUUID);
+
+          loadItemToProvider(itemColQuery.data!);
+          //print(context.read<ShoppingTrip>().itemUUID);
           updateitemHash();
           return
             ExpansionPanelList(
@@ -136,9 +122,9 @@ class _ItemsListState extends State<ItemsList>{
           );
   }
 
-  void loadItemToProvider(QuerySnapshot collection){
+  void loadItemToProvider(QuerySnapshot itemColQuery){
     List<String> rawItemList = [];
-    collection.docs.forEach((document) {
+    itemColQuery.docs.forEach((document) {
         String itemID = document['uuid'];
         if(itemID!= 'dummy')
           rawItemList.add(itemID);
@@ -163,12 +149,12 @@ class _ItemsListState extends State<ItemsList>{
 
   //For each new item uid, it is mapped to a collpased item-to-expanded item mapping
   void updateitemHash(){
-    context.watch<ShoppingTrip>().itemUUID.forEach((uid) {
-      if(!itemObjList.containsKey(uid)) {
-        itemObjList[uid] = Map<IndividualItem,IndividualItemExpanded>();
-        itemObjList[uid]![IndividualItem(context.read<ShoppingTrip>().uuid, uid)] = IndividualItemExpanded(context.read<ShoppingTrip>().uuid, uid);
+    context.watch<ShoppingTrip>().itemUUID.forEach((item_uuid) {
+      if(!itemObjList.containsKey(item_uuid)) {
+        itemObjList[item_uuid] = Map<IndividualItem,IndividualItemExpanded>();
+        itemObjList[item_uuid]![IndividualItem(context.read<ShoppingTrip>().uuid, item_uuid)] = IndividualItemExpanded(context.read<ShoppingTrip>().uuid, item_uuid);
         print('made here 2');
-        print(itemObjList[uid]!.keys.first.itemID);
+        print(itemObjList[item_uuid]!.keys.first.itemID);
       }
     });
     //check if any objmapping needs to be removed
@@ -182,7 +168,6 @@ class _ItemsListState extends State<ItemsList>{
     itemObjList.removeWhere((key, value) => tobeDeleted.contains(key));
   }
 }
-
 
 class IndividualItem extends StatefulWidget{
   late Item curItem;
@@ -233,9 +218,7 @@ class _IndividualItemState extends State<IndividualItem> {
   }
 
   Widget simple_item(){
-    print('trying to get simple_item');
     String name = curItem.name;
-    print('simple_item name set fine');
     int quantity = 0;
     curItem.subitems.forEach((name, count) {
       quantity = quantity + count;
@@ -451,6 +434,23 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
   }
 }
 
+class EditListScreen extends StatefulWidget {
+  static String id = 'edit_list_screen';
+  String? tripUUID;
+  User? curUser = FirebaseAuth.instance.currentUser;
+  final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
+
+  // simple constructor, just takes in tripUUID
+  EditListScreen(String? tripUUID) {
+    this.tripUUID = tripUUID;
+    if (this.tripUUID == null) {
+      throw Exception('editlist.dart: Invalid tripUUID was passed');
+    }
+  }
+
+  @override
+  _EditListsScreenState createState() => _EditListsScreenState();
+}
 
 class _EditListsScreenState extends State<EditListScreen> {
   var _tripTitleController;
@@ -484,9 +484,6 @@ class _EditListsScreenState extends State<EditListScreen> {
   }
 
 
-
-
-
   void _queryCurrentTrip(DocumentSnapshot curTrip)  {
 
     DateTime date = DateTime.now();
@@ -502,17 +499,6 @@ class _EditListsScreenState extends State<EditListScreen> {
         curTrip['host'],
         bene_uid);
   }
-
-/*
-  void auto_collapse(Item? ignore){
-    context.read<ShoppingTrip>().items.values.forEach((item) {
-      setState(() {
-        if(item != ignore)
-          item.isExpanded = false;
-      });
-    });
-  }
- */
 
 
 
@@ -716,6 +702,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                           child: IconButton(
                             icon: const Icon(Icons.add_circle),
                             onPressed: () {
+
                               setState(() {
                                 isAdd = true;
                               });
@@ -726,7 +713,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                   ),
                   if(isAdd)
                     create_item(),
-                  //single_item(grocery_list[1]),
+
                   ItemsList(tripUUID),
                   SizedBox(height: 10.0,),
                   Row(

@@ -24,7 +24,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
+    final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
