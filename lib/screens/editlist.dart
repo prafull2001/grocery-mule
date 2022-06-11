@@ -11,18 +11,20 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'createlist.dart';
 
 
 typedef StringVoidFunc = void Function(String,int);
 
-
+var userNameTextGroup = AutoSizeGroup();
 
 class UserName extends StatefulWidget {
   late final String userUUID;
   UserName(String userUUID){
     this.userUUID = userUUID;
   }
+
   @override
   _UserNameState createState() => _UserNameState();
 }
@@ -45,13 +47,14 @@ class _UserNameState extends State<UserName>{
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
-          return Text(
-            '${snapshot.data!['first_name']} ',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-          );
+          return
+            Text(
+              '${snapshot.data!['first_name']} ',
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.red
+              ),
+            );
         }
     );
   }
@@ -115,9 +118,6 @@ class _ItemsListState extends State<ItemsList>{
               );
             }).toList(),
           );;
-
-
-
         }
           );
   }
@@ -287,46 +287,7 @@ class _IndividualItemState extends State<IndividualItem> {
       background: Container(color: red),
     );
   }
-  Widget indie_item(String uid, int number,StringVoidFunc callback){
-    String name = 'Fuuuuck';//uid_name[uid]!;
-    print('indie_item set fine');
-    return Container(
-      color: beige,
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Container(
-              child: Text(
-                '${name.split("|~|")[1].split(" ")[0]}',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
 
-              padding: EdgeInsets.all(20),
-            ),
-            Container(
-              child:
-              NumberInputWithIncrementDecrement(
-                initialValue: number,
-                controller: TextEditingController(),
-                onIncrement: (num newlyIncrementedValue) {
-                  callback(uid,newlyIncrementedValue as int);
-                },
-                onDecrement: (num newlyDecrementedValue) {
-                  callback(uid,newlyDecrementedValue as int);
-                },
-              ),
-              height: 60,
-              width: 105,
-
-            ),
-          ]
-      ),
-
-    );
-  }
 }
 
 class IndividualItemExpanded extends StatefulWidget{
