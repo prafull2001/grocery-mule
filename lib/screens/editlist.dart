@@ -351,6 +351,7 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
             ),
             Container(
               child:
+              (context.read<Cowboy>().uuid == uid)?
               NumberInputWithIncrementDecrement(
                 initialValue: number,
                 controller: TextEditingController(),
@@ -360,11 +361,18 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
                 onDecrement: (num newlyDecrementedValue) {
                   callback(uid,newlyDecrementedValue as int);
                 },
+              )
+              :
+              Text(
+              'x$number',
+              style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
               ),
+            ),
               height: 60,
               width: 105,
-
-            ),
+            )
           ]
       ),
 
