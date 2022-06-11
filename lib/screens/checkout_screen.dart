@@ -141,7 +141,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   child: RoundedButton(
                     onPressed: () {
                     },
-                    title: "Paypal",
+                    title: "PayPal",
                     color: Colors.amber,
                   ),
                 ),
