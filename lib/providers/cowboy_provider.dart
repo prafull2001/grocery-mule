@@ -11,8 +11,8 @@ class Cowboy with ChangeNotifier {
   String _lastName = '';
   String _email = '';
   List<String> _shoppingTrips = [];
-  List<String> _friends = []; // uuid to first name
-  List<String> _requests = []; // uuid to first_last
+  List<String> _friends = []; // uuid
+  List<String> _requests = []; // uuid
 
   // to call after user fields are updated
   fillUpdatedInfo(String firstName, String lastName, String email) {
@@ -32,6 +32,10 @@ class Cowboy with ChangeNotifier {
   }
   updateCowboyEmail() {
     userCollection.doc(_uuid).update({'email': _email});
+  }
+  fillFriendFields(List<String> friends, List<String> requests) {
+    this._friends = friends;
+    this._requests = requests;
   }
   // to initialize fields from StreamBuilder
   fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, List<String> friends, List<String> requests) {
@@ -84,6 +88,7 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
+
   addTrip(String trip_uuid) {
     _shoppingTrips.add(trip_uuid);
     updateCowboyTrips();
@@ -142,16 +147,16 @@ class Cowboy with ChangeNotifier {
      _requests.clear();
   }
   // removes friend from requests, adds friend, notifies listeners, updates database
-  addFriend(String friend_uuid, String friend_string) {
+  addFriend(String friend_uuid) {
     _requests.remove(friend_uuid);
-    _friends.add(friend_string);
+    _friends.add(friend_uuid);
     updateCowboyRequestsRemove(friend_uuid);
     addBothCowboyFriends(friend_uuid);
     notifyListeners();
   }
   addBothCowboyFriends(String friendUUID) {
     userCollection.doc(_uuid).update({'friends': _friends});
-    userCollection.doc(friendUUID).update({'friends.${_uuid}': (_email+'|~|'+_firstName+' '+_lastName)});
+    userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
   }
 
   removeFriendRequest(String friendUUID) {
@@ -196,6 +201,8 @@ class Cowboy with ChangeNotifier {
     // notifyListeners();
   }
   updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
+
+    userCollection.doc(friendUUID).update({'requests':FieldValue.arrayUnion([_uuid])});
+
   }
 }

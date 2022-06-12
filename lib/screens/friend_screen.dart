@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:flutter/services.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:provider/provider.dart';
@@ -8,8 +7,349 @@ import 'package:grocery_mule/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 
-final CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
+final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
 
+class cowamigo extends StatefulWidget {
+  String id = 'inidividual_friend';
+  late String uuid;
+
+  cowamigo(String uuid) {
+    this.uuid = uuid;
+  }
+
+  @override
+  _CowamigoState createState() => _CowamigoState();
+}
+
+class _CowamigoState extends State<cowamigo> with SingleTickerProviderStateMixin {
+  late String uuid;
+  String name = '';
+  String email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    this.uuid = widget.uuid;
+  }
+
+  String lengthify(String str) {
+    if(str.isEmpty) return '';
+    if(str.length > 29) str = str.substring(0, 26) + '...';
+    return str;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: StreamBuilder<DocumentSnapshot>(
+        stream: userCollection.doc(uuid).snapshots(),
+        builder: (context, snapshot) {
+          Map<String, dynamic> result = snapshot.data?.data() as Map<String, dynamic>;
+          if (snapshot.data != null) {
+            name = result['first_name'].toString() + ' ' + result['last_name'].toString();
+            email = result['email'].toString();
+          }
+
+          return Container(
+            padding: const EdgeInsets.all(7.0),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.account_circle_outlined,
+                  size: 46,
+                  // color: orange,
+                ),
+                SizedBox(width: 10,),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 1.0,),
+                    Text(email),
+                  ],
+                ),
+                Spacer(),
+                IconButton(
+                  icon: new Icon(
+                    Icons.close,
+                    size:36,
+                  ),
+                  onPressed: () {
+                    showDialog(context: context, builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: dark_beige,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          side: BorderSide(
+                            width: 5.0,
+                            color: darker_beige,
+                          ),
+                        ),
+                        content: Container(
+                          width: 100,
+                          height: 40,
+                          child: Row(
+                            children: [
+                              Text(
+                                'Adios Amigo?',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
+                              ),
+                              Spacer(),
+                              SizedBox(
+                                width: 35,
+                                child: TextButton(
+                                  child: Icon(
+                                    Icons.done,
+                                    size: 24,
+                                  ),
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all<Color>(orange),
+                                    foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    context.read<Cowboy>().removeFriend(uuid);
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                width: 35,
+                                child: TextButton(
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 24,
+                                  ),
+                                  style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all<Color>(red),
+                                    foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    //print('nefarious holaing amigo deeds'); AKA jack shit
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+                  },
+                ),
+              ],
+            ),
+            decoration: BoxDecoration(
+              color: dark_beige,
+              // border: Border.all(color: Colors.deepOrange),
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class QueryAmigo extends StatefulWidget {
+  String id = 'search_results';
+  late String query;
+
+  QueryAmigo(String query) {
+    this.query = query;
+    print('query check 1: '+this.query);
+  }
+
+  @override
+  _QueryAmigoState createState() => _QueryAmigoState(this.query);
+}
+
+class _QueryAmigoState extends State<QueryAmigo> with SingleTickerProviderStateMixin {
+  late String query;
+  String uuid = '';
+  String name = '';
+  String email = '';
+  Icon accountIcon = Icon(Icons.account_circle_outlined);
+
+  @override
+  void initState() {
+    super.initState();
+    this.query = widget.query;
+    print('query check 2.5: '+this.query);
+  }
+
+  _QueryAmigoState(String query) {
+    this.query = query;
+    print('query check 2: '+this.query);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    this.query = widget.query;
+    if (query=='') {
+      // empty container if query is empty
+      return Container();
+    }
+    return Container(
+      child: StreamBuilder<QuerySnapshot>(
+        stream: userCollection.where('email', isEqualTo: query).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('something went wrong !!');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          List<QueryDocumentSnapshot> result = snapshot.data?.docs as List<QueryDocumentSnapshot>;
+          uuid = result[0]['uuid'].toString();
+          name = result[0]['first_name'].toString() + ' ' + result[0]['last_name'].toString();
+          email = result[0]['email'].toString();
+          return Container(
+            padding: EdgeInsets.all(2.0),
+            child: Row(
+              children: [
+                Icon(Icons.account_box_outlined, size: 45.0,),
+                SizedBox(width: 10.0,),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: TextStyle(fontSize: 20),),
+                    SizedBox(height: 1.0,),
+                    Text(email),
+                  ],
+                ),
+                Spacer(),
+                Container(
+                  child: TextButton(
+                    child: Icon(Icons.add, size: 35.0, color: Colors.black,),
+                    onPressed: () {
+                      // TODO give some sort of message that request has been sent
+                      context.read<Cowboy>().sendFriendRequest(uuid);
+                      setState(() {
+                        query = '';
+                        // searchTextController.clear();
+                      });
+                    },
+                  ),
+                ),
+                //SizedBox(width: 40,),
+              ],
+            ),
+            decoration: BoxDecoration(
+              color: dark_beige,
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+          );
+        },
+      ),
+    );
+    throw UnimplementedError();
+  }
+}
+
+class RequestAmigo extends StatefulWidget {
+  String id = 'request_cowboy';
+  late String uuid;
+
+  @override
+  _RequestAmigoState createState() => _RequestAmigoState();
+
+  RequestAmigo(String uuid) {
+    this.uuid = uuid;
+  }
+}
+
+class _RequestAmigoState extends State<RequestAmigo> with SingleTickerProviderStateMixin {
+  String uuid = '';
+  String name = '';
+  String email = '';
+
+  @override
+  void initState() {
+    super.initState();
+    this.uuid = widget.uuid;
+  }
+
+  String lengthify(String str) {
+    if(str.isEmpty) return '';
+    if(str.length > 29) str = str.substring(0, 26) + '...';
+    return str;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: StreamBuilder<DocumentSnapshot>(
+        stream: userCollection.doc(uuid).snapshots(),
+        builder: (context, snapshot) {
+          Map<String, dynamic> result = snapshot.data?.data() as Map<String, dynamic>;
+          name = result['first_name'].toString() + ' ' + result['last_name'].toString();
+          email = result['email'].toString();
+          return Container(
+            padding: EdgeInsets.all(2.0),
+            child: Row(
+              children: [
+                Text(
+                  lengthify(name),
+                  //lengthify(friendRequests[index].firstName+' '+friendRequests[index].lastName)+'\n'+lengthify(friendRequests[index].email),
+                  //        8       16      24   29 // trim characters 27, 28, 29 to be '...'
+                  //lengthify('asdfjkl;asdfjkl;asdfjkl;asdfj')+'\n'+lengthify('asdfjkl;asdfjkl;asdfjkl;asdfjkl;'),
+                  style: TextStyle(fontSize: 15.0),
+                ),
+                Spacer(),
+                SizedBox(
+                  // ACCEPT
+                  width: 35.0,
+                  child: TextButton(
+                    onPressed: () {
+                      context.read<Cowboy>().addFriend(uuid);
+                      Navigator.pop(context);
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(orange),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                    ),
+                    child: Icon(
+                      Icons.done,
+                      size: 18.0,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  // REJECT
+                  width: 35.0,
+                  child: TextButton(
+                    onPressed: () {
+                      context.read<Cowboy>().removeFriendRequest(uuid);
+                      Navigator.pop(context);
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(red),
+                      foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                    ),
+                    child: Icon(
+                      Icons.close,
+                      size: 18.0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
 
 class FriendScreen extends StatefulWidget {
   static String id = 'friend_screen';
@@ -19,11 +359,10 @@ class FriendScreen extends StatefulWidget {
 }
 
 class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderStateMixin {
-  String searchQuery;
-  int num_requests;
-  List<Cowboy> searchResults; // search results
-  Widget searchResultsWidget; // widget to display upon search
-  Icon searchIcon; // changes between 'X' and search icon while searching
+  late String searchQuery;
+  late int num_requests;
+  late List<Cowboy> searchResults; // search results
+  late Icon searchIcon; // changes between 'X' and search icon while searching
   var searchTextController = TextEditingController();
   @override
   void initState() {
@@ -34,7 +373,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     searchIcon = Icon(Icons.search);
   }
 
-  loadCowboyProvider(DocumentSnapshot snapshot) {
+  loadCowboyProvider(DocumentSnapshot? snapshot) {
     if(snapshot==null) {
       print('snapshot null');
       return;
@@ -54,55 +393,31 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     }
 
     // error checking should be done, update coming fields as if they are 100% correct
-    List<String> trips = [];
     List<String> friends = [];
     List<String> requests = [];
-    if(!(snapshot['shopping_trips'] as List<dynamic>).isEmpty) {
-      (snapshot['shopping_trips'] as List<dynamic>).forEach((uid) {
-        trips.add(uid.trim());
-      });
-    }
+
     if(!(snapshot['friends'] as List<dynamic>).isEmpty) {
       (snapshot['friends'] as List<dynamic>).forEach((dynamicKey) {
         friends.add(dynamicKey.toString().trim());
+        print('added: '+dynamicKey.toString().trim());
       });
+    } else {
+      // print('no friends u bum');
     }
     if(!(snapshot['requests'] as List<dynamic>).isEmpty) {
       (snapshot['requests'] as List<dynamic>).forEach((key) {
         requests.add(key.toString().trim());
       });
+    } else {
+      // print('no requests u bum');
     }
 
-    context.read<Cowboy>().fillFields(snapshot.get('uuid'), snapshot.get('first_name'), snapshot.get('last_name'), snapshot.get('email'), trips, friends, requests);
+    context.read<Cowboy>().fillFriendFields(friends, requests);
   }
+
   Stream<DocumentSnapshot> _getCowboy() {
+    print('getting cowboy with uuid: '+context.read<Cowboy>().uuid);
     return userCollection.doc(context.read<Cowboy>().uuid).snapshots();
-  }
-
-  List<List<String>> _loadDisplayNames() {
-    List<String> uuids = context.read<Cowboy>().requests;
-    List<String> pairs = context.read<Cowboy>().requests;
-    List<List<String>> dispnames = [];
-    for(int i=0; i < pairs.length; i++) {
-      List<String> split = pairs[i].split('|~|');
-      if(split.length<2) continue;
-      // extra step to ensure that split gets truncated to 2 spaces and put in reverse order
-      dispnames.add([uuids[i], split[1], split[0]]);
-    }
-    return dispnames;
-  }
-
-  List<List<String>> _loadFriendNames() {
-    List<String> uuids = context.read<Cowboy>().friends;
-    List<String> pairs = context.read<Cowboy>().friends;
-    List<List<String>> dispnames = [];
-    for(int i=0; i < pairs.length; i++) {
-      List<String> split = pairs[i].split('|~|');
-      if(split.length<2) continue;
-      // extra step to ensure that split gets truncated to 2 spaces and put in reverse order
-      dispnames.add([uuids[i], split[1], split[0]]);
-    }
-    return dispnames;
   }
 
   String lengthify(String str) {
@@ -150,6 +465,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                       textAlign: TextAlign.left,
                       onChanged: (value) {
                         searchQuery = value;
+                        //print('changed searchQuery to: '+value);
                       },
                       decoration: kTextFieldDecoration.copyWith(
                         hintText: 'search by email',
@@ -180,15 +496,14 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                         // requestsent = false;
                         if(searchIcon.icon == Icons.search) {
                           // actually search by setting searchResults
-                          fillSearchResults();
                           // print('len results: '+searchResults.length.toString());
                           // searchResultsWidget = searchResultsList();
                           searchIcon = const Icon(Icons.cancel);
                         } else {
+                          searchQuery = '';
                           searchIcon = const Icon(Icons.search);
                           searchTextController.clear();
                           searchResults = <Cowboy>[];
-                          searchResultsWidget = searchResultsList();
                         }
                       });
                     }
@@ -200,7 +515,6 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                   stream: _getCowboy(),
                   builder: (context, snapshot) {
                     loadCowboyProvider(snapshot.data);
-                    List<List<String>> displaynames = _loadDisplayNames();
                     return Badge(
                       // TODO add live update on number // old VVVVVV
                       badgeContent: Text(context.watch<Cowboy>().requests.length.toString()), // context.watch<Cowboy>().requests.length.toString()
@@ -235,57 +549,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                                             itemCount: context.watch<Cowboy>().requests.length,
                                             controller: ScrollController(),
                                             itemBuilder: (BuildContext context, int index) {
-                                              return Container(
-                                                padding: EdgeInsets.all(2.0),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      lengthify(displaynames[index][1])+'\n'+lengthify(displaynames[index][2]),
-                                                      //lengthify(friendRequests[index].firstName+' '+friendRequests[index].lastName)+'\n'+lengthify(friendRequests[index].email),
-                                                      //        8       16      24   29 // trim characters 27, 28, 29 to be '...'
-                                                      //lengthify('asdfjkl;asdfjkl;asdfjkl;asdfj')+'\n'+lengthify('asdfjkl;asdfjkl;asdfjkl;asdfjkl;'),
-                                                      style: TextStyle(fontSize: 15.0),
-                                                    ),
-                                                    Spacer(),
-                                                    SizedBox(
-                                                      // ACCEPT
-                                                      width: 35.0,
-                                                      child: TextButton(
-                                                        onPressed: () {
-                                                          context.read<Cowboy>().addFriend(displaynames[index][0], displaynames[index][2]+'|~|'+displaynames[index][1]);
-                                                          Navigator.pop(context);
-                                                        },
-                                                        style: ButtonStyle(
-                                                          backgroundColor: MaterialStateProperty.all<Color>(orange),
-                                                          foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                                                        ),
-                                                        child: Icon(
-                                                          Icons.done,
-                                                          size: 18.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      // REJECT
-                                                      width: 35.0,
-                                                      child: TextButton(
-                                                        onPressed: () {
-                                                          context.read<Cowboy>().removeFriendRequest(displaynames[index][0]);
-                                                          Navigator.pop(context);
-                                                        },
-                                                        style: ButtonStyle(
-                                                          backgroundColor: MaterialStateProperty.all<Color>(red),
-                                                          foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                                                        ),
-                                                        child: Icon(
-                                                          Icons.close,
-                                                          size: 18.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              );
+                                              return RequestAmigo(context.read<Cowboy>().requests[index]);
                                             },
                                             separatorBuilder: (context, index) {
                                               return SizedBox(height: 2.0,);
@@ -321,25 +585,27 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                     constraints: BoxConstraints(
                       //maxHeight: 200,
                     ),
-                    child: searchResultsWidget,
+                    child: QueryAmigo(searchQuery),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 12.0,),
-            /*if(context.watch<Cowboy>().friends.values.length != 0)...[SizedBox(
+            if(context.watch<Cowboy>().friends.length != 0)...[SizedBox(
               height: 36.0,
-              child: Text('Friends', style: TextStyle(fontSize: 24.0),),
+              child: Text('friends', style: TextStyle(fontSize: 24.0),),
             )],
-
-             */
             Container(
               child: StreamBuilder<DocumentSnapshot>(
                 stream: _getCowboy(),
                 builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text('something went wrong !!');
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
                   loadCowboyProvider(snapshot.data);
-                  List<List<String>> displaynames = [[]];
-                  displaynames = _loadFriendNames();
                   return ListView.separated(
                     padding: const EdgeInsets.all(2.0),
                     // scrollDirection: Axis.vertical,
@@ -351,109 +617,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                         onTap: () {
                           const xButton = Icon(Icons.done, size: 46);
                         },
-                        child: Container(
-                          padding: const EdgeInsets.all(7.0),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.account_circle_outlined,
-                                size: 46,
-                                // color: orange,
-                              ),
-                              SizedBox(width: 10,),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    displaynames[index][1],
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  SizedBox(height: 1.0,),
-                                  Text(displaynames[index][2]),
-                                ],
-                              ),
-                              Spacer(),
-                              IconButton(
-                                icon: new Icon(
-                                  Icons.close,
-                                  size:36,
-                                ),
-                                onPressed: () {
-                                  showDialog(context: context, builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      backgroundColor: dark_beige,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10.0),
-                                        side: BorderSide(
-                                          width: 5.0,
-                                          color: darker_beige,
-                                        ),
-                                      ),
-                                      content: Container(
-                                        width: 100,
-                                        height: 40,
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              'Adios Amigo?',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            Spacer(),
-                                            SizedBox(
-                                              width: 35,
-                                              child: TextButton(
-                                                child: Icon(
-                                                  Icons.done,
-                                                  size: 24,
-                                                ),
-                                                style: ButtonStyle(
-                                                  backgroundColor: MaterialStateProperty.all<Color>(orange),
-                                                  foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                                                ),
-                                                onPressed: () {
-                                                  context.read<Cowboy>().removeFriend(displaynames[index][0]);
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 35,
-                                              child: TextButton(
-                                                child: Icon(
-                                                  Icons.close,
-                                                  size: 24,
-                                                ),
-                                                style: ButtonStyle(
-                                                  backgroundColor: MaterialStateProperty.all<Color>(red),
-                                                  foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                                                ),
-                                                onPressed: () {
-                                                  //print('nefarious holaing amigo deeds'); AKA jack shit
-                                                  Navigator.pop(context);
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                            color: dark_beige,
-                            // border: Border.all(color: Colors.deepOrange),
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
+                        child: cowamigo(context.read<Cowboy>().friends[index]),
                       );
                     }, // itemBulider
                     separatorBuilder: (context, int index) {
@@ -470,25 +634,7 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
     throw UnimplementedError();
   }
 
-  fillSearchResults() {
-    _querySearchResults().then((QuerySnapshot snapshot) {
-      if(snapshot == null) {
-        print('snapshot was null in fillSearchResults');
-        return;
-      }
-      Map<String, dynamic> result = <String, dynamic>{};
-      result = snapshot.docs[0].data();
-      Cowboy friendboy = Cowboy();
-      friendboy.initializeCowboyFriend(result['uuid'].toString(), result['first_name'].toString(), result['last_name'].toString(), result['email'].toString());
-      print('cowboy: '+friendboy.firstName);
-      searchResults.add(friendboy);
-      print('listboy length: '+searchResults.length.toString());
-      setState(() {
-        searchResultsWidget = searchResultsList();
-      });
-    });
-  }
-  Future<QuerySnapshot> _querySearchResults() async {
+  Future<QuerySnapshot?> _querySearchResults() async {
     // print('query: '+searchQuery);
     if(searchQuery != '') {
       Future<QuerySnapshot> tempShot = userCollection.where('email', isEqualTo: searchQuery).get();
@@ -534,7 +680,6 @@ class _FriendScreenState extends State<FriendScreen> with SingleTickerProviderSt
                       setState(() {
                         searchTextController.clear();
                         searchResults = <Cowboy>[];
-                        searchResultsWidget = searchResultsList();
                       });
                     },
                   ),
