@@ -59,23 +59,23 @@ class ShoppingTrip with ChangeNotifier{
   // metadata editing methods
   editTripTitle(String title) {
     _title = title;
-    notifyListeners();
+    // notifyListeners();
   }
   editTripDate(DateTime date) {
     _date = date;
-    notifyListeners();
+    // notifyListeners();
   }
   editTripDescription(String description) {
     _description = description;
-    notifyListeners();
+    // notifyListeners();
   }
   clearCachedBene() {
     _beneficiaries.clear();
-    notifyListeners();
+    // notifyListeners();
   }
   clearCachedItem() {
     itemUUID.clear();
-    notifyListeners();
+    // notifyListeners();
   }
   // when date field is edited, this method should be called
   updateTripDate(DateTime date) {

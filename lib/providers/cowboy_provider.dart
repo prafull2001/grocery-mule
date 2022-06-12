@@ -155,7 +155,7 @@ class Cowboy with ChangeNotifier {
   }
   addBothCowboyFriends(String friendUUID) {
     userCollection.doc(_uuid).update({'friends': _friends});
-    userCollection.doc(friendUUID).update({'friends': FieldValue.arrayRemove([_uuid])});
+    userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
   }
 
   removeFriendRequest(String friendUUID) {
