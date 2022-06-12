@@ -176,6 +176,7 @@ class _DatePickerState extends State<DatePicker> {
   }
 }
 
+
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
@@ -185,6 +186,7 @@ class CreateListScreen extends StatefulWidget {
   late String initDescription;
   late DateTime initDate;
   late bool newList;
+
   //createList has the ids
   //when createList has a list that's already filled
   //keep a field of the original id, but generate a new id
@@ -219,6 +221,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
   DateTime localTime = DateTime.now();
+
   @override
   void initState() {
     trip_uuid = widget.trip_uuid;
@@ -345,6 +348,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         .toList();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -435,22 +439,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           width: 10.0,
                         ),
                         DatePicker(newList, trip_uuid),
-                        // Text('${context.read<ShoppingTrip>().date}'
-                        //       .split(' ')[0]
-                        //       .replaceAll('-', '/'),
-                        //   style: TextStyle(
-                        //     fontSize: 20,
-                        //     fontWeight: FontWeight.w400,
-                        //   ),
-                        // ),
-                        // //SizedBox(width: 5.0,),
-                        // IconButton(
-                        //   icon: Icon(
-                        //     Icons.calendar_today,
-                        //     color: orange,
-                        //   ),
-                        //   onPressed: () => _selectDate(context),
-                        // ),
                       ],
                     ),
 
@@ -603,6 +591,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             style: ButtonStyle(
                               backgroundColor:
                                   MaterialStateProperty.all<Color>(orange),
+
                               shape: MaterialStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
@@ -635,7 +624,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                         TextButton(
                                           child: Text("OK"),
                                           onPressed: () {
-                                            // Navigator.pop(context);
                                             Navigator.of(context).pop();
                                           },
                                         ),

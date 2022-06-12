@@ -104,7 +104,6 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-
   addTrip(String trip_uuid) {
     _shoppingTrips.add(trip_uuid);
     updateCowboyTrips();
@@ -209,7 +208,6 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
-  // updates cowboy with bene_uuid's shopping trips to have trip_uuid
   addTripToBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
   }
@@ -225,8 +223,6 @@ class Cowboy with ChangeNotifier {
     // notifyListeners();
   }
   updateCowboyRequestsAdd(String friendUUID) {
-
-    userCollection.doc(friendUUID).update({'requests':FieldValue.arrayUnion([_uuid])});
-
+    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
   }
 }

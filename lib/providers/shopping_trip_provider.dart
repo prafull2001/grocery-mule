@@ -94,7 +94,6 @@ class ShoppingTrip with ChangeNotifier {
 
   clearCachedItem() {
     itemUUID.clear();
-    // notifyListeners();
   }
 
   // when date field is edited, this method should be called
