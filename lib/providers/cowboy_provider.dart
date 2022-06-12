@@ -3,16 +3,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final CollectionReference userCollection = FirebaseFirestore.instance.collection('updated_users_test');
+final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
 
 class Cowboy with ChangeNotifier {
   String _uuid = '';
   String _firstName = '';
   String _lastName = '';
   String _email = '';
-  List<String> _shoppingTrips = <String>[];
-  Map<String, String> _friends = <String, String>{}; // uuid to first name
-  List<String> _requests = <String>[]; // uuid to first_last
+  List<String> _shoppingTrips = [];
+  List<String> _friends = []; // uuid
+  List<String> _requests = []; // uuid
 
   // to call after user fields are updated
   fillUpdatedInfo(String firstName, String lastName, String email) {
@@ -33,8 +33,12 @@ class Cowboy with ChangeNotifier {
   updateCowboyEmail() {
     userCollection.doc(_uuid).update({'email': _email});
   }
-  // to initialize fields after empty constructor has been called by provider init
-  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, Map<String, String> friends, List<String> requests) {
+  fillFriendFields(List<String> friends, List<String> requests) {
+    this._friends = friends;
+    this._requests = requests;
+  }
+  // to initialize fields from StreamBuilder
+  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, List<String> friends, List<String> requests) {
     this._uuid = uuid;
     this._firstName = firstName;
     this._lastName = lastName;
@@ -42,17 +46,16 @@ class Cowboy with ChangeNotifier {
     this._shoppingTrips = shoppingTrips;
     this._friends = friends;
     this._requests = requests;
-    // updateCowboyAll();
-    //notifyListeners();
+    // notifyListeners();
   }
   // to initialize account creation
-  initializeCowboy(String uuid, String firstName, String lastName, String email) {
-    this._uuid = uuid;
+  initializeCowboy(String? uuid, String firstName, String lastName, String email) {
+    this._uuid = uuid!;
     this._firstName = firstName;
     this._lastName = lastName;
     this._email = email;
     intializeCowboyDB();
-    notifyListeners();
+    //notifyListeners();
   }
   // initialize cowboy in database for first time
   intializeCowboyDB() {
@@ -74,21 +77,18 @@ class Cowboy with ChangeNotifier {
     this._email = email;
     notifyListeners();
   }
-  clearUserField(){
-    _friends.clear();
-    _shoppingTrips.clear();
-    _requests.clear();
-  }
+
   // getters since '_' identifier makes fields private
   String get uuid => _uuid;
   String get firstName => _firstName;
   String get lastName => _lastName;
   String get email => _email;
   List<String> get shoppingTrips => _shoppingTrips;
-  Map<String, String> get friends => _friends;
+  List<String> get friends => _friends;
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
+
   addTrip(String trip_uuid) {
     _shoppingTrips.add(trip_uuid);
     updateCowboyTrips();
@@ -105,10 +105,51 @@ class Cowboy with ChangeNotifier {
     //delete trip from the shopping trip collection
   }
 
+  updateTripForAll(String uuid, String entry, List<String> beneList){
+    //for the host
+    _shoppingTrips.add(uuid);
+    updateCowboyTrips();
+    beneList.forEach((bene) async {
+      Map<String,String> shoppingTrips = await fetchBeneTrip( bene);
+      shoppingTrips[uuid] = entry;
+      print(entry);
+      userCollection.doc(bene).update({'shopping_trips': shoppingTrips});
+    });
+  }
+
+  Future<Map<String, String>> fetchBeneTrip(String bene) async {
+    DocumentSnapshot beneShot = await userCollection.doc(bene).get();
+    Map<String,String> shoppingTrips = {};
+    if(!(beneShot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
+      (beneShot['shopping_trips'] as Map<String, dynamic>)
+          .forEach((uid,entry) {
+        String fields = entry.toString().trim();
+        shoppingTrips[uid.trim()] = fields;
+      });
+    }
+    return shoppingTrips;
+  }
+  Future<Map<String, String>> fetchFriendFriends(String friend_uuid) async {
+    DocumentSnapshot friendShot = await userCollection.doc(friend_uuid).get();
+    Map<String,String> amigos = {};
+    if(!(friendShot['friends'] as Map<String, dynamic>).isEmpty) {
+      (friendShot['friends'] as Map<String, dynamic>)
+          .forEach((uid,entry) {
+        String fields = entry.toString().trim();
+        amigos[uid.trim()] = fields;
+      });
+    }
+    return amigos;
+  }
+  clearData(){
+    _shoppingTrips.clear();
+     _friends.clear(); // uuid to first name
+     _requests.clear();
+  }
   // removes friend from requests, adds friend, notifies listeners, updates database
-  addFriend(String friend_uuid, String friend_name) {
+  addFriend(String friend_uuid) {
     _requests.remove(friend_uuid);
-    _friends[friend_uuid] = friend_name;
+    _friends.add(friend_uuid);
     updateCowboyRequestsRemove(friend_uuid);
     addBothCowboyFriends(friend_uuid);
     notifyListeners();
@@ -117,25 +158,41 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(_uuid).update({'friends': _friends});
     userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
   }
-  // removes friend, notifies listeners, and updates database
-  removeFriend(String friend_uuid) {
-    _friends.remove(friend_uuid);
-    updateCowboyFriendsRemove(friend_uuid);
-    notifyListeners();
-  }
-  updateCowboyFriendsRemove(String friend_uuid) {
-    userCollection.doc(_uuid).update({'friends': _friends});
-    userCollection.doc(friend_uuid).update({'friends': FieldValue.arrayRemove([_uuid])});
-  }
 
-  // updates from database
-  updateCowboyRequests(List<String> newRequests) {
-    _requests = newRequests;
+  removeFriendRequest(String friendUUID) {
+    _requests.remove(friendUUID);
+    updateCowboyRequestsRemove(friendUUID);
     notifyListeners();
+  }
+  // removes friend, notifies listeners, and updates database
+  removeFriend(String friendUUID) {
+    print('friends: $_friends');
+    _friends.remove(friendUUID);
+    print('friends again: $_friends');
+    updateCowboyFriendsRemove(friendUUID);
+    notifyListeners();
+  }
+  updateCowboyRequestsRemove(String friendUUID) {
+    userCollection.doc(_uuid).update({'requests': _requests});
+  }
+  updateCowboyFriendsRemove(String friendUUID) async {
+    userCollection.doc(_uuid).update({'friends': _friends});
+    Map<String, String> amigos = {};
+    amigos = await fetchFriendFriends(friendUUID);
+    print('amigos: $amigos');
+    amigos.remove(_uuid);
+    print('amigos: $amigos');
+    userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
   addTripToBene(String bene_uuid, String trip_uuid){
     userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
+  }
+  //change this to overwrite
+  RemoveTripFromBene(String bene_uuid, String trip_uuid) async {
+    Map<String,String> shoppingTrips = await fetchBeneTrip(bene_uuid);
+    shoppingTrips.remove(trip_uuid);
+    userCollection.doc(bene_uuid).update({'shopping_trips': shoppingTrips});
   }
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {
@@ -143,17 +200,9 @@ class Cowboy with ChangeNotifier {
     updateCowboyRequestsAdd(friendUUID);
     // notifyListeners();
   }
-  // removes friend request, notifies listeners, and updates database
-  removeFriendRequest(String friendUUID) {
-    _requests.remove(friendUUID);
-    updateCowboyRequestsRemove(friendUUID);
-    notifyListeners();
-  }
   updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
-  }
-  updateCowboyRequestsRemove(String friendUUID) {
-    print('requests remove db called with uuid: '+friendUUID);
-    userCollection.doc(_uuid).update({'requests': FieldValue.arrayRemove([friendUUID])});
+
+    userCollection.doc(friendUUID).update({'requests':FieldValue.arrayUnion([_uuid])});
+
   }
 }

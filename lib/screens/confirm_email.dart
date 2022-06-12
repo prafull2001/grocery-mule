@@ -1,7 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
+
+import '../providers/cowboy_provider.dart';
 
 class ConfirmEmailScreen extends StatefulWidget {
   static String id = 'confirm-email';
@@ -13,11 +15,11 @@ class ConfirmEmailScreen extends StatefulWidget {
 class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
 
   final auth = FirebaseAuth.instance;
-  User user;
-  Timer timer;
+  late User user;
+  late Timer timer;
 
   void initState(){
-    user = auth.currentUser;
+    user = auth.currentUser!;
     user.sendEmailVerification();
     timer = Timer.periodic(Duration(seconds: 2), (timer) {
       checkEmailVerified();
@@ -83,10 +85,11 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
   }
 
   Future<void> checkEmailVerified() async {
-    user = auth.currentUser;
+    user = auth.currentUser!;
     await user.reload();
     if (user.emailVerified){
       timer.cancel();
+      print('email was successfully verified!');
       Navigator.pop(context);
     }
   }

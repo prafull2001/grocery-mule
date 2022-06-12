@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
+import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,40 +23,44 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     // TODO: implement initState
     super.initState();
   }
-  String email;
-  String password;
-  String firstName;
-  String lastName;
+  late String email;
+  late String password;
+  late String firstName;
+  late String lastName;
   FirebaseAuth auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  Future<UserCredential> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+  //final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      final UserCredential res = await auth.signInWithCredential(credential);
-      String fullname = res.user.displayName;
-      List<String> namearray = fullname.split(" ");
-      firstName = namearray[0];
-      lastName = namearray[1];
-      email = res.user.email;
-      print("signed in " + firstName + " " + lastName);
-      if (res.user == null)
-        return await signInWithGoogle();
-      else
-        return res;
-    } catch (e) {
-      print("Sign In Error:" + e.toString());
-      //return await signInWithGoogle();
+
+  Future<void> signInWithGoogle() async {
+    // Trigger the Google Authentication flow.
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    // Obtain the auth details from the request.
+    final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+    // Create a new credential.
+    final OAuthCredential googleCredential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    // Sign in to Firebase with the Google [UserCredential].
+    final UserCredential credential =
+    await FirebaseAuth.instance.signInWithCredential(googleCredential);
+    //check if it is a new user
+    String full_name = credential.user!.displayName!;
+    List<String> name_array = full_name.split(" ");
+    firstName = name_array[0];
+    lastName = name_array[1];
+    email = credential.user!.email!;
+    if(credential.additionalUserInfo!.isNewUser){
+      //create new document for the new user
+      context.read<Cowboy>().initializeCowboy(credential.user!.uid, firstName, lastName, email);
     }
+    return;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: cream,
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
@@ -85,12 +90,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
               onPressed: (){
                 Navigator.pushNamed(context, LoginScreen.id);
               },
+              color: Colors.amber,
             ),
             RoundedButton(
               title: 'Register',
               onPressed: (){
                 Navigator.pushNamed(context, RegistrationScreen.id);
               },
+              color: Colors.amber,
             ),
             RoundedButton(
                 title: 'Sign in with Google',
@@ -98,12 +105,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 onPressed: ()
                 async {
                   try {
-                    UserCredential userCredential = await signInWithGoogle();
-                    if (userCredential != null){
-                      context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
+                    await signInWithGoogle();
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, ListsScreen.id);
+                    /*if (userCredential != null){
+                      //context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
                       Navigator.pop(context);
                       Navigator.pushNamed(context, ListsScreen.id);
                     }
+                     */
                   }  catch (e) {
                     print(e);
                   }

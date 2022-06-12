@@ -14,75 +14,93 @@ class PersonalListScreen extends StatefulWidget {
 }
 
 class _PersonalListScreen extends State<PersonalListScreen> {
-  String hostFirstName;
-  Map<String, Item> list_items;
-  Map<String, int> item_list;
-  Map<String, int> cleaned_list;
+  late String hostFirstName;
+  late Map<String, Item> list_items;
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  late CollectionReference itemSubCollection;
 
   @override
-  void initState() {
+  void initState()  {
+    String tripUUID = context.read<ShoppingTrip>().uuid;
+    itemSubCollection = tripCollection.doc(tripUUID).collection('items');
     hostFirstName = context.read<Cowboy>().firstName;
-    list_items = context.read<ShoppingTrip>().items;
-    cleaned_list = <String, int>{};
-
-    list_items.forEach((key, item) {
-      Item curItem = item;
-      if(item.subitems[context.read<Cowboy>().uuid] > 0) {
-        cleaned_list[key] = item.subitems[context.read<Cowboy>().uuid];
-      }
-    });
   }
 
-  Widget build(BuildContext context) {
 
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Personal List'),
-        backgroundColor: const Color(0xFFbc5100),
+        backgroundColor: light_orange,
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-            children: <Widget>[
-              SizedBox(
-                height: 30.0,
-              ),
-              Text(
-                  '$hostFirstName\'s List',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25,
-                  ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              if(!(cleaned_list.isEmpty))...[
-                for (var entry in cleaned_list.entries)
-                  simple_item(entry.key, entry.value)
-              ] else ...[
-                SizedBox(
-                  height: 70.0,
-                ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: tripCollection.doc(context.read<ShoppingTrip>().uuid).collection('items').snapshots(),
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> itemColQuery) {
 
-                Row(
-                  children: <Widget>[
-                    Flexible(
-                      child: Text(
-                        'Your personal list will appear once you\'ve added items to your list!',
-                        style: TextStyle(
-                          fontSize: 40.0,
-                          fontWeight: FontWeight.w900,
+            if (itemColQuery.hasError) {
+              return const Text('Something went wrong');
+            }
+            if (itemColQuery.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            }
+            Map<String, int> cleaned_list = {};
+            itemColQuery.data!.docs.forEach((doc) {
+              if(doc['uuid'] != 'dummy'){
+                Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems'])); // get map of subitems for cur item
+                curSubitems.forEach((key, value) { // add item name & quantity if user UUIDs match & quantity > 0
+                  if(key == context.read<Cowboy>().uuid && curSubitems[key] > 0) {
+                    dynamic curItemName = doc.get(FieldPath(['name']));
+                    cleaned_list[curItemName] = curSubitems[key];
+                  }
+                });
+              }
+            });
+            return Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Text(
+                    '$hostFirstName\'s List',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 25,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+
+                if(!(cleaned_list.isEmpty))...[
+                  for (var entry in cleaned_list.entries)
+                    simple_item(entry.key, entry.value)
+                ] else ...[
+                  SizedBox(
+                    height: 70.0,
+                  ),
+
+                  Row(
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          'Your personal list will appear once you\'ve added items to your list!',
+                          style: TextStyle(
+                            fontSize: 40.0,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ]
+                    ],
+                  ),
+                ]
 
+                ]
+            );
+          }
 
-          ]
         ),
       ),
     );
@@ -96,7 +114,7 @@ class _PersonalListScreen extends State<PersonalListScreen> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: Theme.of(context).primaryColorDark,
+        color: dark_beige,
       ),
       child: Column(
         children: [
