@@ -1,8 +1,8 @@
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
+import 'dart:convert';
+final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
 
 // shopping trip provider
 class ShoppingTrip with ChangeNotifier{
@@ -11,62 +11,71 @@ class ShoppingTrip with ChangeNotifier{
   DateTime _date = DateTime.now();
   String _description = '';
   String _host = ''; // host uuid
-  Map<String,String> _beneficiaries = {};
-  Map<String, Item> _items = <String, Item>{}; // name to item
-  Receipt _receipt;
+  List<String> _beneficiaries = [];
+  List<String> itemUUID = [];
+  late Receipt _receipt;
 
   // from user creation screen for metadata
-  Future<void> initializeTrip(String title, DateTime date, String description, Map<String,String> uid_name, String host) async {
+  Future<void> initializeTrip(String title, DateTime date, String description, List<String> bene_list, String host) async {
     var uuider = Uuid();
     _uuid = uuider.v4();
     _title = title;
     _date = date;
     _description = description;
     _host = host;
-    _beneficiaries = uid_name;
+    _beneficiaries = bene_list;
     print(_date);
     await initializeTripDB();
+    await initializeSubCollection();
     notifyListeners();
   }
+
+  Future<void> initializeSubCollection() async {
+    await tripCollection.doc(_uuid).collection("items").doc("dummy").set({
+      'uuid': "dummy"
+    });
+  }
   // takes in formatted data from snapshot to directly update the provider
-  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, Map<String,String> beneficiaries, Map<String, Item> items) {
+  initializeTripFromDB(String uuid, String title, DateTime date, String description, String host, List<String> beneficiaries) {
     _uuid = uuid;
     _title = title;
     _date = date;
     _description = description;
     _host = host;
     _beneficiaries = beneficiaries;
-    _items = items;
-    notifyListeners();
   }
+
+  initializeItemUIDFromDB(List<String> itemUUID) {
+    itemUUID = itemUUID;
+  }
+
 
   String get uuid => _uuid;
   String get title => _title;
   DateTime get date => _date;
   String get description => _description;
-  Map<String,String> get beneficiaries => _beneficiaries;
-  Map<String, Item> get items => _items;
+  List<String> get beneficiaries => _beneficiaries;
   String get host => _host;
   // metadata editing methods
   editTripTitle(String title) {
     _title = title;
-    notifyListeners();
+    // notifyListeners();
   }
   editTripDate(DateTime date) {
     _date = date;
-    notifyListeners();
+    // notifyListeners();
   }
   editTripDescription(String description) {
     _description = description;
-    notifyListeners();
+    // notifyListeners();
   }
   clearCachedBene() {
     _beneficiaries.clear();
-    notifyListeners();
+    // notifyListeners();
   }
   clearCachedItem() {
-    items.clear();
-    notifyListeners();
+    itemUUID.clear();
+    // notifyListeners();
   }
   // when date field is edited, this method should be called
   updateTripDate(DateTime date) {
@@ -75,7 +84,7 @@ class ShoppingTrip with ChangeNotifier{
     notifyListeners();
   }
   // when metadata update fields are called from first screen, this method should be called
-  updateTripMetadata(String title, DateTime date, String description, Map<String, String> beneficiary) {
+  updateTripMetadata(String title, DateTime date, String description, List<String> beneficiary) {
     _title = title;
     _date = date;
     _description = description;
@@ -83,55 +92,87 @@ class ShoppingTrip with ChangeNotifier{
     updateTripMetadataDB();
     notifyListeners();
   }
-  setBeneficiary(Map<String,String> new_bene_list){
+  setBeneficiary(List<String> new_bene_list){
     _beneficiaries = new_bene_list;
   }
   // adds beneficiary, notifies listeners, updates database
-  addBeneficiary(String beneficiary_uuid, String name) {
-    _beneficiaries[beneficiary_uuid] = name;
-    if(_items.isNotEmpty) {
-      _items.forEach((name, item) {
-        item.addBeneficiary(beneficiary_uuid);
-      });
-    }
+  addBeneficiary(String beneficiary_uuid) {
+    _beneficiaries.add(beneficiary_uuid);
+    //add bene to every item document
+    tripCollection.doc(_uuid).collection('items').get().then((collection) => {
+      collection.docs.forEach((document) async {
+        await document.reference.update(
+          {
+            "subitems.${beneficiary_uuid}": 0
+          }
+        );
+      })
+    });
     updateBeneficiaryDB();
     notifyListeners();
   }
   // removes beneficiary, notifies listeners, updates database
   removeBeneficiary(String beneficiary_uuid) {
     _beneficiaries.remove(beneficiary_uuid);
-    if(_items.isNotEmpty) {
-      _items.forEach((name, item) {
-        item.removeBeneficiary(beneficiary_uuid);
-      });
-    }
+    tripCollection.doc(_uuid).collection('items').get().then((collection) => {
+      collection.docs.forEach((document) async {
+        Map<String,int> bene_items = {};
+        (document.data()['subitems'] as Map<String,dynamic>).forEach((uuid, quantity) {
+          bene_items[uuid] = int.parse(quantity.toString());
+        });
+        bene_items.remove(beneficiary_uuid);
+        await document.reference.update(
+          {
+            "subitems":bene_items
+          }
+        );
+      })
+    });
     updateBeneficiaryDB();
     notifyListeners();
   }
-  setItems(Map<String,Item> items){
-    _items = items;
-  }
+
   // user adds an item for first time
   addItem(String name, [int quantity=0]) {
-    _items[name] = Item(name, quantity, _beneficiaries);
-    updateItemDB();
+    var uuider = Uuid();
+    String item_uid = uuider.v4();
+    Map<String,int> bene_subitem = {};
+    _beneficiaries.forEach((bene) {
+      bene_subitem[bene] =0;
+    });
+    tripCollection.doc(_uuid).collection('items').doc(item_uid).set(
+      {
+        'name': name,
+        'quantity':0,
+        'subitems': bene_subitem,
+        'uuid': item_uid,
+      }
+    );
+    itemUUID.add(item_uid);
     notifyListeners();
   }
-  // adds item from database?
-  addItemDirect(Item item) {
-    _items[item.name] = item;
-    // TODO if you only call this method from pulling from database, remove this line
-  }
+
   // edits individual item within list, notifies listeners, updates database
-  editItem(String name, int quantity, Map<String, int> subitems) {
-    _items[name] = Item.withSubitems(name, quantity, subitems);
-    updateItemDB();
+  editItem(String item_uid, int sum,String bene_uid, int bene_quantity) async {
+    DocumentSnapshot old_data = await tripCollection.doc(_uuid).collection('items').doc(item_uid).get();
+    Map<String,int> bene_value = {};
+    (old_data['subitems'] as Map<String,dynamic>).forEach((bene, value) {
+      bene_value[bene] = int.parse(value.toString());
+    });
+    bene_value[bene_uid] = bene_quantity;
+    await tripCollection.doc(_uuid).collection('items').doc(item_uid).update(
+        {
+          "quantity": sum,
+          "subitems": bene_value,
+        }
+    );
+    //updateItemDB();
     notifyListeners();
   }
   // adds item, notifies listeners, updates database
-  removeItem(String name) {
-    _items.remove(name);
-    updateItemDB();
+  removeItem(String item_uid) async {
+    await tripCollection.doc(_uuid).collection('items').doc(item_uid).delete();
+    itemUUID.remove(item_uid);
     notifyListeners();
   }
 
@@ -145,7 +186,6 @@ class ShoppingTrip with ChangeNotifier{
           'description': _description,
           'host': _host,
           'beneficiaries': _beneficiaries,
-          'items': itemsToMap(),
         });
   }
   // only update trip date in db
@@ -169,48 +209,32 @@ class ShoppingTrip with ChangeNotifier{
   // updates after a beneficiary has been added
   updateBeneficiaryDB() {
     tripCollection.doc(_uuid).update({'beneficiaries': _beneficiaries});
-    tripCollection.doc(_uuid).update({'items': itemsToMap()});
-  }
-  // updates items only in DB
-  updateItemDB() {
-    tripCollection.doc(_uuid).update({'items': itemsToMap()});
   }
 
-  // toMap func for publishing to database
-  Map<String, Map<String,dynamic>> itemsToMap() {
-    Map<String, Map<String,dynamic>> ret_map = <String, Map<String,dynamic>>{};
-    _items.forEach((name, item) {
-      ret_map[name] = item.toMap();
-    });
-    return ret_map;
+
+  updateItemQuantity(String item_uid, String bene_uid, int quantity) async {
+    await tripCollection.doc(_uuid).collection('items').doc(item_uid).update(
+        {
+          "subitems": {"${bene_uid}": quantity}
+        }
+    );
+    //"subitems": {"${bene_uid}": bene_quantity}
   }
+
 }
 
 class Item {
-  String name;
-  int quantity;
+  late String name;
+  late int quantity;
   Map<String, int> subitems = <String, int>{}; // uuid to individual quantity needed
-  bool isExpanded;
-  Item(this.name, this.quantity, Map<String,String> beneficiaries) {
+  Item(this.name, this.quantity, List<String> beneficiaries) {
     subitems = <String, int>{};
-    beneficiaries.forEach((uid,name) {
+    beneficiaries.forEach((uid) {
       subitems[uid] = 0;
     });
-
-    this.isExpanded = false;
-  }
-  Item.withSubitems(this.name, this.quantity, this.subitems){
-    this.isExpanded = true;
   }
 
-  Item.fromMap(Map<String, dynamic> itemMap) {
-    this.name = itemMap['name'].toString();
-    this.quantity = int.parse(itemMap['quantity'].toString());
-    (itemMap['subitems'] as Map<String, dynamic>).forEach((name, indivQuantity) {
-      this.subitems[name.toString()] = int.parse(indivQuantity.toString());
-    });
-    this.isExpanded = false;
-  }
+  Item.nothing();
 
   addBeneficiary(String beneficiary) {
     subitems[beneficiary] = 0;
@@ -219,20 +243,6 @@ class Item {
     subitems.remove(beneficiary);
   }
 
-  incrementBeneficiary(String beneficiary) {
-    subitems[beneficiary]++;
-  }
-  decrementBeneficiary(String beneficiary) {
-    subitems[beneficiary]--;
-  }
-
-  Map<String,dynamic> toMap() {
-    return {
-      "name": name,
-      "quantity": quantity,
-      "subitems": subitems,
-    };
-  }
 }
 
 class Receipt {
@@ -247,7 +257,7 @@ class ReceiptItem {
   String name;
   double price;
   int quantity;
-  double total_price;
+  late double total_price;
 
   ReceiptItem(this.name, this.price, this.quantity) {
     total_price = price*quantity;

@@ -1,3 +1,4 @@
+// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
@@ -17,8 +18,8 @@ import 'package:grocery_mule/screens/friend_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:grocery_mule/dev/migration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:after_layout/after_layout.dart';
 import 'dart:io';
 
 bool seen_intro; // global that updates with show_home's value upon startup
@@ -87,6 +88,7 @@ void main() async {
             PersonalListScreen.id: (context) => PersonalListScreen(),
             CheckoutScreen.id: (context) => CheckoutScreen(),
             IntroScreen.id: (context) => IntroScreen(),
+            Migration.id: (context) => Migration(),
           },
         ),
       ),

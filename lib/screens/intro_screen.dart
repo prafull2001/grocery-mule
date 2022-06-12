@@ -67,37 +67,37 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
       pages: [
         PageViewModel(
-          title: "Create an Account",
+          title: "Hey There! 👋",
           body:
-          "We\'re happy to see you. Create a GroceryMule account to start shopping easier.",
+          "Nice to meet you. Sign in with Google or your email and add your PayPal.me link to get started!",
           image: _buildFirstImage('logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Add some friends",
+          title: "Find Your Crowd 🔍",
           body:
-          "Head over to the Cowamigos tab to search and add friends",
+          "Head over to the \'Cowamigos\' tab to search for friends and add them to shopping trips!",
           image: _buildImage('friends.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Create a list",
+          title: "Create a List 📝",
           body:
-          "Create a list by pressing the + sign at the bottom right",
+          "Create a list to host a shopping trip by pressing the + sign at the bottom right of your home screen.",
           image: _buildImage('list.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Add items",
+          title: "Add Items 🍎",
           body:
-          "Add some items to your list and click the \'Personal List\' to see the items you\'ve added",
+          "Add items to your list and click \'Personal List\' to view the items you\'ve added to that list.",
           image: _buildImage('items.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Checkout",
+          title: "Checkout 💰",
           body:
-          "When you\'re done shopping, add send payment requests with the touch of a button!",
+          "When you\'re done shopping for a list, click \'Checkout\' to send automatically calculated payment requests with the touch of a button!",
           image: _buildImage('checkout.png'),
           decoration: pageDecoration,
         ),
