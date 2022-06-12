@@ -289,7 +289,7 @@ class _ListsScreenState extends State<ListsScreen> {
             onPressed: () async {
               await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CreateListScreen(true))
+                  MaterialPageRoute(builder: (context) => CreateListScreen(true,"dummy"))
               );
             },
           ),

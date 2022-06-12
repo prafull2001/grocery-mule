@@ -84,8 +84,7 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String trip_uuid, String title,  DateTime date,String desc) {
-    String entry = title+ "|~|" + date.toString() + "|~|" + desc.toString();
+  addTrip(String trip_uuid) {
     _shoppingTrips.add(trip_uuid);
     updateCowboyTrips();
     notifyListeners();
@@ -181,9 +180,8 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
-  addTripToBene(String bene_uuid, String trip_uuid, String title, DateTime date, String desc ){
-    String entry = title+ "|~|" + date.toString() + "|~|" + desc;
-    userCollection.doc(bene_uuid).update({'shopping_trips.${trip_uuid}': entry});
+  addTripToBene(String bene_uuid, String trip_uuid){
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
   }
   //change this to overwrite
   RemoveTripFromBene(String bene_uuid, String trip_uuid) async {
@@ -198,6 +196,6 @@ class Cowboy with ChangeNotifier {
     // notifyListeners();
   }
   updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests.${_uuid}': (_email+'|~|'+_firstName+' '+lastName)});
+    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
   }
 }
