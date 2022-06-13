@@ -447,10 +447,12 @@ class _EditListsScreenState extends State<EditListScreen> {
   List<String> bene_uid = [];
   static bool reload = true;
 
+  late Stream<DocumentSnapshot<Object?>>? listStream;
+
   @override
   void initState() {
-    setState(() {});
     tripUUID = widget.tripUUID!;
+    listStream = shoppingTripCollection.doc(tripUUID).snapshots();
     hostFirstName = context.read<Cowboy>().firstName;
 
     // null value problem here???
@@ -591,7 +593,7 @@ class _EditListsScreenState extends State<EditListScreen> {
         ],
       ),
       body: StreamBuilder<DocumentSnapshot<Object?>>(
-          stream: shoppingTripCollection.doc(tripUUID).snapshots(),
+          stream: listStream,
           builder:
               (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
             if (snapshot.hasError) {
@@ -655,89 +657,177 @@ class _EditListsScreenState extends State<EditListScreen> {
                       ),
                     ),
                   ),
+                  //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
+                  ItemsAddition(
+                    tripUUID: tripUUID,
+                  )
 
                   //SizedBox(height: 10),
-                  SizedBox(
-                    height: 40,
-                    width: double.maxFinite,
-                    child: Divider(
-                      color: Colors.black,
-                      thickness: 1.5,
-                      indent: 75,
-                      endIndent: 75,
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        child: Text(
-                          'Add Item',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                      Container(
-                          child: IconButton(
-                        icon: const Icon(Icons.add_circle),
-                        onPressed: () {
-                          setState(() {
-                            isAdd = true;
-                          });
-                        },
-                      )),
-                    ],
-                  ),
-                  if (isAdd) create_item(),
-
-                  ItemsList(tripUUID),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      //comment
-                      SizedBox(
-                        width: 40.0,
-                      ),
-                      Container(
-                        height: 70,
-                        width: 150,
-                        child: RoundedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, PersonalListScreen.id);
-                          },
-                          title: "Personal List",
-                          color: Colors.blueAccent,
-                        ),
-                      ),
-                      Spacer(),
-                      if (context.read<ShoppingTrip>().host ==
-                          context.read<Cowboy>().uuid) ...[
-                        Container(
-                          height: 70,
-                          width: 150,
-                          child: RoundedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, CheckoutScreen.id);
-                            },
-                            title: "Checkout",
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                      ],
-                      SizedBox(
-                        width: 40.0,
-                      ),
-                    ],
-                  ),
                 ],
               )),
             );
           }),
+    );
+  }
+}
+
+//Moved the changing widget into the a tree on the downward heririary of the masterTree branch
+
+class ItemsAddition extends StatefulWidget {
+  final String tripUUID;
+  const ItemsAddition({Key? key, required this.tripUUID}) : super(key: key);
+
+  @override
+  State<ItemsAddition> createState() => _ItemsAdditionState();
+}
+
+class _ItemsAdditionState extends State<ItemsAddition> {
+  Widget create_item() {
+    String food = '';
+    //auto_collapse(null);
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        color: beige,
+      ),
+      child: (Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Container(
+            child: Text(
+              'Enter Item',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+              ),
+            ),
+            padding: EdgeInsets.all(20),
+          ),
+          Container(
+            height: 45,
+            width: 100,
+            child: TextField(
+              style: TextStyle(color: darker_beige),
+              cursorColor: darker_beige,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: darker_beige,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: darker_beige, width: 2),
+                ),
+                hintText: 'EX: Apple',
+              ),
+              onChanged: (text) {
+                food = text;
+              },
+            ),
+          ),
+          Container(
+              child: IconButton(
+                  icon: const Icon(Icons.add_circle),
+                  onPressed: () {
+                    if (food != '')
+                      setState(() {
+                        context.read<ShoppingTrip>().addItem(food);
+                        isAdd = false;
+                      });
+                  })),
+          Container(
+              child: IconButton(
+                  icon: const Icon(Icons.remove),
+                  onPressed: () => (setState(() {
+                        isAdd = false;
+                      })))),
+        ],
+      )),
+    );
+  }
+
+  bool isAdd = false;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          height: 40,
+          width: double.maxFinite,
+          child: Divider(
+            color: Colors.black,
+            thickness: 1.5,
+            indent: 75,
+            endIndent: 75,
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Container(
+              child: Text(
+                'Add Item',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+            Container(
+                child: IconButton(
+              icon: const Icon(Icons.add_circle),
+              onPressed: () {
+                setState(() {
+                  isAdd = true;
+                });
+              },
+            )),
+          ],
+        ),
+        if (isAdd) create_item(),
+        ItemsList(widget.tripUUID),
+        SizedBox(
+          height: 10.0,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            //comment
+            SizedBox(
+              width: 40.0,
+            ),
+            Container(
+              height: 70,
+              width: 150,
+              child: RoundedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, PersonalListScreen.id);
+                },
+                title: "Personal List",
+                color: Colors.blueAccent,
+              ),
+            ),
+            Spacer(),
+            if (context.read<ShoppingTrip>().host ==
+                context.read<Cowboy>().uuid) ...[
+              Container(
+                height: 70,
+                width: 150,
+                child: RoundedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, CheckoutScreen.id);
+                  },
+                  title: "Checkout",
+                  color: Colors.blueAccent,
+                ),
+              ),
+            ],
+            SizedBox(
+              width: 40.0,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
