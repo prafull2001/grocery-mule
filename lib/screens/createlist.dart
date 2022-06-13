@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +17,7 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
-  UserName(String userUUID){
+  UserName(String userUUID) {
     this.userUUID = userUUID;
   }
 
@@ -26,19 +25,22 @@ class UserName extends StatefulWidget {
   _UserNameState createState() => _UserNameState();
 }
 
-class _UserNameState extends State<UserName>{
+class _UserNameState extends State<UserName> {
   late String userUUID;
   late String name;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+  CollectionReference userCollection =
+      FirebaseFirestore.instance.collection('users_02');
   @override
-  void initState(){
+  void initState() {
     userUUID = widget.userUUID;
   }
+
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
         stream: userCollection.doc(userUUID).snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
@@ -46,37 +48,34 @@ class _UserNameState extends State<UserName>{
             return const CircularProgressIndicator();
           }
           name = snapshot.data!['first_name'];
-          return
-            Text(
-              '${snapshot.data!['first_name']} ',
-              style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.red
-              ),
-            );
-        }
-    );
+          return Text(
+            '${snapshot.data!['first_name']} ',
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          );
+        });
   }
-  String getName(){
+
+  String getName() {
     return name;
   }
 }
-typedef StringVoidFunc = void Function(String,int);
+
+typedef StringVoidFunc = void Function(String, int);
 
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
   static String id = 'create_list_screen';
-   late String trip_uuid;
-   late String initTitle;
-   late String initDescription;
-   late DateTime initDate;
-   late bool newList;
+  late String trip_uuid;
+  late String initTitle;
+  late String initDescription;
+  late DateTime initDate;
+  late bool newList;
   //createList has the ids
   //when createList has a list that's already filled
   //keep a field of the original id, but generate a new id
   //in the return variable
-  CreateListScreen(bool newList, String trip_id ) {
+  CreateListScreen(bool newList, String trip_id) {
     this.newList = newList;
     trip_uuid = trip_id;
   }
@@ -88,11 +87,12 @@ class CreateListScreen extends StatefulWidget {
 class _CreateListsScreenState extends State<CreateListScreen> {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-   late bool newList;
-   late String trip_uuid;
+  late bool newList;
+  late String trip_uuid;
   //////////////////////
-  var _tripTitleController;
-  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  TextEditingController _tripTitleController = TextEditingController();
+  CollectionReference shoppingTripCollection =
+      FirebaseFirestore.instance.collection('shopping_trips_02');
   var _tripDescriptionController;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
@@ -104,29 +104,27 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   List<String> uid_name = [];
   List<String> friend_bene = [];
   //List<String> selected_friend = [];
-  Map<String,String> friendsName = {};
+  Map<String, String> friendsName = {};
   @override
   void initState() {
     trip_uuid = widget.trip_uuid;
 
     newList = widget.newList;
     cur_trip = context.read<ShoppingTrip>();
-    if(trip_uuid != "dummy") {
-      _tripTitleController = TextEditingController()..text = cur_trip.title;
-      _tripDescriptionController = TextEditingController()..text = cur_trip.description;
+    if (trip_uuid != "dummy") {
+      _tripTitleController = TextEditingController(text: cur_trip.title);
+      _tripDescriptionController = TextEditingController()
+        ..text = cur_trip.description;
       newList = false;
       //selected_friend = context.read<ShoppingTrip>().beneficiaries;
-    }else{
+    } else {
       clear_provider();
       newList = true;
     }
     super.initState();
-
-
-
   }
-  
-  void clear_provider(){
+
+  void clear_provider() {
     context.read<ShoppingTrip>().editTripDate(DateTime.now());
     context.read<ShoppingTrip>().editTripDescription("");
     context.read<ShoppingTrip>().editTripTitle("");
@@ -137,29 +135,30 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   }
 
   void _loadCurrentTrip(DocumentSnapshot snapshot) {
-        DateTime date = DateTime.now();
-        List<String> beneficiaries = <String>[];
-        Map<String, Item> items = <String, Item>{};
-        date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
-        (snapshot['beneficiaries'] as List<String>).forEach((uid) {
-          uid_name.add(uid);
-        });
-        setState(() {
-          cur_trip.initializeTripFromDB(snapshot['uuid'],
-              (snapshot.data() as Map<String, dynamic>)['title'], date,
-              (snapshot.data() as Map<String, dynamic>)['description'],
-              (snapshot.data() as Map<String, dynamic>)['host'],
-              uid_name);
-        });
+    DateTime date = DateTime.now();
+    List<String> beneficiaries = <String>[];
+    Map<String, Item> items = <String, Item>{};
+    date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
+    (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
+      uid_name.add(uid);
+    });
+    // setState(() {
+    cur_trip.initializeTripFromDB(
+        snapshot['uuid'],
+        (snapshot.data() as Map<String, dynamic>)['title'],
+        date,
+        (snapshot.data() as Map<String, dynamic>)['description'],
+        (snapshot.data() as Map<String, dynamic>)['host'],
+        uid_name);
+    // });
   }
-
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: context.read<ShoppingTrip>().date,
-        firstDate: DateTime(2022),
-        lastDate: DateTime(2050),
+      context: context,
+      initialDate: context.read<ShoppingTrip>().date,
+      firstDate: DateTime(2022),
+      lastDate: DateTime(2050),
     );
     if (picked != null && picked != context.read<ShoppingTrip>().date) {
       context.read<ShoppingTrip>().editTripDate(picked);
@@ -167,96 +166,106 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   }
 
   Future<void> updateGridView(bool new_trip) async {
-      if(new_trip) {
-        print("made here");
-        await context.read<ShoppingTrip>().initializeTrip(
-            context.read<ShoppingTrip>().title,
-            context.read<ShoppingTrip>().date,
-            context.read<ShoppingTrip>().description,
-            uid_name,
-            curUser!.uid);
-        context.read<ShoppingTrip>().addBeneficiary(hostUUID);
-        for(var friend in friend_bene) {
-          context.read<ShoppingTrip>().addBeneficiary(friend);
-          context.read<Cowboy>().addTripToBene(friend, context.read<ShoppingTrip>().uuid);
-               //addTripToBene(String bene_uuid, String trip_uuid)
+    if (new_trip) {
+      print("made here");
+      await context.read<ShoppingTrip>().initializeTrip(
+          context.read<ShoppingTrip>().title,
+          context.read<ShoppingTrip>().date,
+          context.read<ShoppingTrip>().description,
+          uid_name,
+          curUser!.uid);
+      context.read<ShoppingTrip>().addBeneficiary(hostUUID);
+      for (var friend in friend_bene) {
+        context.read<ShoppingTrip>().addBeneficiary(friend);
+        context
+            .read<Cowboy>()
+            .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
+        //addTripToBene(String bene_uuid, String trip_uuid)
+      }
+      context.read<Cowboy>().addTrip(
+            context.read<ShoppingTrip>().uuid,
+          );
+    } else {
+      List<String> new_bene_list = [];
+      //check if any bene needs to be removed
+      context.read<ShoppingTrip>().beneficiaries.forEach((uid) {
+        if (!friend_bene.contains(uid)) {
+          //below doesn't work
+          context
+              .read<Cowboy>()
+              .RemoveTripFromBene(uid, context.read<ShoppingTrip>().uuid);
+          context.read<ShoppingTrip>().removeBeneficiary(uid);
+        } else {
+          new_bene_list.add(uid);
         }
-        context.read<Cowboy>().addTrip(context.read<ShoppingTrip>().uuid,);
-      } else {
-        List<String> new_bene_list = [];
-        //check if any bene needs to be removed
-        context.read<ShoppingTrip>().beneficiaries.forEach((uid) {
-          if(!friend_bene.contains(uid)){
-            //below doesn't work
-            context.read<Cowboy>().RemoveTripFromBene(uid,context.read<ShoppingTrip>().uuid);
-            context.read<ShoppingTrip>().removeBeneficiary(uid);
-          }else{
-            new_bene_list.add(uid);
-          }
-        });
-        context.read<ShoppingTrip>().setBeneficiary(new_bene_list);
-        //check if new bene need to be added
-        for(var friend in friend_bene) {
-          if(!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
-            //context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
-            context.read<Cowboy>().addTripToBene(friend, context.read<ShoppingTrip>().uuid,);
-
-          }
-          //addTripToBene(String bene_uuid, String trip_uuid)
+      });
+      context.read<ShoppingTrip>().setBeneficiary(new_bene_list);
+      //check if new bene need to be added
+      for (var friend in friend_bene) {
+        if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
+          //context.read<ShoppingTrip>().addBeneficiary(friend, context.read<Cowboy>().friends[friend]);
+          context.read<Cowboy>().addTripToBene(
+                friend,
+                context.read<ShoppingTrip>().uuid,
+              );
         }
-        context.read<ShoppingTrip>().updateTripMetadata(
+        //addTripToBene(String bene_uuid, String trip_uuid)
+      }
+      context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
             context.read<ShoppingTrip>().description,
             context.read<ShoppingTrip>().beneficiaries,
-        );
-        // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
-      }
+          );
+      // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
+    }
   }
 
-  List<MultiSelectItem<String>> loadFriendsName(QuerySnapshot snapshot){
+  List<MultiSelectItem<String>> loadFriendsName(QuerySnapshot snapshot) {
     snapshot.docs.forEach((document) {
-      friendsName[document['uuid']]=document['first_name'];
+      friendsName[document['uuid']] = document['first_name'];
     });
-    return friendsName.keys.toList().map((uid) =>
-        MultiSelectItem<String>(uid, friendsName[uid]!)
-    ).toList();
+    return friendsName.keys
+        .toList()
+        .map((uid) => MultiSelectItem<String>(uid, friendsName[uid]!))
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
-        return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: (newList) ? const Text(
-              'Create List',
-              style: TextStyle(color: Colors.black),
-            ) :
-            Text(
-              'List Settings',
-              style: TextStyle(fontSize: 18, color: Colors.black),
-            ),
-            systemOverlayStyle: SystemUiOverlayStyle(
-              statusBarBrightness: Brightness.light,
-            ),
-            iconTheme: IconThemeData(
-              color: Colors.black,
-            ),
-            backgroundColor: light_orange,
+    return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: (newList)
+              ? const Text(
+                  'Create List',
+                  style: TextStyle(color: Colors.black),
+                )
+              : Text(
+                  'List Settings',
+                  style: TextStyle(fontSize: 18, color: Colors.black),
+                ),
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.light,
           ),
-          body:
-           FutureBuilder<DocumentSnapshot>(
-                future: tripCollection.doc(trip_uuid).get(),
-            builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return const Text('Something went wrong');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            }
-            if(snapshot.data!.exists){
-              _loadCurrentTrip(snapshot.data!);
-            }
+          iconTheme: IconThemeData(
+            color: Colors.black,
+          ),
+          backgroundColor: light_orange,
+        ),
+        body: FutureBuilder<DocumentSnapshot>(
+            future: tripCollection.doc(trip_uuid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Something went wrong');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snapshot.data!.exists) {
+                _loadCurrentTrip(snapshot.data!);
+              }
               return Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Column(
@@ -284,15 +293,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 ),
                                 controller: _tripTitleController,
                                 onChanged: (value) {
-                                  context.read<ShoppingTrip>().editTripTitle(value);
-                                }
-                            ),
+                                  context
+                                      .read<ShoppingTrip>()
+                                      .editTripTitle(value);
+                                }),
                           ),
                         ),
                       ],
                     ),
 
-                    SizedBox(height: 10.0,),
+                    SizedBox(
+                      height: 10.0,
+                    ),
 
                     // trip date
                     Row(
@@ -304,12 +316,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        SizedBox(width: 10.0,),
+                        SizedBox(
+                          width: 10.0,
+                        ),
                         Text(
-                          '${context
-                              .watch<ShoppingTrip>()
-                              .date
-                              .toLocal()}'.split(' ')[0].replaceAll('-', '/'),
+                          '${context.watch<ShoppingTrip>().date.toLocal()}'
+                              .split(' ')[0]
+                              .replaceAll('-', '/'),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -317,13 +330,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         ),
                         //SizedBox(width: 5.0,),
                         IconButton(
-                          icon: Icon(Icons.calendar_today, color: orange,),
+                          icon: Icon(
+                            Icons.calendar_today,
+                            color: orange,
+                          ),
                           onPressed: () => _selectDate(context),
                         ),
                       ],
                     ),
 
-                    SizedBox(height: 10.0,),
+                    SizedBox(
+                      height: 10.0,
+                    ),
 
                     // description header
                     Row(
@@ -354,79 +372,101 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 ),
                                 controller: _tripDescriptionController,
                                 onChanged: (value) {
-                                  context.read<ShoppingTrip>().editTripDescription(
-                                      value);
-                                }
-                            ),
+                                  context
+                                      .read<ShoppingTrip>()
+                                      .editTripDescription(value);
+                                }),
                           ),
                         ),
                       ],
                     ),
 
-                    SizedBox(height: 10.0,),
+                    SizedBox(
+                      height: 10.0,
+                    ),
 
                     // selected friends
                     Container(
-                      child:
-                      StreamBuilder<QuerySnapshot>(
-                        stream: userCollection.where('uuid', whereIn:context.read<Cowboy>().friends).snapshots(),
-                        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                          if (snapshot.hasError) {
-                            return Text('Something went wrong StreamBuilder');
-                          }
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return CircularProgressIndicator();
-                          }
-                          print(snapshot.data!.docs.length);
-                          return MultiSelectDialogField(
-                            searchable: true,
-                            items: loadFriendsName(snapshot.data!),
-                            initialValue: context
-                                .read<ShoppingTrip>()
-                                .beneficiaries,
-                            title: Text('Friends'),
-                            selectedColor: dark_beige,
-                            decoration: BoxDecoration(
-                              color: dark_beige.withOpacity(0.25),
-                              borderRadius: BorderRadius.all(Radius.circular(40)),
-                              border: Border.all(
-                                color: darker_beige,
-                                width: 2,
+                      child: StreamBuilder<QuerySnapshot>(
+                          stream: userCollection
+                              // .where('uuid',
+                              //     whereIn:
+                              //         context.read<Cowboy>().friends.isEmpty
+                              //             ? ['']
+                              //             : context.read<Cowboy>().friends)
+                              .snapshots(),
+                          builder:
+                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return Text('Something went wrong StreamBuilder');
+                            }
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            }
+                            List<MultiSelectItem<String>> friends = [];
+                            print(snapshot.data!.docs[1].get('uuid'));
+
+                            snapshot.data!.docs.forEach((document) {
+                              if (context
+                                  .read<Cowboy>()
+                                  .friends
+                                  .contains(document.get('uuid'))) {
+                                friends.add(MultiSelectItem<String>(
+                                    document.get('uuid'),
+                                    document.get('first_name')));
+                              }
+                            });
+
+                            print(snapshot.data!.docs.length);
+                            return MultiSelectDialogField(
+                              searchable: true,
+                              items: friends,
+                              initialValue:
+                                  context.read<ShoppingTrip>().beneficiaries,
+                              title: Text('Friends'),
+                              selectedColor: dark_beige,
+                              decoration: BoxDecoration(
+                                color: dark_beige.withOpacity(0.25),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(40)),
+                                border: Border.all(
+                                  color: darker_beige,
+                                  width: 2,
+                                ),
                               ),
-                            ),
-                            chipDisplay: MultiSelectChipDisplay(
-                              onTap: (item) {
-                                setState(() {
-                                  context
-                                      .read<ShoppingTrip>()
-                                      .beneficiaries
-                                      .remove(item);
+                              chipDisplay: MultiSelectChipDisplay(
+                                onTap: (item) {
+                                  setState(() {
+                                    context
+                                        .read<ShoppingTrip>()
+                                        .beneficiaries
+                                        .remove(item);
+                                  });
+                                },
+                              ),
+                              buttonIcon: Icon(
+                                Icons.person,
+                                color: orange,
+                              ),
+                              buttonText: Text(
+                                'Selected Friends',
+                                style: TextStyle(
+                                  color: darker_beige,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              onConfirm: (results) {
+                                print(results.toList());
+                                results.forEach((friend) {
+                                  if (!friend_bene.contains(friend.toString()))
+                                    friend_bene.add(friend.toString());
                                 });
+                                print(friend_bene);
                               },
-                            ),
-                            buttonIcon: Icon(
-                              Icons.person,
-                              color: orange,
-                            ),
-                            buttonText: Text(
-                              'Selected Friends',
-                              style: TextStyle(
-                                color: darker_beige,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            onConfirm: (results) {
-                              print(results.toList());
-                              results.forEach((friend) {
-                                if(!friend_bene.contains(friend.toString()))
-                                  friend_bene.add(friend.toString());
-                              });
-                              print(friend_bene);
-                            },
-                          );
-                        }
-                      ),
+                            );
+                          }),
                     ),
 
                     // spacer
@@ -442,16 +482,20 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             borderRadius: BorderRadius.circular(25.0),
                           ),
                           child: TextButton(
-                            child: (newList) ? Text(
-                              'Create List',
-                              style: TextStyle(fontSize: 18, color: Colors.black),
-                            ) : Text(
-                              'Edit List',
-                              style: TextStyle(fontSize: 18, color: Colors.black),
-                            ),
+                            child: (newList)
+                                ? Text(
+                                    'Create List',
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.black),
+                                  )
+                                : Text(
+                                    'Edit List',
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.black),
+                                  ),
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  orange),
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(orange),
                               shape: MaterialStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
@@ -459,18 +503,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               ),
                             ),
                             onPressed: () async {
-                              if (context
-                                  .read<ShoppingTrip>()
-                                  .title != '') {
+                              if (context.read<ShoppingTrip>().title != '') {
                                 await updateGridView(newList);
                                 setState(() {});
                                 Navigator.pop(context);
                                 if (newList) {
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (context) =>
-                                          EditListScreen(context
-                                              .read<ShoppingTrip>()
-                                              .uuid)));
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => EditListScreen(
+                                              context
+                                                  .read<ShoppingTrip>()
+                                                  .uuid)));
                                 }
                               } else {
                                 // print("triggered");
@@ -504,11 +548,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           child: TextButton(
                             child: Text(
                               'Delete List',
-                              style: TextStyle(fontSize: 18, color: Colors.black),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.black),
                             ),
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                  red),
+                              backgroundColor:
+                                  MaterialStateProperty.all<Color>(red),
                               shape: MaterialStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
@@ -521,9 +566,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 if (!newList) {
                                   print('delete');
                                   context.read<ShoppingTrip>().deleteTripDB();
-                                  context.read<Cowboy>().removeTrip(context
-                                      .read<ShoppingTrip>()
-                                      .uuid);
+                                  context.read<Cowboy>().removeTrip(
+                                      context.read<ShoppingTrip>().uuid);
                                 }
                                 Navigator.of(context).popUntil((route) {
                                   return route.settings.name == ListsScreen.id;
@@ -533,15 +577,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             },
                           ),
                         ),
-                        SizedBox(height: 200.0,),
+                        SizedBox(
+                          height: 200.0,
+                        ),
                       ],
                     ),
                   ],
                 ),
               );
-            }
-    )
-        );
+            }));
   }
 
   check_delete(BuildContext context) {
@@ -554,16 +598,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           actions: <Widget>[
             FlatButton(
                 onPressed: () => {
-                  delete_list = true,
-                  Navigator.of(context).pop(),
-                  },
-                child: const Text("DELETE")
-            ),
+                      delete_list = true,
+                      Navigator.of(context).pop(),
+                    },
+                child: const Text("DELETE")),
             FlatButton(
               onPressed: () => {
                 delete_list = false,
                 Navigator.of(context).pop(),
-
               },
               child: const Text("CANCEL"),
             ),
