@@ -38,7 +38,6 @@ class ShoppingTripQuery extends StatefulWidget {
   _ShoppingTripQueryState createState() => _ShoppingTripQueryState();
 }
 
-
 class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
   late String listUUID;
 
@@ -69,6 +68,7 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
             if(desc_short.length > 50){
               desc_short = desc_short.substring(0,11) + "...";
             }
+
             return Container(
               margin: const EdgeInsets.all(10.0),
               width: 80,
@@ -342,6 +342,7 @@ class _ListsScreenState extends State<ListsScreen> {
                 return CircularProgressIndicator();
               }
               readInData(snapshot.data!);
+              print(context.watch<Cowboy>().shoppingTrips);
 
               return ShoppingCollectionQuery();
             }
@@ -354,7 +355,6 @@ class _ListsScreenState extends State<ListsScreen> {
             onPressed: () async {
               await Navigator.push(
                   context,
-
                   MaterialPageRoute(builder: (context) => CreateListScreen(true,"dummy")));
             },
           ),

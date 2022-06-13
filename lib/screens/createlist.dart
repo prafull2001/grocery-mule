@@ -26,6 +26,7 @@ class UserName extends StatefulWidget {
 class _UserNameState extends State<UserName> {
   late String userUUID;
   late String name;
+
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -207,7 +208,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   late String trip_uuid;
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
-
   var _tripDescriptionController;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
@@ -221,6 +221,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
   DateTime localTime = DateTime.now();
+
 
   @override
   void initState() {
@@ -258,6 +259,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     //Map<String, Item> items = <String, Item>{};
     date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
     localTime = date;
+
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
       friend_bene.add(uid);
     });
@@ -385,6 +387,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 _loadCurrentTrip(snapshot.data!);
               }
               print(localTime);
+
               return Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Column(
@@ -520,6 +523,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                     document['first_name']));
                               }
                             });
+
                             return MultiSelectDialogField(
                               searchable: true,
                               items: friends,
@@ -550,13 +554,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               ),
                               onConfirm: (results) {
                                 //print(results.toList());
-                                /*
-                                results.forEach((friend) {
-                                  if (!friend_bene.contains(friend.toString()))
-                                    friend_bene.add(friend.toString());
-                                });
-
-                                 */
                                 friend_bene = results.map((e) => e.toString()).toList();
                                 print(context.read<ShoppingTrip>().beneficiaries);
                               },
@@ -591,7 +588,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             style: ButtonStyle(
                               backgroundColor:
                                   MaterialStateProperty.all<Color>(orange),
-
                               shape: MaterialStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
