@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
+import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/dev/migration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -242,6 +243,13 @@ class _ListsScreenState extends State<ListsScreen> {
                 onTap: () {
                   //Navigator.pop(context);
                   Navigator.pushNamed(context, Migration.id);
+                },
+              ),
+              ListTile(
+                title: const Text('Paypal testing'),
+                onTap: () {
+                  //Navigator.pop(context);
+                  Navigator.pushNamed(context, PayPalPage.id);
                 },
               ),
             ],
