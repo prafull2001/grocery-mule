@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/screens/receipt_scanning.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
@@ -298,6 +299,17 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   itemBuilder: (context, int index){
                     return ItemsPerPerson(aggre_raw_list.keys.toList()[index],aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,key: Key(aggre_raw_list.keys.toList()[index]));
                   },
+                ),
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, ReceiptScanning.id);
+                    },
+                    title: "Receipt Scanning",
+                    color: Colors.blueAccent,
+                  ),
                 ),
               ],
             );

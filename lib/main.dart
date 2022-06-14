@@ -22,6 +22,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:grocery_mule/dev/migration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'dart:io';
 
 bool seen_intro; // global that updates with show_home's value upon startup
@@ -92,7 +93,7 @@ void main() async {
             IntroScreen.id: (context) => IntroScreen(),
             Migration.id: (context) => Migration(),
             PayPalPage.id: (context) => PayPalPage(),
-            ReceiptScanningScreen.id: (context) => ReceiptScanningScreen(),
+            ReceiptScanning.id: (context) => ReceiptScanning(),
           },
         ),
       ),
