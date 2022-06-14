@@ -10,6 +10,7 @@ import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_mule/screens/receipt_scanning.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:auto_size_text/auto_size_text.dart';

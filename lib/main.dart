@@ -6,6 +6,7 @@ import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
+import 'package:grocery_mule/screens/receipt_scanning.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
@@ -91,6 +92,7 @@ void main() async {
             IntroScreen.id: (context) => IntroScreen(),
             Migration.id: (context) => Migration(),
             PayPalPage.id: (context) => PayPalPage(),
+            ReceiptScanningScreen.id: (context) => ReceiptScanningScreen(),
           },
         ),
       ),
