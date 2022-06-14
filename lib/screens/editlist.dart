@@ -8,6 +8,7 @@ import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_mule/screens/receipt_scanning.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
@@ -827,6 +828,10 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             ),
           ],
         ),
+        SizedBox(
+          height: 10,
+        ),
+
       ],
     );
   }

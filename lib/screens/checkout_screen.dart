@@ -131,23 +131,26 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           if(aggre_raw_list[uuid]!.isNotEmpty)...[
           for (var entry in aggre_raw_list[uuid]!.entries)
             simple_item(entry.key, entry.value),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                //comment
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
-                    onPressed: () {
-                    },
-                    title: "PayPal",
-                    color: Colors.amber,
+            if(context.read<Cowboy>().uuid != uuid)...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  //comment
+                  Container(
+                    height: 70,
+                    width: 150,
+                    child: RoundedButton(
+                      onPressed: () {
+                      },
+                      title: "PayPal",
+                      color: Colors.amber,
+                    ),
                   ),
-                ),
 
-              ],
-            )
+                ],
+              )
+            ]
+
           ]else...[
             Container(
               height: 40,
