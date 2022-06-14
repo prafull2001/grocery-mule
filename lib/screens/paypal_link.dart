@@ -10,19 +10,23 @@ import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 class PayPalPage extends StatefulWidget{
   static String id = 'paypal_page';
 
+
   @override
   _PayPalPageSate createState() => _PayPalPageSate();
 }
 
-
+// TODO: make link button visitable and add image with example PayPal.me screen
 
 class _PayPalPageSate extends State<PayPalPage>{
   String paypal_link = '';
+  bool link_valid = false;
 
   void checkStringValidity(String input){
     String paypal_prefix = "https://www.paypal.com/paypalme/";
 
     if (input.startsWith(paypal_prefix) && input.length > 32) {
+      link_valid = true;
+      setState(() {});
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -41,6 +45,8 @@ class _PayPalPageSate extends State<PayPalPage>{
         },
       );
     } else {
+      link_valid = false;
+      setState(() {});
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -74,9 +80,27 @@ class _PayPalPageSate extends State<PayPalPage>{
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SizedBox(
+              height: 30.0,
+            ),
+            Image(
+              image: AssetImage('images/paypal_example.png'),
+            ),
+            SizedBox(
+              height: 30.0,
+            ),
+            Flexible(
+              child: Text(
+                'Please add your full \'https\' PayPal.me link to your profile!',
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             SizedBox(
               height: 30.0,
             ),
@@ -98,6 +122,7 @@ class _PayPalPageSate extends State<PayPalPage>{
                   if(paypal_link != ''){
                     checkStringValidity(paypal_link);
                   } else {
+                    setState(() {});
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -116,7 +141,16 @@ class _PayPalPageSate extends State<PayPalPage>{
                     );
                   }
                 }
-            )
+            ),
+            if(link_valid)...[
+              RoundedButton(
+                  title: 'Check Link',
+                  color: Colors.blueAccent,
+                  onPressed: () {
+
+                  }
+              )
+            ]
           ],
         ),
       ),
