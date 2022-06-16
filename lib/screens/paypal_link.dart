@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PayPalPage extends StatefulWidget{
   static String id = 'paypal_page';
@@ -146,8 +147,13 @@ class _PayPalPageSate extends State<PayPalPage>{
               RoundedButton(
                   title: 'Check Link',
                   color: Colors.blueAccent,
-                  onPressed: () {
-
+                  onPressed: () async{
+                    Uri link = Uri.parse(paypal_link);
+                    print(link);
+                    if(await canLaunchUrl(link)){
+                      print('About to launch $link');
+                      await launchUrl(link);
+                    }
                   }
               )
             ]
