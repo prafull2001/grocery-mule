@@ -17,6 +17,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
   late String email;
   late String firstName;
   late String lastName;
+  late String payPal;
 
   FirebaseAuth auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
@@ -24,7 +25,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+    final CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
@@ -33,14 +34,18 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
             String prevEmail;
             String prevFirst;
             String prevLast;
+            String prevPaypal;
             if (snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> data = snapshot.data?.data() as Map<String, dynamic>;
               prevEmail = data['email'];
               prevFirst = data['first_name'];
               prevLast = data['last_name'];
+              prevPaypal = data['paypal'];
               email = prevEmail;
               firstName = prevFirst;
               lastName = prevLast;
+              payPal = prevPaypal;
+
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
@@ -84,13 +89,21 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                     SizedBox(
                       height: 24.0,
                     ),
+                    TextFormField(
+                      textAlign: TextAlign.center,
+                      initialValue: prevPaypal,
+                      onChanged: (value) {
+                        payPal = value;
+                      },
+                      style: TextStyle(color: Colors.black),
+                    ),
                     RoundedButton(
                         title: 'Update User Info',
                         color: Colors.blueAccent,
                         onPressed: ()
                         async {
                           try {
-                            context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email);
+                            context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email, payPal);
                             print('moving to lists screen');
                             Navigator.pop(context);
                           }  catch (e) {

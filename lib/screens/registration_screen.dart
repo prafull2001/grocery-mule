@@ -3,6 +3,7 @@ import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:provider/provider.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/lists.dart';
@@ -120,7 +121,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       // await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
 
                       Navigator.pop(context);
-                      Navigator.pushNamed(context, ListsScreen.id);
+                      //Navigator.pushNamed(context, ListsScreen.id);
+                      Navigator.pushNamed(context, PayPalPage.id);
                     }
                   } on FirebaseAuthException catch (e) {
                     print(e);

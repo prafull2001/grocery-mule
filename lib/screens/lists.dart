@@ -40,7 +40,7 @@ class ShoppingTripQuery extends StatefulWidget {
 }
 
 class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
-  final CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  final CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   late String listUUID;
 
   @override
@@ -111,8 +111,8 @@ class _ListsScreenState extends State<ListsScreen> {
 
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_test');
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   Future<void>? Cowsnapshot;
   List<String> dev = ["NYxh0dZXDya9VAdSYnOeWkY2wv83","yTWmoo2Qskf3wFcbxaJYUt9qrZM2","nW7NnPdQGcXtj1775nrLdB1igjG2"];
   @override

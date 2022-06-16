@@ -2,7 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
-final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+final CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
 
 // shopping trip provider
 class ShoppingTrip with ChangeNotifier{
