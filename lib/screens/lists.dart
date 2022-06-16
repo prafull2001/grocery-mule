@@ -245,13 +245,6 @@ class _ListsScreenState extends State<ListsScreen> {
                   Navigator.pushNamed(context, Migration.id);
                 },
               ),
-              ListTile(
-                title: const Text('Paypal testing'),
-                onTap: () {
-                  //Navigator.pop(context);
-                  Navigator.pushNamed(context, PayPalPage.id);
-                },
-              ),
             ],
           ),
         ),
