@@ -22,6 +22,33 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
 
+  bool checkPaypalValidity(String input){
+    String paypal_prefix = "https://www.paypal.com/paypalme/";
+
+    if (input.startsWith(paypal_prefix) && input.length > 32) {
+      return true;
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Please enter a valid PayPal.me link.'),
+            actions: [
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+    return false;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -102,12 +129,14 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         color: Colors.blueAccent,
                         onPressed: ()
                         async {
-                          try {
-                            context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email, payPal);
-                            print('moving to lists screen');
-                            Navigator.pop(context);
-                          }  catch (e) {
-                            print(e);
+                          if(checkPaypalValidity(payPal)){
+                            try {
+                              context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email, payPal);
+                              print('moving to lists screen');
+                              Navigator.pop(context);
+                            }  catch (e) {
+                              print(e);
+                            }
                           }
                         }
                     )
