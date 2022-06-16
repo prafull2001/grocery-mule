@@ -8,6 +8,8 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'lists.dart';
+
 class PayPalPage extends StatefulWidget{
   static String id = 'paypal_page';
 
@@ -150,10 +152,12 @@ class _PayPalPageSate extends State<PayPalPage>{
                   onPressed: () async{
                     Uri link = Uri.parse(paypal_link);
                     print(link);
-                    if(await canLaunchUrl(link)){
-                      print('About to launch $link');
-                      await launchUrl(link);
-                    }
+                    // if(await canLaunchUrl(link)){
+                    //   print('About to launch $link');
+                    //   await launchUrl(link);
+                    // }
+                    context.read<Cowboy>().updateCowboyPaypal(paypal_link);
+                    Navigator.pushNamed(context, ListsScreen.id);
                   }
               )
             ]

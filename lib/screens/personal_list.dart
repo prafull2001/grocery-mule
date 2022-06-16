@@ -16,7 +16,7 @@ class PersonalListScreen extends StatefulWidget {
 class _PersonalListScreen extends State<PersonalListScreen> {
   late String hostFirstName;
   late Map<String, Item> list_items;
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   late CollectionReference itemSubCollection;
 
   @override
