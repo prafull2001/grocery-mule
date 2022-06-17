@@ -7,7 +7,7 @@ import 'package:grocery_mule/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
 
-final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+final CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
 
 class cowamigo extends StatefulWidget {
   String id = 'inidividual_friend';

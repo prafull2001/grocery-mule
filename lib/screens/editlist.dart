@@ -32,8 +32,8 @@ class UserName extends StatefulWidget {
 
 class _UserNameState extends State<UserName> {
   late String userUUID;
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('users_02');
+
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -74,8 +74,7 @@ Map<String, Map<IndividualItem, IndividualItemExpanded>> itemObjList = {};
 
 class _ItemsListState extends State<ItemsList> {
   late String tripUUID;
-  CollectionReference tripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
 
   late Stream<QuerySnapshot> getItemsStream;
 
@@ -126,7 +125,7 @@ class _ItemsListState extends State<ItemsList> {
               );
             }).toList(),
           );
-          ;
+          
         });
   }
 
@@ -192,8 +191,8 @@ class _IndividualItemState extends State<IndividualItem> {
   late final String itemID;
   late final String tripID;
   bool isExpanded = false;
-  CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+
+  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   @override
   void initState() {
     itemID = widget.itemID;
@@ -318,8 +317,8 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+
+  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   @override
   void initState() {
     itemID = widget.itemID;
@@ -489,8 +488,8 @@ class _EditListsScreenState extends State<EditListScreen> {
   var _tripDescriptionController;
   User? curUser = FirebaseAuth.instance.currentUser;
   late String tripUUID;
-  CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+
+  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   bool isAdd = false;
   bool invite_guest = false;
   late String hostFirstName;
