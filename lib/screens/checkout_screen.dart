@@ -19,7 +19,7 @@ class UserName extends StatefulWidget {
 
 class _UserNameState extends State<UserName>{
   late String userUUID;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
   @override
   void initState(){
     userUUID = widget.userUUID;
@@ -59,8 +59,8 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreen extends State<CheckoutScreen> {
   Map<String, Map<String,int>> aggre_raw_list = {};
   Map<String, Map<String,int>> aggre_clean_list = {};
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
   late CollectionReference itemSubCollection;
   //map each bene uuid to their own map
   //@override
@@ -131,23 +131,26 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           if(aggre_raw_list[uuid]!.isNotEmpty)...[
           for (var entry in aggre_raw_list[uuid]!.entries)
             simple_item(entry.key, entry.value),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                //comment
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
-                    onPressed: () {
-                    },
-                    title: "PayPal",
-                    color: Colors.amber,
+            if(context.read<Cowboy>().uuid != uuid)...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  //comment
+                  Container(
+                    height: 70,
+                    width: 150,
+                    child: RoundedButton(
+                      onPressed: () {
+                      },
+                      title: "PayPal",
+                      color: Colors.amber,
+                    ),
                   ),
-                ),
 
-              ],
-            )
+                ],
+              )
+            ]
+
           ]else...[
             Container(
               height: 40,
