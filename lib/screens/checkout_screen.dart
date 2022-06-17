@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -48,6 +49,66 @@ class _UserNameState extends State<UserName>{
   }
 }
 
+class PayPalButton extends StatefulWidget {
+  late final String userUUID;
+  PayPalButton(String userUUID){
+    this.userUUID = userUUID;
+  }
+
+  @override
+  _PayPalButtonState createState() => _PayPalButtonState();
+}
+
+class _PayPalButtonState extends State<PayPalButton>{
+  late String userUUID;
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
+  @override
+  void initState(){
+    userUUID = widget.userUUID;
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return StreamBuilder<DocumentSnapshot>(
+        stream: userCollection.doc(userUUID).snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          return
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                //comment
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () async {
+                      String paypalStr = snapshot.data!['paypal'];
+                      Uri paypal_link = Uri.parse(paypalStr);
+                      if(await canLaunchUrl(paypal_link)){
+                        launchUrl(paypal_link);
+                      }
+                    },
+                    title: "PayPal",
+                    color: Colors.amber,
+                  ),
+                ),
+
+              ],
+            );
+        }
+    );
+  }
+  }
+
+
+
+
 
 class CheckoutScreen extends StatefulWidget {
   static String id = 'checkout_screen';
@@ -59,6 +120,7 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreen extends State<CheckoutScreen> {
   Map<String, Map<String,int>> aggre_raw_list = {};
   Map<String, Map<String,int>> aggre_clean_list = {};
+  Map<String, String> paypalLinks = {};
   CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
   late CollectionReference itemSubCollection;
@@ -131,25 +193,26 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           if(aggre_raw_list[uuid]!.isNotEmpty)...[
           for (var entry in aggre_raw_list[uuid]!.entries)
             simple_item(entry.key, entry.value),
-            if(context.read<Cowboy>().uuid != uuid)...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  //comment
-                  Container(
-                    height: 70,
-                    width: 150,
-                    child: RoundedButton(
-                      onPressed: () {
-                      },
-                      title: "PayPal",
-                      color: Colors.amber,
-                    ),
-                  ),
-
-                ],
-              )
-            ]
+             if(context.read<Cowboy>().uuid != uuid)...[
+               PayPalButton(uuid)
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     //comment
+              //     Container(
+              //       height: 70,
+              //       width: 150,
+              //       child: RoundedButton(
+              //         onPressed: () {
+              //         },
+              //         title: "PayPal",
+              //         color: Colors.amber,
+              //       ),
+              //     ),
+              //
+              //   ],
+              // )
+             ]
 
           ]else...[
             Container(
@@ -173,6 +236,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     );
 
   }
+
 
 
   @override
