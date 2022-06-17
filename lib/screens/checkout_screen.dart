@@ -195,23 +195,6 @@ class _CheckoutScreen extends State<CheckoutScreen> {
             simple_item(entry.key, entry.value),
              if(context.read<Cowboy>().uuid != uuid)...[
                PayPalButton(uuid)
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: [
-              //     //comment
-              //     Container(
-              //       height: 70,
-              //       width: 150,
-              //       child: RoundedButton(
-              //         onPressed: () {
-              //         },
-              //         title: "PayPal",
-              //         color: Colors.amber,
-              //       ),
-              //     ),
-              //
-              //   ],
-              // )
              ]
 
           ]else...[
