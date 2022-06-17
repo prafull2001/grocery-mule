@@ -147,7 +147,7 @@ class _PayPalPageSate extends State<PayPalPage>{
             ),
             if(link_valid)...[
               RoundedButton(
-                  title: 'Check Link',
+                  title: 'Finish Login',
                   color: Colors.blueAccent,
                   onPressed: () async{
                     Uri link = Uri.parse(paypal_link);
