@@ -95,7 +95,7 @@ class _PayPalPageSate extends State<PayPalPage>{
             ),
             Flexible(
               child: Text(
-                'Please add your full \'https\' PayPal.me link to your profile!',
+                'Add your full \'https\' PayPal.me link to your profile!',
                 style: TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
@@ -126,8 +126,60 @@ class _PayPalPageSate extends State<PayPalPage>{
                     ListTile(
                       title: Text("Type: \'paypal.me\' in a browser window")
                     ),
-                    Image(
-                      image: AssetImage('images/paypal_example.png'),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          title: Text(
+                            "Tap \'My PayPal.me\'",
+                            style: TextStyle(
+                              fontSize: 17.0,
+                              //fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          children: [
+                            Image(
+                              image: AssetImage('images/step1.png'),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          title: Text(
+                            "Tap \'copy link\'",
+                            style: TextStyle(
+                              fontSize: 17.0,
+                              //fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          children: [
+                            Image(
+                              image: AssetImage('images/step2.png'),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                        title: Text("Paste your link below")
                     ),
                   ],
                 ),
