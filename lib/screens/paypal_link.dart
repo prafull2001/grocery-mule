@@ -84,169 +84,169 @@ class _PayPalPageSate extends State<PayPalPage>{
         ),
         backgroundColor: light_orange,
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 30.0,
-            ),
-            Flexible(
-              child: Text(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 30.0,
+              ),
+              Text(
                 'Add your full \'https\' PayPal.me link to your profile!',
                 style: TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-            ),
-            SizedBox(
-              height: 30.0,
-            ),
-            Card(
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(
-                    color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                borderRadius: BorderRadius.circular(30.0),
+              SizedBox(
+                height: 30.0,
               ),
-              child: Theme(
-                data: Theme.of(context)
-                    .copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  title: Text(
-                    "Finding your PayPal.me link",
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      //fontWeight: FontWeight.w700,
+              Card(
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(
+                      color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    title: Text(
+                      "Finding your PayPal.me link",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        //fontWeight: FontWeight.w700,
+                      ),
                     ),
+                    children: [
+                      ListTile(
+                        title: Text("Type: \'paypal.me\' in a browser window")
+                      ),
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        child: Theme(
+                          data: Theme.of(context)
+                              .copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            title: Text(
+                              "Tap \'My PayPal.me\'",
+                              style: TextStyle(
+                                fontSize: 17.0,
+                                //fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            children: [
+                              Image(
+                                image: AssetImage('images/step1.png'),
+                              ),
+
+                            ],
+                          ),
+                        ),
+                      ),
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        child: Theme(
+                          data: Theme.of(context)
+                              .copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            title: Text(
+                              "Tap \'copy link\'",
+                              style: TextStyle(
+                                fontSize: 17.0,
+                                //fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            children: [
+                              Image(
+                                image: AssetImage('images/step2.png'),
+                              ),
+
+                            ],
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                          title: Text("Paste your link below")
+                      ),
+                    ],
                   ),
-                  children: [
-                    ListTile(
-                      title: Text("Type: \'paypal.me\' in a browser window")
-                    ),
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      child: Theme(
-                        data: Theme.of(context)
-                            .copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          title: Text(
-                            "Tap \'My PayPal.me\'",
-                            style: TextStyle(
-                              fontSize: 17.0,
-                              //fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          children: [
-                            Image(
-                              image: AssetImage('images/step1.png'),
-                            ),
-
-                          ],
-                        ),
-                      ),
-                    ),
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      child: Theme(
-                        data: Theme.of(context)
-                            .copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          title: Text(
-                            "Tap \'copy link\'",
-                            style: TextStyle(
-                              fontSize: 17.0,
-                              //fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          children: [
-                            Image(
-                              image: AssetImage('images/step2.png'),
-                            ),
-
-                          ],
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                        title: Text("Paste your link below")
-                    ),
-                  ],
                 ),
               ),
-            ),
 
-            SizedBox(
-              height: 30.0,
-            ),
-            SizedBox(
-              height: 30.0,
-            ),
-            TextFormField(
-              keyboardType: TextInputType.emailAddress,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black),
-              onChanged: (value) {
-                paypal_link = value;
-              },
-            ),
-            SizedBox(
-              height: 24.0,
-            ),
-            RoundedButton(
-                title: 'Add Paypal Link',
-                color: Colors.blueAccent,
-                onPressed: () {
-                  if(paypal_link != ''){
-                    checkStringValidity(paypal_link);
-                  } else {
-                    setState(() {});
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('This field cannot be empty!'),
-                          actions: [
-                            TextButton(
-                              child: Text("OK"),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                }
-            ),
-            if(link_valid)...[
+              SizedBox(
+                height: 30.0,
+              ),
+              SizedBox(
+                height: 30.0,
+              ),
+              TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black),
+                onChanged: (value) {
+                  paypal_link = value;
+                },
+              ),
+              SizedBox(
+                height: 24.0,
+              ),
               RoundedButton(
-                  title: 'Finish Login',
+                  title: 'Add Paypal Link',
                   color: Colors.blueAccent,
-                  onPressed: () async{
-                    Uri link = Uri.parse(paypal_link);
-                    print(link);
-                    // if(await canLaunchUrl(link)){
-                    //   print('About to launch $link');
-                    //   await launchUrl(link);
-                    // }
-                    context.read<Cowboy>().updateCowboyPaypal(paypal_link);
-                    Navigator.pushNamed(context, ListsScreen.id);
+                  onPressed: () {
+                    if(paypal_link != ''){
+                      checkStringValidity(paypal_link);
+                    } else {
+                      setState(() {});
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('This field cannot be empty!'),
+                            actions: [
+                              TextButton(
+                                child: Text("OK"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   }
-              )
-            ]
-          ],
+              ),
+              if(link_valid)...[
+                RoundedButton(
+                    title: 'Finish Login',
+                    color: Colors.blueAccent,
+                    onPressed: () async{
+                      Uri link = Uri.parse(paypal_link);
+                      print(link);
+                      // if(await canLaunchUrl(link)){
+                      //   print('About to launch $link');
+                      //   await launchUrl(link);
+                      // }
+                      context.read<Cowboy>().updateCowboyPaypal(paypal_link);
+                      Navigator.pushNamed(context, ListsScreen.id);
+                    }
+                )
+              ]
+            ],
+          ),
         ),
       ),
     );
