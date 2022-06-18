@@ -18,7 +18,6 @@ class PayPalPage extends StatefulWidget{
   _PayPalPageSate createState() => _PayPalPageSate();
 }
 
-// TODO: make link button visitable and add image with example PayPal.me screen
 
 class _PayPalPageSate extends State<PayPalPage>{
   String paypal_link = '';
@@ -77,7 +76,12 @@ class _PayPalPageSate extends State<PayPalPage>{
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Add PayPal.me Link'),
+        title: const Text(
+            'Add PayPal.me Link',
+            style: TextStyle(
+              color: Colors.black,
+            ),
+        ),
         backgroundColor: light_orange,
       ),
       body: Padding(
@@ -89,12 +93,6 @@ class _PayPalPageSate extends State<PayPalPage>{
             SizedBox(
               height: 30.0,
             ),
-            Image(
-              image: AssetImage('images/paypal_example.png'),
-            ),
-            SizedBox(
-              height: 30.0,
-            ),
             Flexible(
               child: Text(
                 'Please add your full \'https\' PayPal.me link to your profile!',
@@ -103,6 +101,41 @@ class _PayPalPageSate extends State<PayPalPage>{
                   fontWeight: FontWeight.w700,
                 ),
               ),
+            ),
+            SizedBox(
+              height: 30.0,
+            ),
+            Card(
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(
+                    color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  title: Text(
+                    "Finding your PayPal.me link",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      //fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  children: [
+                    ListTile(
+                      title: Text("Type: \'paypal.me\' in a browser window")
+                    ),
+                    Image(
+                      image: AssetImage('images/paypal_example.png'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            SizedBox(
+              height: 30.0,
             ),
             SizedBox(
               height: 30.0,
