@@ -69,7 +69,14 @@ class _IntroScreenState extends State<IntroScreen> {
         PageViewModel(
           title: "Hey There! 👋",
           body:
-          "Nice to meet you. Sign in with Google or your email and add your PayPal.me link to get started!",
+          "Nice to meet you. Sign in with Google or your email to get started!",
+          image: _buildFirstImage('logo.png'),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Connect with PayPal 💵",
+          body:
+          "Add your PayPal.me link to your account to set up future payments",
           image: _buildFirstImage('logo.png'),
           decoration: pageDecoration,
         ),
