@@ -71,6 +71,12 @@ class ShoppingTrip with ChangeNotifier {
     //notifyListeners();
   }
 
+  editTripDateSync(DateTime date) {
+    _date = date;
+    notifyListeners();
+    print('notif listeners: $_date');
+  }
+
   editTripDescription(String description) {
     _description = description;
   }

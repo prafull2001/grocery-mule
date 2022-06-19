@@ -61,6 +61,124 @@ class _UserNameState extends State<UserName> {
 
 typedef StringVoidFunc = void Function(String, int);
 
+class DatePicker extends StatefulWidget {
+  bool newlist = false;
+  String tripuuid = '';
+
+  DatePicker(bool newlist, String tripuuid) {
+    this.newlist = newlist;
+    this.tripuuid = tripuuid;
+  }
+
+  @override
+  _DatePickerState createState() => _DatePickerState();
+}
+
+class _DatePickerState extends State<DatePicker> {
+
+  bool newlist = false;
+  String tripid = '';
+  DateTime date = DateTime.now();
+  bool clicked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    this.newlist = widget.newlist;
+    this.tripid = widget.tripuuid;
+  }
+
+  _selectDate(BuildContext context, DateTime initdate) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: initdate,
+        firstDate: DateTime(2022),
+        lastDate: DateTime(2050),
+        builder: (context, child) => Theme(
+          data: ThemeData().copyWith(
+              colorScheme: ColorScheme.light(
+                  primary:  Colors.amber,
+                  onPrimary: Colors.white,
+                  onSurface: Colors.black
+              )
+          ),
+          child: child!,
+        )
+    );
+    if (picked != null && picked != context.read<ShoppingTrip>().date) {
+      context.read<ShoppingTrip>().editTripDate(picked);
+      setState(() {
+        // print('setted state uwu');
+        date = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    if (newlist) {
+      return Row(
+        children: [
+          Text('$date'
+              .split(' ')[0]
+              .replaceAll('-', '/'),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          //SizedBox(width: 5.0,),
+          IconButton(
+            icon: Icon(
+              Icons.calendar_today,
+              color: orange,
+            ),
+            onPressed: () => _selectDate(context, DateTime.now()),
+          ),
+        ],
+      );
+    }
+    return FutureBuilder<DocumentSnapshot>(
+      future: tripCollection.doc(tripid).get(),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+
+        if (snapshot.hasError) {
+          return const Text('Something went wrong');
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+        String tdate = context.read<ShoppingTrip>().date.toString();
+        if (!clicked) {
+          tdate = (snapshot.data!['date'] as Timestamp).toDate().toString();
+          clicked = true;
+        }
+        return Row(
+          children: [
+            Text('$tdate'
+                .split(' ')[0]
+                .replaceAll('-', '/'),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            //SizedBox(width: 5.0,),
+            IconButton(
+              icon: Icon(
+                Icons.calendar_today,
+                color: orange,
+              ),
+              onPressed: () => _selectDate(context, DateTime.now()),
+            ),
+          ],
+        );
+      }
+    );
+  }
+}
+
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
@@ -171,9 +289,20 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           child: child!,
        )
     );
-    if (picked != null && picked != context.read<ShoppingTrip>().date) {
+    if (picked != null && picked != context.read<ShoppingTrip>().date && picked != localTime) {
       context.read<ShoppingTrip>().editTripDate(picked);
-      localTime = picked;
+      // TODO temporary fix only, encapsulating within class should fix
+      if (newList) {
+        setState(() {
+          print('overwrite localTime: $localTime');
+          localTime = picked;
+        });
+      } else {
+        localTime = picked;
+        context.read<ShoppingTrip>().editTripDateSync(picked);
+        print('synced provider: $localTime');
+      }
+      //localTime = picked;
     }
   }
 
@@ -330,24 +459,23 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         SizedBox(
                           width: 10.0,
                         ),
-                        Text('${context
-                            .watch<ShoppingTrip>().date}'
-                              .split(' ')[0]
-                              .replaceAll('-', '/'),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        //SizedBox(width: 5.0,),
-                        IconButton(
-                          icon: Icon(
-                            Icons.calendar_today,
-                            color: orange,
-                          ),
-                          onPressed: () =>
-                              setState(() async { await _selectDate(context);}),
-                        ),
+                        DatePicker(newList, trip_uuid),
+                        // Text('${context.read<ShoppingTrip>().date}'
+                        //       .split(' ')[0]
+                        //       .replaceAll('-', '/'),
+                        //   style: TextStyle(
+                        //     fontSize: 20,
+                        //     fontWeight: FontWeight.w400,
+                        //   ),
+                        // ),
+                        // //SizedBox(width: 5.0,),
+                        // IconButton(
+                        //   icon: Icon(
+                        //     Icons.calendar_today,
+                        //     color: orange,
+                        //   ),
+                        //   onPressed: () => _selectDate(context),
+                        // ),
                       ],
                     ),
 
@@ -587,7 +715,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   ],
                 ),
               );
-            }));
+            })
+    );
   }
 
   check_delete(BuildContext context) {
