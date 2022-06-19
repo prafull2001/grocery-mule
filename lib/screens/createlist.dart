@@ -278,6 +278,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               if (snapshot.data!.exists) {
                 _loadCurrentTrip(snapshot.data!);
               }
+              print(localTime);
               return Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Column(
@@ -331,7 +332,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         SizedBox(
                           width: 10.0,
                         ),
-                        Text('$localTime'
+                        Text('${context
+                            .watch<ShoppingTrip>().date}'
                               .split(' ')[0]
                               .replaceAll('-', '/'),
                           style: TextStyle(
@@ -345,7 +347,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             Icons.calendar_today,
                             color: orange,
                           ),
-                          onPressed: () => _selectDate(context),
+                          onPressed: () =>
+                              setState(() async { await _selectDate(context);}),
                         ),
                       ],
                     ),
