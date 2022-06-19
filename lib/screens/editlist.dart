@@ -125,7 +125,7 @@ class _ItemsListState extends State<ItemsList> {
               );
             }).toList(),
           );
-          
+
         });
   }
 
