@@ -191,6 +191,9 @@ class Cowboy with ChangeNotifier {
     _friends.remove(friendUUID);
     print('friends again: $_friends');
     updateCowboyFriendsRemove(friendUUID);
+    userCollection.doc(friendUUID).update(
+        {'friends': FieldValue.arrayRemove([_uuid])}
+    );
     notifyListeners();
   }
   updateCowboyRequestsRemove(String friendUUID) {
