@@ -1,3 +1,5 @@
+//import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -88,7 +90,8 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String trip_uuid, String title,  DateTime date,String desc) {
+
+  addTrip(String trip_uuid) {
     _shoppingTrips.add(trip_uuid);
     updateCowboyTrips();
     notifyListeners();
@@ -158,6 +161,11 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
   }
 
+  leaveTrip(String tripUid) async {
+    _shoppingTrips.remove(tripUid);
+    userCollection.doc(_uuid).update({'shopping_trips': _shoppingTrips});
+    notifyListeners();
+  }
   removeFriendRequest(String friendUUID) {
     _requests.remove(friendUUID);
     updateCowboyRequestsRemove(friendUUID);
@@ -184,16 +192,15 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(friendUUID).update({'friends': amigos});
   }
 
-  addTripToBene(String bene_uuid, String trip_uuid, String title, DateTime date, String desc ){
-    String entry = title+ "|~|" + date.toString() + "|~|" + desc;
-    userCollection.doc(bene_uuid).update({'shopping_trips.${trip_uuid}': entry});
+  // updates cowboy with bene_uuid's shopping trips to have trip_uuid
+  addTripToBene(String bene_uuid, String trip_uuid){
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
   }
-  //change this to overwrite
+  // removes trip with trip_uuid from cowboy with bene_uuid
   RemoveTripFromBene(String bene_uuid, String trip_uuid) async {
-    Map<String,String> shoppingTrips = await fetchBeneTrip(bene_uuid);
-    shoppingTrips.remove(trip_uuid);
-    userCollection.doc(bene_uuid).update({'shopping_trips': shoppingTrips});
+    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
   }
+
   // adds friend request, notifies listeners, and updates database
   sendFriendRequest(String friendUUID) {
     // _requests.add(friendUUID);
@@ -201,6 +208,8 @@ class Cowboy with ChangeNotifier {
     // notifyListeners();
   }
   updateCowboyRequestsAdd(String friendUUID) {
+
     userCollection.doc(friendUUID).update({'requests':FieldValue.arrayUnion([_uuid])});
+
   }
 }

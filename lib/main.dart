@@ -80,7 +80,7 @@ void main() async {
             LoginScreen.id: (context) => LoginScreen(),
             RegistrationScreen.id: (context) => RegistrationScreen(),
             ListsScreen.id: (context) => ListsScreen(),
-            CreateListScreen.id: (context) => CreateListScreen(true),
+            CreateListScreen.id: (context) => CreateListScreen(true, "dummy"),
             EditListScreen.id: (context) => EditListScreen(null),
             UserInfoScreen.id: (context) => UserInfoScreen(),
             ConfirmEmailScreen.id: (context) => ConfirmEmailScreen(),

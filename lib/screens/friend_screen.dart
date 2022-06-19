@@ -45,7 +45,7 @@ class _CowamigoState extends State<cowamigo> with SingleTickerProviderStateMixin
         stream: userCollection.doc(uuid).snapshots(),
         builder: (context, snapshot) {
           Map<String, dynamic> result = snapshot.data?.data() as Map<String, dynamic>;
-          if (snapshot.data != null) {
+          if (result!=null && snapshot.data!=null) {
             name = result['first_name'].toString() + ' ' + result['last_name'].toString();
             email = result['email'].toString();
           }
