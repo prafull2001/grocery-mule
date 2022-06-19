@@ -29,7 +29,7 @@ class _UserNameState extends State<UserName> {
   late String userUUID;
   late String name;
   CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('users_02');
+      FirebaseFirestore.instance.collection('paypal_users');
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -92,7 +92,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
   CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+      FirebaseFirestore.instance.collection('paypal_shopping_trips');
   var _tripDescriptionController;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;

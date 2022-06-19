@@ -122,7 +122,7 @@ class ShoppingCollectionQuery extends StatefulWidget {
 
 class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
   final CollectionReference shoppingTripCollection =
-  FirebaseFirestore.instance.collection('shopping_trips_02');
+  FirebaseFirestore.instance.collection('paypal_shopping_trips');
   //late List<String> personalTrips;
   @override
   void initState() {
