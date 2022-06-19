@@ -416,16 +416,17 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               return CircularProgressIndicator();
                             }
                             List<MultiSelectItem<String>> friends = [];
-                            print(snapshot.data!.docs[1].get('uuid'));
+                            //print("first friend: ${snapshot.data!.docs[1].get('uuid')}");
 
                             snapshot.data!.docs.forEach((document) {
+                              print("next friend: ${document['uuid']}");
                               if (context
                                   .read<Cowboy>()
                                   .friends
-                                  .contains(document.get('uuid'))) {
+                                  .contains(document['uuid'])) {
                                 friends.add(MultiSelectItem<String>(
-                                    document.get('uuid'),
-                                    document.get('first_name')));
+                                    document['uuid'],
+                                    document['first_name']));
                               }
                             });
                             return MultiSelectDialogField(

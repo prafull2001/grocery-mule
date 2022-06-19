@@ -16,7 +16,7 @@ class ShoppingTrip with ChangeNotifier {
   List<String> _beneficiaries = [];
   List<String> itemUUID = [];
   late Receipt _receipt;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
+  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
 
   // from user creation screen for metadata
   Future<void> initializeTrip(String title, DateTime date, String description,
@@ -150,7 +150,7 @@ class ShoppingTrip with ChangeNotifier {
   removeBeneficiaries(List<String> bene_uuids) {
     _beneficiaries.removeWhere((element) => bene_uuids.contains(element));
     print("modified");
-    print(_beneficiaries);
+    print(bene_uuids);
     bene_uuids.forEach((String bene_uuid) {
       removeBeneficiaryFromItems(bene_uuid);
       tripCollection.doc(_uuid).update({'beneficiaries': FieldValue.arrayRemove([bene_uuid])});
