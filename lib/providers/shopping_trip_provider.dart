@@ -147,6 +147,12 @@ class ShoppingTrip with ChangeNotifier {
     notifyListeners();
   }
 
+  removeStaleTripUUIDS(){
+    _beneficiaries.forEach((bene_uuid) {
+      userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([_uuid])});
+    });
+  }
+
   removeBeneficiaries(List<String> bene_uuids) {
     _beneficiaries.removeWhere((element) => bene_uuids.contains(element));
     print("modified");
