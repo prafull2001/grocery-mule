@@ -2,8 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
-
-final CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
+import 'package:grocery_mule/dev/collection_references.dart';
 
 
 // shopping trip provider
@@ -16,7 +15,6 @@ class ShoppingTrip with ChangeNotifier {
   List<String> _beneficiaries = [];
   List<String> itemUUID = [];
   late Receipt _receipt;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
 
   // from user creation screen for metadata
   Future<void> initializeTrip(String title, DateTime date, String description,

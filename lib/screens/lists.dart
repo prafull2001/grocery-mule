@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,7 +40,6 @@ class ShoppingTripQuery extends StatefulWidget {
 
 
 class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
-  final CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   late String listUUID;
 
   @override
@@ -52,7 +51,7 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
   Widget build(BuildContext context) {
     // TODO: implement build
     return StreamBuilder<DocumentSnapshot>(
-        stream: shoppingTripCollection.doc(listUUID).snapshots(),
+        stream: tripCollection.doc(listUUID).snapshots(),
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -121,8 +120,6 @@ class ShoppingCollectionQuery extends StatefulWidget {
 }
 
 class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
-  final CollectionReference shoppingTripCollection =
-  FirebaseFirestore.instance.collection('paypal_shopping_trips');
   //late List<String> personalTrips;
   @override
   void initState() {
@@ -133,7 +130,7 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return StreamBuilder<QuerySnapshot>(
-        stream: shoppingTripCollection.orderBy('date',descending: true).snapshots(),
+        stream: tripCollection.orderBy('date',descending: true).snapshots(),
         builder:
             (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -178,8 +175,6 @@ class _ListsScreenState extends State<ListsScreen> {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
 
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   Future<void>? Cowsnapshot;
   List<String> dev = [
     "NYxh0dZXDya9VAdSYnOeWkY2wv83",

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 class UserInfoScreen extends StatefulWidget {
   static String id = 'userinfo_screen';
@@ -52,7 +53,6 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(

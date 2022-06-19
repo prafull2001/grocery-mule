@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 import 'dart:io';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -28,8 +29,6 @@ class UserName extends StatefulWidget {
 class _UserNameState extends State<UserName> {
   late String userUUID;
   late String name;
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('paypal_users');
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -91,8 +90,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   late String trip_uuid;
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
-  CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('paypal_shopping_trips');
+
   var _tripDescriptionController;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
@@ -200,25 +198,25 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().uuid,
           );
     } else {
-      print("made hereee 1");
+      print("starting to edit list");
       List<String> removeList = [];
-      print("cur bene: " + context.read<ShoppingTrip>().beneficiaries.toString());
-      print("new bene: " + friend_bene.toString());
       context.read<ShoppingTrip>().beneficiaries.forEach((old_bene) {
-        if(!friend_bene.contains(old_bene)) {
+        if(!friend_bene.contains(old_bene) && old_bene != context.read<Cowboy>().uuid) {
           print("remove: " + old_bene);
           removeList.add(old_bene);
         }
       });
       //check if any bene needs to be removed
+      print("removeList: " + removeList.toString());
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
 
       //check if new bene need to be added
       for (var friend in friend_bene) {
 
         if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
-          print(friend);
-           context.read<ShoppingTrip>().addBeneficiary(friend);
+          //print(friend);
+          print("adding new bene: " + friend);
+          context.read<ShoppingTrip>().addBeneficiary(friend);
           //context.read<Cowboy>().addTripToBene(friend, context.read<ShoppingTrip>().uuid,);
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
@@ -422,7 +420,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             //print("first friend: ${snapshot.data!.docs[1].get('uuid')}");
 
                             snapshot.data!.docs.forEach((document) {
-                              print("next friend: ${document['uuid']}");
                               if (context
                                   .read<Cowboy>()
                                   .friends
@@ -491,7 +488,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                         fontSize: 18, color: Colors.black),
                                   )
                                 : Text(
-                                    'Edit List',
+                                    'Save Changes',
                                     style: TextStyle(
                                         fontSize: 18, color: Colors.black),
                                   ),
@@ -506,6 +503,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             ),
                             onPressed: () async {
                               if (context.read<ShoppingTrip>().title != '') {
+                                print("editing list");
                                 await updateGridView(newList);
                                 setState(() {});
                                 Navigator.pop(context);

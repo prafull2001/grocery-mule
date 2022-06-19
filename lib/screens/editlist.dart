@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'createlist.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 typedef StringVoidFunc = void Function(String, int);
 
@@ -33,7 +34,7 @@ class UserName extends StatefulWidget {
 class _UserNameState extends State<UserName> {
   late String userUUID;
 
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
+
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -74,7 +75,7 @@ Map<String, Map<IndividualItem, IndividualItemExpanded>> itemObjList = {};
 
 class _ItemsListState extends State<ItemsList> {
   late String tripUUID;
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
+
 
   late Stream<QuerySnapshot> getItemsStream;
 
@@ -192,7 +193,7 @@ class _IndividualItemState extends State<IndividualItem> {
   late final String tripID;
   bool isExpanded = false;
 
-  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
+
   @override
   void initState() {
     itemID = widget.itemID;
@@ -203,7 +204,7 @@ class _IndividualItemState extends State<IndividualItem> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: shoppingTripCollection
+        stream: tripCollection
             .doc(tripID)
             .collection('items')
             .doc(itemID)
@@ -318,7 +319,6 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
   late final String itemID;
   late final String tripID;
 
-  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   @override
   void initState() {
     itemID = widget.itemID;
@@ -329,7 +329,7 @@ class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: shoppingTripCollection
+        stream: tripCollection
             .doc(tripID)
             .collection('items')
             .doc(itemID)
@@ -489,7 +489,6 @@ class _EditListsScreenState extends State<EditListScreen> {
   User? curUser = FirebaseAuth.instance.currentUser;
   late String tripUUID;
 
-  CollectionReference shoppingTripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
   bool isAdd = false;
   bool invite_guest = false;
   late String hostFirstName;
@@ -501,7 +500,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   @override
   void initState() {
     tripUUID = widget.tripUUID!;
-    listStream = shoppingTripCollection.doc(tripUUID).snapshots();
+    listStream = tripCollection.doc(tripUUID).snapshots();
     hostFirstName = context.read<Cowboy>().firstName;
 
     // null value problem here???
@@ -682,7 +681,7 @@ class _EditListsScreenState extends State<EditListScreen> {
 
       ),
       body: StreamBuilder<DocumentSnapshot<Object?>>(
-          stream: shoppingTripCollection.doc(tripUUID).snapshots(),
+          stream: tripCollection.doc(tripUUID).snapshots(),
           builder:
               (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
             if (snapshot.hasError) {

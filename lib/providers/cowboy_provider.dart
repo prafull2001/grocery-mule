@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
-final CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
 
 class Cowboy with ChangeNotifier {
   String _uuid = '';
