@@ -571,6 +571,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                   context.read<ShoppingTrip>().deleteTripDB();
                                   context.read<Cowboy>().removeTrip(
                                       context.read<ShoppingTrip>().uuid);
+                                  context.read<ShoppingTrip>().removeStaleTripUUIDS();
                                 }
                                 Navigator.of(context).popUntil((route) {
                                   return route.settings.name == ListsScreen.id;
