@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 class UserInfoScreen extends StatefulWidget {
   static String id = 'userinfo_screen';
@@ -17,14 +18,41 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
   late String email;
   late String firstName;
   late String lastName;
+  late String payPal;
 
   FirebaseAuth auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
 
+  bool checkPaypalValidity(String input){
+    String paypal_prefix = "https://www.paypal.com/paypalme/";
+
+    if (input.startsWith(paypal_prefix) && input.length > 32) {
+      return true;
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Please enter a valid PayPal.me link.'),
+            actions: [
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+    return false;
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
@@ -33,14 +61,18 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
             String prevEmail;
             String prevFirst;
             String prevLast;
+            String prevPaypal;
             if (snapshot.connectionState == ConnectionState.done) {
               Map<String, dynamic> data = snapshot.data?.data() as Map<String, dynamic>;
               prevEmail = data['email'];
               prevFirst = data['first_name'];
               prevLast = data['last_name'];
+              prevPaypal = data['paypal'];
               email = prevEmail;
               firstName = prevFirst;
               lastName = prevLast;
+              payPal = prevPaypal;
+
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
@@ -84,17 +116,27 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                     SizedBox(
                       height: 24.0,
                     ),
+                    TextFormField(
+                      textAlign: TextAlign.center,
+                      initialValue: prevPaypal,
+                      onChanged: (value) {
+                        payPal = value;
+                      },
+                      style: TextStyle(color: Colors.black),
+                    ),
                     RoundedButton(
                         title: 'Update User Info',
                         color: Colors.blueAccent,
                         onPressed: ()
                         async {
-                          try {
-                            context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email);
-                            print('moving to lists screen');
-                            Navigator.pop(context);
-                          }  catch (e) {
-                            print(e);
+                          if(checkPaypalValidity(payPal)){
+                            try {
+                              context.read<Cowboy>().fillUpdatedInfo(firstName, lastName, email, payPal);
+                              print('moving to lists screen');
+                              Navigator.pop(context);
+                            }  catch (e) {
+                              print(e);
+                            }
                           }
                         }
                     )

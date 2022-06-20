@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 class PersonalListScreen extends StatefulWidget {
   static String id = 'personallist_screen';
@@ -16,7 +17,6 @@ class PersonalListScreen extends StatefulWidget {
 class _PersonalListScreen extends State<PersonalListScreen> {
   late String hostFirstName;
   late Map<String, Item> list_items;
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
   late CollectionReference itemSubCollection;
 
   @override

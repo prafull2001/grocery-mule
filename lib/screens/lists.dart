@@ -1,11 +1,12 @@
 import 'dart:async';
-
+import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
+import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/dev/migration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,9 +38,8 @@ class ShoppingTripQuery extends StatefulWidget {
   _ShoppingTripQueryState createState() => _ShoppingTripQueryState();
 }
 
-class _ShoppingTripQueryState extends State<ShoppingTripQuery> {
-  final CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+
+class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
   late String listUUID;
 
   @override
@@ -51,7 +51,7 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return StreamBuilder<DocumentSnapshot>(
-        stream: shoppingTripCollection.doc(listUUID).snapshots(),
+        stream: tripCollection.doc(listUUID).snapshots(),
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -120,8 +120,6 @@ class ShoppingCollectionQuery extends StatefulWidget {
 }
 
 class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
-  final CollectionReference shoppingTripCollection =
-  FirebaseFirestore.instance.collection('shopping_trips_02');
   //late List<String> personalTrips;
   @override
   void initState() {
@@ -132,7 +130,7 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return StreamBuilder<QuerySnapshot>(
-        stream: shoppingTripCollection.orderBy('date',descending: true).snapshots(),
+        stream: tripCollection.orderBy('date',descending: true).snapshots(),
         builder:
             (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -176,10 +174,7 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
 class _ListsScreenState extends State<ListsScreen> {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('users_02');
-  CollectionReference tripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_test');
+
   Future<void>? Cowsnapshot;
   List<String> dev = [
     "NYxh0dZXDya9VAdSYnOeWkY2wv83",

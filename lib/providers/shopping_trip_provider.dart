@@ -2,8 +2,8 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
+import 'package:grocery_mule/dev/collection_references.dart';
 
-final CollectionReference tripCollection = FirebaseFirestore.instance.collection('shopping_trips_02');
 
 // shopping trip provider
 class ShoppingTrip with ChangeNotifier {
@@ -15,7 +15,6 @@ class ShoppingTrip with ChangeNotifier {
   List<String> _beneficiaries = [];
   List<String> itemUUID = [];
   late Receipt _receipt;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
 
   // from user creation screen for metadata
   Future<void> initializeTrip(String title, DateTime date, String description,
@@ -70,6 +69,12 @@ class ShoppingTrip with ChangeNotifier {
   editTripDate(DateTime date) {
     _date = date;
     //notifyListeners();
+  }
+
+  editTripDateSync(DateTime date) {
+    _date = date;
+    notifyListeners();
+    print('notif listeners: $_date');
   }
 
   editTripDescription(String description) {
@@ -146,10 +151,16 @@ class ShoppingTrip with ChangeNotifier {
     notifyListeners();
   }
 
+  removeStaleTripUUIDS(){
+    _beneficiaries.forEach((bene_uuid) {
+      userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([_uuid])});
+    });
+  }
+
   removeBeneficiaries(List<String> bene_uuids) {
     _beneficiaries.removeWhere((element) => bene_uuids.contains(element));
     print("modified");
-    print(_beneficiaries);
+    print(bene_uuids);
     bene_uuids.forEach((String bene_uuid) {
       removeBeneficiaryFromItems(bene_uuid);
       tripCollection.doc(_uuid).update({'beneficiaries': FieldValue.arrayRemove([bene_uuid])});

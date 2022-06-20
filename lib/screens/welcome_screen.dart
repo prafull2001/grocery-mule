@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -50,9 +51,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
     firstName = name_array[0];
     lastName = name_array[1];
     email = credential.user!.email!;
+    // if new user, create doc and push PayPal Screen, else continue to Lists
     if(credential.additionalUserInfo!.isNewUser){
-      //create new document for the new user
       context.read<Cowboy>().initializeCowboy(credential.user!.uid, firstName, lastName, email);
+      Navigator.pop(context);
+      Navigator.pushNamed(context, PayPalPage.id);
+    } else {
+      Navigator.pop(context);
+      Navigator.pushNamed(context, ListsScreen.id);
     }
     return;
   }
@@ -106,8 +112,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 async {
                   try {
                     await signInWithGoogle();
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, ListsScreen.id);
+
+
+                    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => PayPalPage()));
+
+                    // Navigator.pushNamed(context, ListsScreen.id);
                     /*if (userCredential != null){
                       //context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
                       Navigator.pop(context);

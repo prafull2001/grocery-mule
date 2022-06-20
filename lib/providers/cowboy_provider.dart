@@ -4,26 +4,29 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
-final CollectionReference userCollection = FirebaseFirestore.instance.collection('users_02');
 
 class Cowboy with ChangeNotifier {
   String _uuid = '';
   String _firstName = '';
   String _lastName = '';
   String _email = '';
+  String _paypal = '';
   List<String> _shoppingTrips = [];
   List<String> _friends = []; // uuid
   List<String> _requests = []; // uuid
 
   // to call after user fields are updated
-  fillUpdatedInfo(String firstName, String lastName, String email) {
+  fillUpdatedInfo(String firstName, String lastName, String email, String paypal) {
     this._firstName = firstName;
     this._lastName = lastName;
     this._email = email;
+    this._paypal = paypal;
     updateCowboyFirst();
     updateCowboyLast();
     updateCowboyEmail();
+    setCowboyPaypal();
     notifyListeners();
   }
   updateCowboyFirst() {
@@ -35,6 +38,15 @@ class Cowboy with ChangeNotifier {
   updateCowboyEmail() {
     userCollection.doc(_uuid).update({'email': _email});
   }
+  setCowboyPaypal() {
+    userCollection.doc(_uuid).update({'paypal': _paypal});
+  }
+
+  updateCowboyPaypal(String new_link){
+    this._paypal = new_link;
+    setCowboyPaypal();
+  }
+
   fillFriendFields(List<String> friends, List<String> requests) {
     this._friends = friends;
     this._requests = requests;
@@ -69,6 +81,7 @@ class Cowboy with ChangeNotifier {
       'shopping_trips': _shoppingTrips,
       'friends': _friends,
       'requests': _requests,
+      'paypal': _paypal,
     });
   }
   // only to instantiate during email search
@@ -85,6 +98,7 @@ class Cowboy with ChangeNotifier {
   String get firstName => _firstName;
   String get lastName => _lastName;
   String get email => _email;
+  String get paypal => _paypal;
   List<String> get shoppingTrips => _shoppingTrips;
   List<String> get friends => _friends;
   List<String> get requests => _requests;
@@ -177,6 +191,9 @@ class Cowboy with ChangeNotifier {
     _friends.remove(friendUUID);
     print('friends again: $_friends');
     updateCowboyFriendsRemove(friendUUID);
+    userCollection.doc(friendUUID).update(
+        {'friends': FieldValue.arrayRemove([_uuid])}
+    );
     notifyListeners();
   }
   updateCowboyRequestsRemove(String friendUUID) {

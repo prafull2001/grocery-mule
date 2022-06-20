@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:number_inc_dec/number_inc_dec.dart';
 import 'dart:io';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -28,8 +29,6 @@ class UserName extends StatefulWidget {
 class _UserNameState extends State<UserName> {
   late String userUUID;
   late String name;
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('users_02');
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -62,6 +61,124 @@ class _UserNameState extends State<UserName> {
 
 typedef StringVoidFunc = void Function(String, int);
 
+class DatePicker extends StatefulWidget {
+  bool newlist = false;
+  String tripuuid = '';
+
+  DatePicker(bool newlist, String tripuuid) {
+    this.newlist = newlist;
+    this.tripuuid = tripuuid;
+  }
+
+  @override
+  _DatePickerState createState() => _DatePickerState();
+}
+
+class _DatePickerState extends State<DatePicker> {
+
+  bool newlist = false;
+  String tripid = '';
+  DateTime date = DateTime.now();
+  bool clicked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    this.newlist = widget.newlist;
+    this.tripid = widget.tripuuid;
+  }
+
+  _selectDate(BuildContext context, DateTime initdate) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: initdate,
+        firstDate: DateTime(2022),
+        lastDate: DateTime(2050),
+        builder: (context, child) => Theme(
+          data: ThemeData().copyWith(
+              colorScheme: ColorScheme.light(
+                  primary:  Colors.amber,
+                  onPrimary: Colors.white,
+                  onSurface: Colors.black
+              )
+          ),
+          child: child!,
+        )
+    );
+    if (picked != null && picked != context.read<ShoppingTrip>().date) {
+      context.read<ShoppingTrip>().editTripDate(picked);
+      setState(() {
+        // print('setted state uwu');
+        date = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    if (newlist) {
+      return Row(
+        children: [
+          Text('$date'
+              .split(' ')[0]
+              .replaceAll('-', '/'),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          //SizedBox(width: 5.0,),
+          IconButton(
+            icon: Icon(
+              Icons.calendar_today,
+              color: orange,
+            ),
+            onPressed: () => _selectDate(context, DateTime.now()),
+          ),
+        ],
+      );
+    }
+    return FutureBuilder<DocumentSnapshot>(
+      future: tripCollection.doc(tripid).get(),
+        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+
+        if (snapshot.hasError) {
+          return const Text('Something went wrong');
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+        String tdate = context.read<ShoppingTrip>().date.toString();
+        if (!clicked) {
+          tdate = (snapshot.data!['date'] as Timestamp).toDate().toString();
+          clicked = true;
+        }
+        return Row(
+          children: [
+            Text('$tdate'
+                .split(' ')[0]
+                .replaceAll('-', '/'),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            //SizedBox(width: 5.0,),
+            IconButton(
+              icon: Icon(
+                Icons.calendar_today,
+                color: orange,
+              ),
+              onPressed: () => _selectDate(context, context.read<ShoppingTrip>().date),
+            ),
+          ],
+        );
+      }
+    );
+  }
+}
+
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
@@ -91,8 +208,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   late String trip_uuid;
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
-  CollectionReference shoppingTripCollection =
-      FirebaseFirestore.instance.collection('shopping_trips_02');
+
   var _tripDescriptionController;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
@@ -173,9 +289,20 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           child: child!,
        )
     );
-    if (picked != null && picked != context.read<ShoppingTrip>().date) {
+    if (picked != null && picked != context.read<ShoppingTrip>().date && picked != localTime) {
       context.read<ShoppingTrip>().editTripDate(picked);
-      localTime = picked;
+      // TODO temporary fix only, encapsulating within class should fix
+      if (newList) {
+        setState(() {
+          print('overwrite localTime: $localTime');
+          localTime = picked;
+        });
+      } else {
+        localTime = picked;
+        context.read<ShoppingTrip>().editTripDateSync(picked);
+        print('synced provider: $localTime');
+      }
+      //localTime = picked;
     }
   }
 
@@ -200,25 +327,25 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().uuid,
           );
     } else {
-      print("made hereee 1");
+      print("starting to edit list");
       List<String> removeList = [];
-      print("cur bene: " + context.read<ShoppingTrip>().beneficiaries.toString());
-      print("new bene: " + friend_bene.toString());
       context.read<ShoppingTrip>().beneficiaries.forEach((old_bene) {
-        if(!friend_bene.contains(old_bene)) {
+        if(!friend_bene.contains(old_bene) && old_bene != context.read<Cowboy>().uuid) {
           print("remove: " + old_bene);
           removeList.add(old_bene);
         }
       });
       //check if any bene needs to be removed
+      print("removeList: " + removeList.toString());
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
 
       //check if new bene need to be added
       for (var friend in friend_bene) {
 
         if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
-          print(friend);
-           context.read<ShoppingTrip>().addBeneficiary(friend);
+          //print(friend);
+          print("adding new bene: " + friend);
+          context.read<ShoppingTrip>().addBeneficiary(friend);
           //context.read<Cowboy>().addTripToBene(friend, context.read<ShoppingTrip>().uuid,);
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
@@ -278,6 +405,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               if (snapshot.data!.exists) {
                 _loadCurrentTrip(snapshot.data!);
               }
+              print(localTime);
               return Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Column(
@@ -331,22 +459,23 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         SizedBox(
                           width: 10.0,
                         ),
-                        Text('$localTime'
-                              .split(' ')[0]
-                              .replaceAll('-', '/'),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        //SizedBox(width: 5.0,),
-                        IconButton(
-                          icon: Icon(
-                            Icons.calendar_today,
-                            color: orange,
-                          ),
-                          onPressed: () => _selectDate(context),
-                        ),
+                        DatePicker(newList, trip_uuid),
+                        // Text('${context.read<ShoppingTrip>().date}'
+                        //       .split(' ')[0]
+                        //       .replaceAll('-', '/'),
+                        //   style: TextStyle(
+                        //     fontSize: 20,
+                        //     fontWeight: FontWeight.w400,
+                        //   ),
+                        // ),
+                        // //SizedBox(width: 5.0,),
+                        // IconButton(
+                        //   icon: Icon(
+                        //     Icons.calendar_today,
+                        //     color: orange,
+                        //   ),
+                        //   onPressed: () => _selectDate(context),
+                        // ),
                       ],
                     ),
 
@@ -416,16 +545,16 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               return CircularProgressIndicator();
                             }
                             List<MultiSelectItem<String>> friends = [];
-                            print(snapshot.data!.docs[1].get('uuid'));
+                            //print("first friend: ${snapshot.data!.docs[1].get('uuid')}");
 
                             snapshot.data!.docs.forEach((document) {
                               if (context
                                   .read<Cowboy>()
                                   .friends
-                                  .contains(document.get('uuid'))) {
+                                  .contains(document['uuid'])) {
                                 friends.add(MultiSelectItem<String>(
-                                    document.get('uuid'),
-                                    document.get('first_name')));
+                                    document['uuid'],
+                                    document['first_name']));
                               }
                             });
                             return MultiSelectDialogField(
@@ -487,7 +616,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                         fontSize: 18, color: Colors.black),
                                   )
                                 : Text(
-                                    'Edit List',
+                                    'Save Changes',
                                     style: TextStyle(
                                         fontSize: 18, color: Colors.black),
                                   ),
@@ -502,6 +631,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             ),
                             onPressed: () async {
                               if (context.read<ShoppingTrip>().title != '') {
+                                print("editing list");
                                 await updateGridView(newList);
                                 setState(() {});
                                 Navigator.pop(context);
@@ -564,6 +694,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               if (delete_list) {
                                 if (!newList) {
                                   print('delete');
+                                  context.read<ShoppingTrip>().removeStaleTripUUIDS();
                                   context.read<ShoppingTrip>().deleteTripDB();
                                   context.read<Cowboy>().removeTrip(
                                       context.read<ShoppingTrip>().uuid);
@@ -584,7 +715,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   ],
                 ),
               );
-            }));
+            })
+    );
   }
 
   check_delete(BuildContext context) {
