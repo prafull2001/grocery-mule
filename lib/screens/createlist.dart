@@ -170,7 +170,7 @@ class _DatePickerState extends State<DatePicker> {
                 Icons.calendar_today,
                 color: orange,
               ),
-              onPressed: () => _selectDate(context, DateTime.now()),
+              onPressed: () => _selectDate(context, context.read<ShoppingTrip>().date),
             ),
           ],
         );
