@@ -204,11 +204,20 @@ class _IndividualItemState extends State<IndividualItem> {
     return Card(
       key: Key(itemID),
       child: ListTile(
-        title: Text('${name}'),
         subtitle:
         Row(
             crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Container(
+              child:
+
+              Text(
+                '${name}',
+                  style: TextStyle(color: Colors.black,
+                      fontSize: 20,
+                  ),
+                  ),
+            ),
             Container(
                 child: IconButton(
                     icon: const Icon(Icons.remove_circle),
