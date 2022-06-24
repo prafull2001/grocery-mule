@@ -101,14 +101,17 @@ class _ItemsListState extends State<ItemsList> {
           }
 
           loadItemToProvider(itemColQuery.data!);
-          return ListView(
+          return ListView.builder(
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
-            children: context.read<ShoppingTrip>().itemUUID
-                .map((itemUid) => IndividualItem(tripUUID,itemUid))
-                .toList(),
+            itemCount: context.watch<ShoppingTrip>().itemUUID.length,
+            itemBuilder: (context, int index){
+              return IndividualItem(tripUUID,context.watch<ShoppingTrip>().itemUUID[index], key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
+            },
           );
-
+//context.watch<ShoppingTrip>().itemUUID
+//                 .map((itemUid) => IndividualItem(tripUUID,itemUid))
+//                 .toList()
         });
   }
 
@@ -143,7 +146,8 @@ class IndividualItem extends StatefulWidget {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  IndividualItem(this.tripID, this.itemID);
+
+  IndividualItem(this.tripID, this.itemID,{ required Key key}): super(key: key);
   @override
   _IndividualItemState createState() => _IndividualItemState();
 }
@@ -152,25 +156,24 @@ class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  late Stream<DocumentSnapshot> getItemStream;
+  late Stream<DocumentSnapshot> getItemStream = tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
 
   @override
   void initState() {
     itemID = widget.itemID;
     tripID = widget.tripID;
     curItem = Item.nothing();
-    getItemStream = tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
+    //getItemStream = ;
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return StreamBuilder(
         stream: getItemStream,
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
@@ -199,6 +202,7 @@ class _IndividualItemState extends State<IndividualItem> {
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
 
     return Card(
+      key: Key(itemID),
       child: ListTile(
         title: Text('${name}'),
         subtitle:
@@ -234,7 +238,10 @@ class _IndividualItemState extends State<IndividualItem> {
 
         trailing: IconButton(
           icon: Icon(Icons.delete),
-          onPressed: (){setState(() {});},
+          onPressed: (){setState(() {
+            context.read<ShoppingTrip>().removeItem(itemID);
+
+          });},
         ),
         isThreeLine: true,
       ),
@@ -386,26 +393,6 @@ class _EditListsScreenState extends State<EditListScreen> {
       )),
     );
   }
-
-  Future<void> handleClick(int item) async {
-    switch (item) {
-      case 1:
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CreateListScreen(
-                    false, context.read<ShoppingTrip>().uuid))).then((_) => setState(() {}));
-        break;
-      case 2:
-        await check_leave(context);
-        if(leave_list){
-          context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
-          context.read<ShoppingTrip>().removeBeneficiary(context.read<Cowboy>().uuid);
-          Navigator.of(context).pop();
-        }
-    }
-  }
-
   check_leave(BuildContext context) {
     return showDialog(
       context: context,
@@ -432,12 +419,29 @@ class _EditListsScreenState extends State<EditListScreen> {
       },
     );
   }
-  @override
-  Widget build(BuildContext context) {
-    return Masterlist(context);
-  }
+  Future<void> handleClick(int item) async {
+    switch (item) {
+      case 1:
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => CreateListScreen(
+                    false, context.read<ShoppingTrip>().uuid))).then((_) => setState(() {}));
+        break;
+      case 2:
+        await check_leave(context);
+        if(leave_list){
+          context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
+          context.read<ShoppingTrip>().removeBeneficiary(context.read<Cowboy>().uuid);
+          Navigator.of(context).pop();
 
-  Widget Masterlist(BuildContext context) {
+    }
+  }}
+
+
+
+    @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
