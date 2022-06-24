@@ -5,7 +5,7 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:flutter_statusbarcolor/flutter_statusbarcolor.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 
 
@@ -209,6 +209,9 @@ class _QueryAmigoState extends State<QueryAmigo> with SingleTickerProviderStateM
             return const CircularProgressIndicator();
           }
           List<QueryDocumentSnapshot> result = snapshot.data?.docs as List<QueryDocumentSnapshot>;
+          if (result.isEmpty) {
+            return const Text('sorry, nobody with that email');
+          }
           uuid = result[0]['uuid'].toString();
           name = result[0]['first_name'].toString() + ' ' + result[0]['last_name'].toString();
           email = result[0]['email'].toString();
@@ -236,6 +239,7 @@ class _QueryAmigoState extends State<QueryAmigo> with SingleTickerProviderStateM
                       context.read<Cowboy>().sendFriendRequest(uuid);
                       setState(() {
                         query = '';
+                        Fluttertoast.showToast(msg: 'Friend Request Sent!');
                         // searchTextController.clear();
                       });
                     },
@@ -252,6 +256,7 @@ class _QueryAmigoState extends State<QueryAmigo> with SingleTickerProviderStateM
         },
       ),
     );
+    return Container();
     throw UnimplementedError();
   }
 }

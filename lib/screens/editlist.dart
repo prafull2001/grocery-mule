@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
@@ -71,7 +73,6 @@ class ItemsList extends StatefulWidget {
   _ItemsListState createState() => _ItemsListState();
 }
 
-Map<String, Map<IndividualItem, IndividualItemExpanded>> itemObjList = {};
 
 class _ItemsListState extends State<ItemsList> {
   late String tripUUID;
@@ -100,31 +101,12 @@ class _ItemsListState extends State<ItemsList> {
           }
 
           loadItemToProvider(itemColQuery.data!);
-          //print(context.read<ShoppingTrip>().itemUUID);
-          updateitemHash();
-          return ExpansionPanelList(
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                //it takes the uuid of the item  at the index in the panellist,
-                //Then use the mapping from uuid to the current instance of the IndividualItem object; this object allows us
-                //to flip the isExpanded field of the item that is associated to the uuid
-                itemObjList[context.read<ShoppingTrip>().itemUUID[index]]!
-                    .keys
-                    .first
-                    .isExpanded = !isExpanded;
-                //TODO: rewrite autp_collapse
-                //auto_collapse(context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]);
-              });
-            },
-            children: context.watch<ShoppingTrip>().itemUUID.map((uid) {
-              return ExpansionPanel(
-                headerBuilder: (BuildContext context, bool isExpanded) {
-                  return itemObjList[uid]!.keys.first;
-                },
-                body: itemObjList[uid]!.values.first,
-                isExpanded: itemObjList[uid]!.keys.first.isExpanded,
-              );
-            }).toList(),
+          return ListView(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            children: context.read<ShoppingTrip>().itemUUID
+                .map((itemUid) => IndividualItem(tripUUID,itemUid))
+                .toList(),
           );
 
         });
@@ -154,34 +136,13 @@ class _ItemsListState extends State<ItemsList> {
         .removeWhere((element) => tobeDeleted.contains(element));
   }
 
-  //For each new item uid, it is mapped to a collpased item-to-expanded item mapping
-  void updateitemHash() {
-    context.watch<ShoppingTrip>().itemUUID.forEach((item_uuid) {
-      if (!itemObjList.containsKey(item_uuid)) {
-        itemObjList[item_uuid] = Map<IndividualItem, IndividualItemExpanded>();
-        itemObjList[item_uuid]![
-                IndividualItem(context.read<ShoppingTrip>().uuid, item_uuid)] =
-            IndividualItemExpanded(
-                context.read<ShoppingTrip>().uuid, item_uuid);
-        //print(itemObjList[item_uuid]!.keys.first.itemID);
-      }
-    });
-    //check if any objmapping needs to be removed
-    List<String> tobeDeleted = [];
-    itemObjList.forEach((key, value) {
-      if (!context.read<ShoppingTrip>().itemUUID.contains(key)) {
-        tobeDeleted.add(key);
-      }
-    });
-    itemObjList.removeWhere((key, value) => tobeDeleted.contains(key));
-  }
-}
 
+}
+//ignore: must_be_immutable
 class IndividualItem extends StatefulWidget {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  bool isExpanded = false;
   IndividualItem(this.tripID, this.itemID);
   @override
   _IndividualItemState createState() => _IndividualItemState();
@@ -191,24 +152,20 @@ class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  bool isExpanded = false;
-
+  late Stream<DocumentSnapshot> getItemStream;
 
   @override
   void initState() {
     itemID = widget.itemID;
     tripID = widget.tripID;
     curItem = Item.nothing();
+    getItemStream = tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: tripCollection
-            .doc(tripID)
-            .collection('items')
-            .doc(itemID)
-            .snapshots(),
+        stream: getItemStream,
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -221,6 +178,7 @@ class _IndividualItemState extends State<IndividualItem> {
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
           return simple_item();
+
         });
   }
 
@@ -238,232 +196,61 @@ class _IndividualItemState extends State<IndividualItem> {
 
   Widget simple_item() {
     String name = curItem.name;
-    int quantity = 0;
-    curItem.subitems.forEach((name, count) {
-      quantity = quantity + count;
-    });
+    int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
 
-    return Dismissible(
-      key: Key(name),
-      onDismissed: (direction) {
-        context.read<ShoppingTrip>().removeItem(itemID);
-        itemObjList.remove(itemID);
-        // Remove the item from the data source.
-      },
-      confirmDismiss: (DismissDirection direction) async {
-        return await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Confirm"),
-              content: const Text("Are you sure you wish to delete this item?"),
-              actions: <Widget>[
-                FlatButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text("DELETE")),
-                FlatButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("CANCEL"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: dark_beige,
-        ),
-        child: (Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return Card(
+      child: ListTile(
+        title: Text('${name}'),
+        subtitle:
+        Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              child: Text(
-                '$name',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
-              padding: EdgeInsets.all(20),
+                child: IconButton(
+                    icon: const Icon(Icons.remove_circle),
+                    onPressed: () => (setState(() {
+                      updateUsrQuantity(context.read<Cowboy>().uuid, max(0, quantity -1));
+                    })
+                    )
+                )
             ),
             Container(
-              child: Text(
-                'x$quantity',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
+              child:
+                Text(
+                    '${quantity}'
                 ),
-              ),
             ),
+
+            Container(
+                child: IconButton(
+                    icon: const Icon(Icons.add_circle),
+                    onPressed: () {
+                      setState(() {
+                        updateUsrQuantity(context.read<Cowboy>().uuid, quantity +1);
+                      });
+                    })),
           ],
-        )),
-      ),
-      background: Container(color: red),
-    );
-  }
-}
-
-class IndividualItemExpanded extends StatefulWidget {
-  late Item curItem;
-  late final String itemID;
-  late final String tripID;
-  IndividualItemExpanded(this.tripID, this.itemID);
-  @override
-  _IndividualItemExpandedState createState() => _IndividualItemExpandedState();
-}
-
-class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
-  late Item curItem;
-  late final String itemID;
-  late final String tripID;
-
-  @override
-  void initState() {
-    itemID = widget.itemID;
-    tripID = widget.tripID;
-    curItem = Item.nothing();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: tripCollection
-            .doc(tripID)
-            .collection('items')
-            .doc(itemID)
-            .snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-
-          if (snapshot.hasError) return const CircularProgressIndicator();
-          loadItem(snapshot.data!);
-          print(curItem.subitems.length);
-          void updateUsrQuantity(String person, int number) {
-            //setState(() {
-            //curItem.subitems = {};
-            curItem.subitems[person] = number;
-            context.read<ShoppingTrip>().editItem(
-                itemID,
-                curItem.subitems.values.reduce((sum, element) => sum + element),
-                person,
-                number);
-            // TODO update database here for quant
-          }
-          //);}
-              ;
-
-          print(curItem.subitems);
-          return Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: beige,
-            ),
-            child: Column(
-              children: [
-                for (var entry in curItem.subitems.entries)
-                  indie_item(entry.key, entry.value, updateUsrQuantity)
-              ],
-            ),
-          );
-        });
-  }
-
-  //this function loads stream snapshots into item
-  void loadItem(DocumentSnapshot snapshot) {
-    Item temp = Item.nothing();
-    temp.name = snapshot['name'];
-    temp.quantity = snapshot['quantity'];
-    temp.subitems = {};
-    List<String> bene_list = [];
-    (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
-      bene_list.add(uid);
-      temp.subitems[uid] = int.parse(value.toString());
-    });
-
-    if(temp != curItem){
-      //setState(() {
-        curItem = temp;
-       // });
-    }
-    //context.read<ShoppingTrip>().setBeneficiary(bene_list);
-  }
-
-  Widget indie_item(String uid, int number, StringVoidFunc callback) {
-    print("this user: " + uid);
-    // print('uid of user (indie_item): ${uid}');
-    return Container(
-      color: beige,
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        Container(
-          child: UserName(uid, true),
-          padding: EdgeInsets.all(20),
         ),
-        Container(
-          child: (context.read<Cowboy>().uuid == uid)
-              ? NumberInputWithIncrementDecrement(
-                  initialValue: number,
-                  controller: TextEditingController(),
-                  onIncrement: (num newlyIncrementedValue) {
-                    callback(uid, newlyIncrementedValue as int);
-                  },
-                  onDecrement: (num newlyDecrementedValue) {
-                    callback(uid, newlyDecrementedValue as int);
-                  },
-                )
-          // TODO vvvv--- maybe issue here???
-              : Center(
-                child: Text(
-                    'x$number',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                    ),
-                  ),
-              ),
-          height: 60,
-          width: 105,
-        )
-      ]),
+
+        trailing: IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: (){setState(() {});},
+        ),
+        isThreeLine: true,
+      ),
     );
   }
-
-  Widget expanded_item() {
-    void updateUsrQuantity(String person, int number) {
-      //setState(() {
-      //curItem.subitems = {};
-        curItem.subitems[person] = number;
-        context.read<ShoppingTrip>().editItem(
-            itemID,
-            curItem.subitems.values.reduce((sum, element) => sum + element),
-            person,
-            number);
-        // TODO update database here for quant
-        }
-      //);}
-    ;
-    print(curItem.subitems);
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: beige,
-      ),
-      child: Column(
-        children: [
-          for (var entry in curItem.subitems.entries)
-            indie_item(entry.key, entry.value, updateUsrQuantity)
-        ],
-      ),
-    );
+  void updateUsrQuantity(String person, int number) {
+    curItem.subitems[person] = number;
+    context.read<ShoppingTrip>().editItem(
+        itemID,
+        curItem.subitems.values.reduce((sum, element) => sum + element),
+        person,
+        number);
+    // TODO update database here for quant
   }
 }
+
 
 class EditListScreen extends StatefulWidget {
   static String id = 'edit_list_screen';
