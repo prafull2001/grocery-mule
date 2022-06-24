@@ -12,7 +12,6 @@ import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'createlist.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
@@ -35,25 +34,26 @@ class UserName extends StatefulWidget {
 
 class _UserNameState extends State<UserName> {
   late String userUUID;
-
+  late Stream<DocumentSnapshot> personalshot;
 
   @override
   void initState() {
     userUUID = widget.userUUID;
+    personalshot = userCollection.doc(userUUID).snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     print("actual streamed: ${userUUID}");
     return StreamBuilder<DocumentSnapshot>(
-        stream: userCollection.doc(userUUID).snapshots(),
+        stream: personalshot,
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox.shrink();
           }
           // print('name for uuid ($userUUID): ' + snapshot.data!['first_name']);
           return Text(
@@ -97,7 +97,7 @@ class _ItemsListState extends State<ItemsList> {
             return const Text('Something went wrong');
           }
           if (itemColQuery.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox.shrink();
           }
 
           loadItemToProvider(itemColQuery.data!);
@@ -175,7 +175,7 @@ class _IndividualItemState extends State<IndividualItem> {
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox.shrink();
           }
 
           if (snapshot.hasError) return const CircularProgressIndicator();
@@ -480,80 +480,82 @@ class _EditListsScreenState extends State<EditListScreen> {
 
 
       ),
-      body: StreamBuilder<DocumentSnapshot<Object?>>(
-          stream: tripCollection.doc(tripUUID).snapshots(),
-          builder:
-              (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Something went wrong StreamBuilder');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            }
-            //readInData(snapshot.data!);
-            _queryCurrentTrip(snapshot.data!);
-            return SingleChildScrollView(
-              child: Container(
-                  child: Column(
-                //padding: const EdgeInsets.all(25),
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
+      body: Container(
+        child: StreamBuilder<DocumentSnapshot<Object?>>(
+            stream: tripCollection.doc(tripUUID).snapshots(),
+            builder:
+                (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Something went wrong StreamBuilder');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SizedBox.shrink();
+              }
+              //readInData(snapshot.data!);
+              _queryCurrentTrip(snapshot.data!);
+              return SingleChildScrollView(
+                child: Container(
+                    child: Column(
+                  //padding: const EdgeInsets.all(25),
+                  children: [
+                    SizedBox(
+                      height: 20,
+                    ),
 
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 10.0,
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        Text(
+                          //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                          // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                          'Host - ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                        ),
+                        UserName(context.read<ShoppingTrip>().host, false, true),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                        borderRadius: BorderRadius.circular(30.0),
                       ),
-                      Text(
-                        //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
-                        // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                        'Host - ',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          title: Text(
+                            "Beneficiaries",
+                          ),
+                          children: [
+                            // TODO error right vvvvvvv should be watching beneficaries from firebase not from context
+                            for (String name in context.watch<ShoppingTrip>().beneficiaries)
+                              ListTile(
+                                title: UserName(name, false, true),
+                              )
+                          ],
                         ),
                       ),
-                      UserName(context.read<ShoppingTrip>().host, false, true),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(
-                          color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                      borderRadius: BorderRadius.circular(30.0),
                     ),
-                    child: Theme(
-                      data: Theme.of(context)
-                          .copyWith(dividerColor: Colors.transparent),
-                      child: ExpansionTile(
-                        title: Text(
-                          "Beneficiaries",
-                        ),
-                        children: [
-                          // TODO error right vvvvvvv should be watching beneficaries from firebase not from context
-                          for (String name in context.watch<ShoppingTrip>().beneficiaries)
-                            ListTile(
-                              title: UserName(name, false, true),
-                            )
-                        ],
-                      ),
-                    ),
-                  ),
-                  //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
-                  ItemsAddition(
-                    tripUUID: tripUUID,
-                  )
+                    //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
+                    ItemsAddition(
+                      tripUUID: tripUUID,
+                    )
 
-                  //SizedBox(height: 10),
-                ],
-              )),
-            );
-          }),
+                    //SizedBox(height: 10),
+                  ],
+                )),
+              );
+            }),
+      ),
     );
   }
 }
