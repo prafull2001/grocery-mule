@@ -30,7 +30,7 @@ class ShoppingTripQuery extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   late String listUUID;
 
-  ShoppingTripQuery(String listUUID) {
+  ShoppingTripQuery(String listUUID, { required Key key}) : super(key: key){
     this.listUUID = listUUID;
   }
 
@@ -163,8 +163,9 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 7),
                 itemBuilder: (context, int index) {
-                  return new ShoppingTripQuery(sortedList[
-                  index]); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
+                  return new ShoppingTripQuery(
+                      sortedList[index],key: Key(sortedList[index])
+                  ); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
                 },
               ),
             ),
