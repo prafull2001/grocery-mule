@@ -16,6 +16,8 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'createlist.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 
+import 'lists.dart';
+
 typedef StringVoidFunc = void Function(String, int);
 
 var userNameTextGroup = AutoSizeGroup();
@@ -304,7 +306,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   bool isAdd = false;
   bool invite_guest = false;
   late String hostFirstName;
-  List<String> bene_uid = [];
+
   static bool reload = true;
   bool leave_list = false;
   late Stream<DocumentSnapshot<Object?>>? listStream;
@@ -330,6 +332,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   }
 
   void _queryCurrentTrip(DocumentSnapshot curTrip) {
+    List<String> bene_uid = [];
     DateTime date = DateTime.now();
     date = (curTrip['date'] as Timestamp).toDate();
     List<String> temp_bene_uid = [];
@@ -337,6 +340,19 @@ class _EditListsScreenState extends State<EditListScreen> {
       temp_bene_uid.add(uid.toString());
       if (!bene_uid.contains(uid)) bene_uid.add(uid.toString());
     });
+    //if the current user is contained in the beneficiary list
+    //pop out the editList
+    print("current beneficiaries: ${bene_uid}");
+    /*
+    if(!bene_uid.contains(context.read<Cowboy>().uuid)) {
+      print("kick");
+      Navigator.of(context).popUntil((route) {
+        return route.settings.name == ListsScreen.id;
+      });
+      Navigator.pushNamed(context, ListsScreen.id);
+    }
+
+     */
     bene_uid = temp_bene_uid;
 
     context.read<ShoppingTrip>().initializeTripFromDB(
@@ -502,6 +518,30 @@ class _EditListsScreenState extends State<EditListScreen> {
               }
               //readInData(snapshot.data!);
               _queryCurrentTrip(snapshot.data!);
+              if(!context.watch<ShoppingTrip>().beneficiaries.contains(context.read<Cowboy>().uuid)) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                'You have been removed from this trip',
+                                style: TextStyle(
+                                  fontSize: 40.0,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+              }
               return SingleChildScrollView(
                 child: Container(
                     child: Column(
