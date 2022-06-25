@@ -420,18 +420,18 @@ class _EditListsScreenState extends State<EditListScreen> {
           content: const Text("Are you sure you wish to leave this trip?"),
           actions: <Widget>[
             FlatButton(
-                onPressed: () => {
-                  leave_list = true,
-                  Navigator.of(context).pop(),
-                },
-                child: const Text("Leave")),
-            FlatButton(
               onPressed: () => {
                 leave_list = false,
                 Navigator.of(context).pop(),
               },
               child: const Text("CANCEL"),
             ),
+            FlatButton(
+                onPressed: () => {
+                  leave_list = true,
+                  Navigator.of(context).pop(),
+                },
+                child: const Text("LEAVE")),
           ],
         );
       },
@@ -688,16 +688,7 @@ class _ItemsAdditionState extends State<ItemsAddition> {
         SizedBox(
           height: 10.0,
         ),
-        SizedBox(
-          height: 40,
-          width: double.maxFinite,
-          child: Divider(
-            color: Colors.black,
-            thickness: 1.5,
-            indent: 75,
-            endIndent: 75,
-          ),
-        ),
+        
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -705,18 +696,6 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             SizedBox(
               width: 40.0,
             ),
-            Container(
-              height: 70,
-              width: 150,
-              child: RoundedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, PersonalListScreen.id);
-                },
-                title: "Personal List",
-                color: Colors.blueAccent,
-              ),
-            ),
-            Spacer(),
             if (context.read<ShoppingTrip>().host ==
                 context.read<Cowboy>().uuid) ...[
               Container(
@@ -731,6 +710,7 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                 ),
               ),
             ],
+            Spacer(),
             SizedBox(
               width: 40.0,
             ),
