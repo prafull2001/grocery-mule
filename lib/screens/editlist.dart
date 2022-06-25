@@ -23,7 +23,7 @@ var userNameTextGroup = AutoSizeGroup();
 class UserName extends StatefulWidget {
   late final String userUUID;
   UserName(String userUUID, [bool spec=false, bool strng=false]) {
-    // if (spec) print('spec uuid: $userUUID');
+    // if (spec)rint('spec uuid: $userUUID');
     // if (strng) print('strng uuid: $userUUID');
     this.userUUID = userUUID;
   }
@@ -44,7 +44,6 @@ class _UserNameState extends State<UserName> {
 
   @override
   Widget build(BuildContext context) {
-    print("actual streamed: ${userUUID}");
     return StreamBuilder<DocumentSnapshot>(
         stream: personalshot,
         builder:
@@ -58,7 +57,7 @@ class _UserNameState extends State<UserName> {
           // print('name for uuid ($userUUID): ' + snapshot.data!['first_name']);
           return Text(
             '${snapshot.data!['first_name']} ',
-            style: TextStyle(fontSize: 20, color: Colors.red),
+            style: TextStyle(fontSize: 20, color: Colors.black),
           );
         });
   }
@@ -101,13 +100,16 @@ class _ItemsListState extends State<ItemsList> {
           }
 
           loadItemToProvider(itemColQuery.data!);
-          return ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemCount: context.watch<ShoppingTrip>().itemUUID.length,
-            itemBuilder: (context, int index){
-              return IndividualItem(tripUUID,context.watch<ShoppingTrip>().itemUUID[index], key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
-            },
+          return Container(
+            height: 370,
+            child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: context.watch<ShoppingTrip>().itemUUID.length,
+              itemBuilder: (context, int index){
+                return IndividualItem(tripUUID,context.watch<ShoppingTrip>().itemUUID[index], index, key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
+              },
+            ),
           );
 //context.watch<ShoppingTrip>().itemUUID
 //                 .map((itemUid) => IndividualItem(tripUUID,itemUid))
@@ -146,8 +148,8 @@ class IndividualItem extends StatefulWidget {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-
-  IndividualItem(this.tripID, this.itemID,{ required Key key}): super(key: key);
+  late final int index;
+  IndividualItem(this.tripID, this.itemID, this.index, { required Key key}): super(key: key);
   @override
   _IndividualItemState createState() => _IndividualItemState();
 }
@@ -156,12 +158,14 @@ class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
   late final String itemID;
   late final String tripID;
+  late final int index;
   late Stream<DocumentSnapshot> getItemStream = tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
 
   @override
   void initState() {
     itemID = widget.itemID;
     tripID = widget.tripID;
+    index = widget.index;
     curItem = Item.nothing();
     //getItemStream = ;
     super.initState();
@@ -202,22 +206,25 @@ class _IndividualItemState extends State<IndividualItem> {
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
 
     return Card(
+      color: (index % 2 == 0 )? card_yellow : card_orange,
       key: Key(itemID),
       child: ListTile(
+        title: Container(
+          child:
+
+          Text(
+            '${name}',
+            style: TextStyle(color: Colors.black,
+              fontSize: 20,
+            ),
+          ),
+        ),
         subtitle:
         Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              child:
 
-              Text(
-                '${name}',
-                  style: TextStyle(color: Colors.black,
-                      fontSize: 20,
-                  ),
-                  ),
-            ),
             Container(
                 child: IconButton(
                     icon: const Icon(Icons.remove_circle),
@@ -244,14 +251,16 @@ class _IndividualItemState extends State<IndividualItem> {
                     })),
           ],
         ),
-
-        trailing: IconButton(
+        trailing:
+        (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
+        IconButton(
           icon: Icon(Icons.delete),
           onPressed: (){setState(() {
             context.read<ShoppingTrip>().removeItem(itemID);
 
           });},
-        ),
+        ):SizedBox.shrink()
+        ,
         isThreeLine: true,
       ),
     );
@@ -482,7 +491,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       ),
       body: Container(
         child: StreamBuilder<DocumentSnapshot<Object?>>(
-            stream: tripCollection.doc(tripUUID).snapshots(),
+            stream: listStream,
             builder:
                 (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
               if (snapshot.hasError) {
@@ -523,6 +532,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                       height: 10,
                     ),
                     Card(
+                      color: light_cream,
                       shape: RoundedRectangleBorder(
                         side: const BorderSide(
                             color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
@@ -677,6 +687,16 @@ class _ItemsAdditionState extends State<ItemsAddition> {
         ItemsList(widget.tripUUID),
         SizedBox(
           height: 10.0,
+        ),
+        SizedBox(
+          height: 40,
+          width: double.maxFinite,
+          child: Divider(
+            color: Colors.black,
+            thickness: 1.5,
+            indent: 75,
+            endIndent: 75,
+          ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
