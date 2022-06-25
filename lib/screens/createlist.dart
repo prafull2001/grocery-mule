@@ -217,7 +217,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   bool delete_list = false;
   bool invite_guest = false;
   late ShoppingTrip cur_trip;
-  List<String> uid_name = [];
+  //List<String> uid_name = [];
   List<String> friend_bene = [];
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
@@ -258,7 +258,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
     localTime = date;
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
-      uid_name.add(uid);
+      friend_bene.add(uid);
     });
     // setState(() {
     cur_trip.initializeTripFromDB(
@@ -267,55 +267,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         date,
         (snapshot.data() as Map<String, dynamic>)['description'],
         (snapshot.data() as Map<String, dynamic>)['host'],
-        uid_name);
+        friend_bene);
     // });
 
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: context.read<ShoppingTrip>().date,
-      firstDate: DateTime(2022),
-      lastDate: DateTime(2050),
-      builder: (context, child) => Theme(
-          data: ThemeData().copyWith(
-            colorScheme: ColorScheme.light(
-              primary:  Colors.amber,
-              onPrimary: Colors.white,
-              onSurface: Colors.black
-            )
-          ),
-          child: child!,
-       )
-    );
-    if (picked != null && picked != context.read<ShoppingTrip>().date && picked != localTime) {
-      context.read<ShoppingTrip>().editTripDate(picked);
-      // TODO temporary fix only, encapsulating within class should fix
-      if (newList) {
-        setState(() {
-          print('overwrite localTime: $localTime');
-          localTime = picked;
-        });
-      } else {
-        localTime = picked;
-        context.read<ShoppingTrip>().editTripDateSync(picked);
-        print('synced provider: $localTime');
-      }
-      //localTime = picked;
-    }
   }
 
   Future<void> updateGridView(bool new_trip) async {
     if (new_trip) {
       print("made here");
-      await context.read<ShoppingTrip>().initializeTrip(
-          context.read<ShoppingTrip>().title,
-          context.read<ShoppingTrip>().date,
-          context.read<ShoppingTrip>().description,
-          uid_name,
-          curUser!.uid);
-      context.read<ShoppingTrip>().addBeneficiary(hostUUID);
       for (var friend in friend_bene) {
         context.read<ShoppingTrip>().addBeneficiary(friend);
         context
@@ -323,6 +282,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
         //addTripToBene(String bene_uuid, String trip_uuid)
       }
+      friend_bene.add(hostUUID);
+      await context.read<ShoppingTrip>().initializeTrip(
+          context.read<ShoppingTrip>().title,
+          context.read<ShoppingTrip>().date,
+          context.read<ShoppingTrip>().description,
+          friend_bene,
+          curUser!.uid);
+      //context.read<ShoppingTrip>().addBeneficiary(hostUUID);
+
       context.read<Cowboy>().addTrip(
             context.read<ShoppingTrip>().uuid,
           );
@@ -335,6 +303,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           removeList.add(old_bene);
         }
       });
+
+
       //check if any bene needs to be removed
       print("removeList: " + removeList.toString());
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
@@ -350,6 +320,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
       }
+      print(context.read<ShoppingTrip>().beneficiaries);
       context.read<ShoppingTrip>().updateTripMetadata(
         context.read<ShoppingTrip>().title,
         context.read<ShoppingTrip>().date,
@@ -633,7 +604,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               if (context.read<ShoppingTrip>().title != '') {
                                 print("editing list");
                                 await updateGridView(newList);
-                                setState(() {});
+                                //setState(() {});
                                 Navigator.pop(context);
                                 if (newList) {
                                   Navigator.push(
