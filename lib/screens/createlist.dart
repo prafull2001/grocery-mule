@@ -254,11 +254,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   void _loadCurrentTrip(DocumentSnapshot snapshot) {
     DateTime date = DateTime.now();
     List<String> beneficiaries = <String>[];
-    Map<String, Item> items = <String, Item>{};
+    //Map<String, Item> items = <String, Item>{};
     date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
     localTime = date;
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
       friend_bene.add(uid);
+    });
+    friend_bene.forEach((element) {
+      beneficiaries.add(element);
     });
     // setState(() {
     cur_trip.initializeTripFromDB(
@@ -267,9 +270,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         date,
         (snapshot.data() as Map<String, dynamic>)['description'],
         (snapshot.data() as Map<String, dynamic>)['host'],
-        friend_bene);
+        beneficiaries);
     // });
-
+    print(context.read<ShoppingTrip>().beneficiaries);
   }
 
   Future<void> updateGridView(bool new_trip) async {
@@ -295,8 +298,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             context.read<ShoppingTrip>().uuid,
           );
     } else {
+      print(context.read<ShoppingTrip>().beneficiaries);
       print("starting to edit list");
       List<String> removeList = [];
+      print(friend_bene);
       context.read<ShoppingTrip>().beneficiaries.forEach((old_bene) {
         if(!friend_bene.contains(old_bene) && old_bene != context.read<Cowboy>().uuid) {
           print("remove: " + old_bene);
@@ -304,14 +309,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         }
       });
 
-
       //check if any bene needs to be removed
       print("removeList: " + removeList.toString());
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
 
       //check if new bene need to be added
       for (var friend in friend_bene) {
-
         if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
           //print(friend);
           print("adding new bene: " + friend);
@@ -558,10 +561,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               ),
                               onConfirm: (results) {
                                 //print(results.toList());
+                                /*
                                 results.forEach((friend) {
                                   if (!friend_bene.contains(friend.toString()))
                                     friend_bene.add(friend.toString());
                                 });
+
+                                 */
+                                friend_bene = results.map((e) => e.toString()).toList();
+                                print(context.read<ShoppingTrip>().beneficiaries);
                               },
                             );
                           }),
