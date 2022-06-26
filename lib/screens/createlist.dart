@@ -9,10 +9,7 @@ import 'package:grocery_mule/screens/lists.dart';
 import 'package:provider/provider.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
-import 'dart:io';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 
@@ -279,13 +276,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   Future<void> updateGridView(bool new_trip) async {
     if (new_trip) {
       print("made here");
-      for (var friend in friend_bene) {
-        //context.read<ShoppingTrip>().addBeneficiary(friend, true);
-        context
-            .read<Cowboy>()
-            .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
-        //addTripToBene(String bene_uuid, String trip_uuid)
-      }
       friend_bene.add(hostUUID);
       await context.read<ShoppingTrip>().initializeTrip(
           context.read<ShoppingTrip>().title,
@@ -293,6 +283,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           context.read<ShoppingTrip>().description,
           friend_bene,
           curUser!.uid);
+      friend_bene.remove(hostUUID);
+      for (var friend in friend_bene) {
+        //context.read<ShoppingTrip>().addBeneficiary(friend, true);
+        context
+            .read<Cowboy>()
+            .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
+        //addTripToBene(String bene_uuid, String trip_uuid)
+      }
       //context.read<ShoppingTrip>().addBeneficiary(hostUUID);
 
       context.read<Cowboy>().addTrip(
