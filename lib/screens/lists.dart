@@ -294,7 +294,7 @@ class _ListsScreenState extends State<ListsScreen> {
                 },
               ),
               ListTile(
-                title: const Text('Log Out'),
+                title: const Text('Log Out'), //
                 onTap: () async {
                   var currentUser = FirebaseAuth.instance.currentUser;
                   if (currentUser != null) {
