@@ -279,7 +279,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     if (new_trip) {
       print("made here");
       for (var friend in friend_bene) {
-        context.read<ShoppingTrip>().addBeneficiary(friend);
+        //context.read<ShoppingTrip>().addBeneficiary(friend, true);
         context
             .read<Cowboy>()
             .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
