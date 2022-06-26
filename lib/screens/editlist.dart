@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
@@ -10,10 +12,11 @@ import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'createlist.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
+
+import 'lists.dart';
 
 typedef StringVoidFunc = void Function(String, int);
 
@@ -22,7 +25,7 @@ var userNameTextGroup = AutoSizeGroup();
 class UserName extends StatefulWidget {
   late final String userUUID;
   UserName(String userUUID, [bool spec=false, bool strng=false]) {
-    // if (spec) print('spec uuid: $userUUID');
+    // if (spec)rint('spec uuid: $userUUID');
     // if (strng) print('strng uuid: $userUUID');
     this.userUUID = userUUID;
   }
@@ -33,30 +36,30 @@ class UserName extends StatefulWidget {
 
 class _UserNameState extends State<UserName> {
   late String userUUID;
-
+  late Stream<DocumentSnapshot> personalshot;
 
   @override
   void initState() {
     userUUID = widget.userUUID;
+    personalshot = userCollection.doc(userUUID).snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("actual streamed: ${userUUID}");
     return StreamBuilder<DocumentSnapshot>(
-        stream: userCollection.doc(userUUID).snapshots(),
+        stream: personalshot,
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
             return const Text('Something went wrong');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox.shrink();
           }
           // print('name for uuid ($userUUID): ' + snapshot.data!['first_name']);
           return Text(
             '${snapshot.data!['first_name']} ',
-            style: TextStyle(fontSize: 20, color: Colors.red),
+            style: TextStyle(fontSize: 20, color: Colors.black),
           );
         });
   }
@@ -71,7 +74,6 @@ class ItemsList extends StatefulWidget {
   _ItemsListState createState() => _ItemsListState();
 }
 
-Map<String, Map<IndividualItem, IndividualItemExpanded>> itemObjList = {};
 
 class _ItemsListState extends State<ItemsList> {
   late String tripUUID;
@@ -96,37 +98,24 @@ class _ItemsListState extends State<ItemsList> {
             return const Text('Something went wrong');
           }
           if (itemColQuery.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox.shrink();
           }
 
           loadItemToProvider(itemColQuery.data!);
-          //print(context.read<ShoppingTrip>().itemUUID);
-          updateitemHash();
-          return ExpansionPanelList(
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                //it takes the uuid of the item  at the index in the panellist,
-                //Then use the mapping from uuid to the current instance of the IndividualItem object; this object allows us
-                //to flip the isExpanded field of the item that is associated to the uuid
-                itemObjList[context.read<ShoppingTrip>().itemUUID[index]]!
-                    .keys
-                    .first
-                    .isExpanded = !isExpanded;
-                //TODO: rewrite autp_collapse
-                //auto_collapse(context.read<ShoppingTrip>().items[context.read<ShoppingTrip>().items.keys.toList()[index]]);
-              });
-            },
-            children: context.watch<ShoppingTrip>().itemUUID.map((uid) {
-              return ExpansionPanel(
-                headerBuilder: (BuildContext context, bool isExpanded) {
-                  return itemObjList[uid]!.keys.first;
-                },
-                body: itemObjList[uid]!.values.first,
-                isExpanded: itemObjList[uid]!.keys.first.isExpanded,
-              );
-            }).toList(),
+          return Container(
+            height: 370,
+            child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: context.watch<ShoppingTrip>().itemUUID.length,
+              itemBuilder: (context, int index){
+                return IndividualItem(tripUUID,context.watch<ShoppingTrip>().itemUUID[index], index, key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
+              },
+            ),
           );
-
+//context.watch<ShoppingTrip>().itemUUID
+//                 .map((itemUid) => IndividualItem(tripUUID,itemUid))
+//                 .toList()
         });
   }
 
@@ -154,35 +143,15 @@ class _ItemsListState extends State<ItemsList> {
         .removeWhere((element) => tobeDeleted.contains(element));
   }
 
-  //For each new item uid, it is mapped to a collpased item-to-expanded item mapping
-  void updateitemHash() {
-    context.watch<ShoppingTrip>().itemUUID.forEach((item_uuid) {
-      if (!itemObjList.containsKey(item_uuid)) {
-        itemObjList[item_uuid] = Map<IndividualItem, IndividualItemExpanded>();
-        itemObjList[item_uuid]![
-                IndividualItem(context.read<ShoppingTrip>().uuid, item_uuid)] =
-            IndividualItemExpanded(
-                context.read<ShoppingTrip>().uuid, item_uuid);
-        //print(itemObjList[item_uuid]!.keys.first.itemID);
-      }
-    });
-    //check if any objmapping needs to be removed
-    List<String> tobeDeleted = [];
-    itemObjList.forEach((key, value) {
-      if (!context.read<ShoppingTrip>().itemUUID.contains(key)) {
-        tobeDeleted.add(key);
-      }
-    });
-    itemObjList.removeWhere((key, value) => tobeDeleted.contains(key));
-  }
-}
 
+}
+//ignore: must_be_immutable
 class IndividualItem extends StatefulWidget {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  bool isExpanded = false;
-  IndividualItem(this.tripID, this.itemID);
+  late final int index;
+  IndividualItem(this.tripID, this.itemID, this.index, { required Key key}): super(key: key);
   @override
   _IndividualItemState createState() => _IndividualItemState();
 }
@@ -191,36 +160,34 @@ class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
   late final String itemID;
   late final String tripID;
-  bool isExpanded = false;
-
+  late final int index;
+  late Stream<DocumentSnapshot> getItemStream = tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
 
   @override
   void initState() {
     itemID = widget.itemID;
     tripID = widget.tripID;
+    index = widget.index;
     curItem = Item.nothing();
+    //getItemStream = ;
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return StreamBuilder(
-        stream: tripCollection
-            .doc(tripID)
-            .collection('items')
-            .doc(itemID)
-            .snapshots(),
+        stream: getItemStream,
         builder:
             (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
+            return const SizedBox.shrink();
           }
 
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
           return simple_item();
+
         });
   }
 
@@ -238,232 +205,79 @@ class _IndividualItemState extends State<IndividualItem> {
 
   Widget simple_item() {
     String name = curItem.name;
-    int quantity = 0;
-    curItem.subitems.forEach((name, count) {
-      quantity = quantity + count;
-    });
+    int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
 
-    return Dismissible(
-      key: Key(name),
-      onDismissed: (direction) {
-        context.read<ShoppingTrip>().removeItem(itemID);
-        itemObjList.remove(itemID);
-        // Remove the item from the data source.
-      },
-      confirmDismiss: (DismissDirection direction) async {
-        return await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Confirm"),
-              content: const Text("Are you sure you wish to delete this item?"),
-              actions: <Widget>[
-                FlatButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text("DELETE")),
-                FlatButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text("CANCEL"),
-                ),
-              ],
-            );
-          },
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          color: dark_beige,
+    return Card(
+      color: (index % 2 == 0 )? card_yellow : card_orange,
+      key: Key(itemID),
+      child: ListTile(
+        title: Container(
+          child:
+
+          Text(
+            '${name}',
+            style: TextStyle(color: Colors.black,
+              fontSize: 20,
+            ),
+          ),
         ),
-        child: (Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+        subtitle:
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+
             Container(
-              child: Text(
-                '$name',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
-              padding: EdgeInsets.all(20),
-            ),
-            Container(
-              child: Text(
-                'x$quantity',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-          ],
-        )),
-      ),
-      background: Container(color: red),
-    );
-  }
-}
-
-class IndividualItemExpanded extends StatefulWidget {
-  late Item curItem;
-  late final String itemID;
-  late final String tripID;
-  IndividualItemExpanded(this.tripID, this.itemID);
-  @override
-  _IndividualItemExpandedState createState() => _IndividualItemExpandedState();
-}
-
-class _IndividualItemExpandedState extends State<IndividualItemExpanded> {
-  late Item curItem;
-  late final String itemID;
-  late final String tripID;
-
-  @override
-  void initState() {
-    itemID = widget.itemID;
-    tripID = widget.tripID;
-    curItem = Item.nothing();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: tripCollection
-            .doc(tripID)
-            .collection('items')
-            .doc(itemID)
-            .snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          }
-
-          if (snapshot.hasError) return const CircularProgressIndicator();
-          loadItem(snapshot.data!);
-          print(curItem.subitems.length);
-          void updateUsrQuantity(String person, int number) {
-            //setState(() {
-            //curItem.subitems = {};
-            curItem.subitems[person] = number;
-            context.read<ShoppingTrip>().editItem(
-                itemID,
-                curItem.subitems.values.reduce((sum, element) => sum + element),
-                person,
-                number);
-            // TODO update database here for quant
-          }
-          //);}
-              ;
-
-          print(curItem.subitems);
-          return Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.rectangle,
-              color: beige,
-            ),
-            child: Column(
-              children: [
-                for (var entry in curItem.subitems.entries)
-                  indie_item(entry.key, entry.value, updateUsrQuantity)
-              ],
-            ),
-          );
-        });
-  }
-
-  //this function loads stream snapshots into item
-  void loadItem(DocumentSnapshot snapshot) {
-    Item temp = Item.nothing();
-    temp.name = snapshot['name'];
-    temp.quantity = snapshot['quantity'];
-    temp.subitems = {};
-    List<String> bene_list = [];
-    (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
-      bene_list.add(uid);
-      temp.subitems[uid] = int.parse(value.toString());
-    });
-
-    if(temp != curItem){
-      //setState(() {
-        curItem = temp;
-       // });
-    }
-    //context.read<ShoppingTrip>().setBeneficiary(bene_list);
-  }
-
-  Widget indie_item(String uid, int number, StringVoidFunc callback) {
-    print("this user: " + uid);
-    // print('uid of user (indie_item): ${uid}');
-    return Container(
-      color: beige,
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-        Container(
-          child: UserName(uid, true),
-          padding: EdgeInsets.all(20),
-        ),
-        Container(
-          child: (context.read<Cowboy>().uuid == uid)
-              ? NumberInputWithIncrementDecrement(
-                  initialValue: number,
-                  controller: TextEditingController(),
-                  onIncrement: (num newlyIncrementedValue) {
-                    callback(uid, newlyIncrementedValue as int);
-                  },
-                  onDecrement: (num newlyDecrementedValue) {
-                    callback(uid, newlyDecrementedValue as int);
-                  },
+                child: IconButton(
+                    icon: const Icon(Icons.remove_circle),
+                    onPressed: () => (setState(() {
+                      updateUsrQuantity(context.read<Cowboy>().uuid, max(0, quantity -1));
+                    })
+                    )
                 )
-          // TODO vvvv--- maybe issue here???
-              : Center(
-                child: Text(
-                    'x$number',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                    ),
-                  ),
-              ),
-          height: 60,
-          width: 105,
-        )
-      ]),
+            ),
+            Container(
+              child:
+                Text(
+                    '${quantity}'
+                ),
+            ),
+
+            Container(
+                child: IconButton(
+                    icon: const Icon(Icons.add_circle),
+                    onPressed: () {
+                      setState(() {
+                        updateUsrQuantity(context.read<Cowboy>().uuid, quantity +1);
+                      });
+                    })),
+          ],
+        ),
+        trailing:
+        (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
+        IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: (){setState(() {
+            context.read<ShoppingTrip>().removeItem(itemID);
+
+          });},
+        ):SizedBox.shrink()
+        ,
+        isThreeLine: true,
+      ),
     );
   }
-
-  Widget expanded_item() {
-    void updateUsrQuantity(String person, int number) {
-      //setState(() {
-      //curItem.subitems = {};
-        curItem.subitems[person] = number;
-        context.read<ShoppingTrip>().editItem(
-            itemID,
-            curItem.subitems.values.reduce((sum, element) => sum + element),
-            person,
-            number);
-        // TODO update database here for quant
-        }
-      //);}
-    ;
-    print(curItem.subitems);
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: beige,
-      ),
-      child: Column(
-        children: [
-          for (var entry in curItem.subitems.entries)
-            indie_item(entry.key, entry.value, updateUsrQuantity)
-        ],
-      ),
-    );
+  void updateUsrQuantity(String person, int number) {
+    curItem.subitems[person] = number;
+    context.read<ShoppingTrip>().editItem(
+        itemID,
+        curItem.subitems.values.reduce((sum, element) => sum + element),
+        person,
+        number);
+    // TODO update database here for quant
   }
 }
+
 
 class EditListScreen extends StatefulWidget {
   static String id = 'edit_list_screen';
@@ -492,7 +306,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   bool isAdd = false;
   bool invite_guest = false;
   late String hostFirstName;
-  List<String> bene_uid = [];
+
   static bool reload = true;
   bool leave_list = false;
   late Stream<DocumentSnapshot<Object?>>? listStream;
@@ -518,6 +332,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   }
 
   void _queryCurrentTrip(DocumentSnapshot curTrip) {
+    List<String> bene_uid = [];
     DateTime date = DateTime.now();
     date = (curTrip['date'] as Timestamp).toDate();
     List<String> temp_bene_uid = [];
@@ -525,6 +340,19 @@ class _EditListsScreenState extends State<EditListScreen> {
       temp_bene_uid.add(uid.toString());
       if (!bene_uid.contains(uid)) bene_uid.add(uid.toString());
     });
+    //if the current user is contained in the beneficiary list
+    //pop out the editList
+    print("current beneficiaries: ${bene_uid}");
+    /*
+    if(!bene_uid.contains(context.read<Cowboy>().uuid)) {
+      print("kick");
+      Navigator.of(context).popUntil((route) {
+        return route.settings.name == ListsScreen.id;
+      });
+      Navigator.pushNamed(context, ListsScreen.id);
+    }
+
+     */
     bene_uid = temp_bene_uid;
 
     context.read<ShoppingTrip>().initializeTripFromDB(
@@ -599,7 +427,32 @@ class _EditListsScreenState extends State<EditListScreen> {
       )),
     );
   }
-
+  check_leave(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm"),
+          content: const Text("Are you sure you wish to leave this trip?"),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () => {
+                leave_list = false,
+                Navigator.of(context).pop(),
+              },
+              child: const Text("CANCEL"),
+            ),
+            FlatButton(
+                onPressed: () => {
+                  leave_list = true,
+                  Navigator.of(context).pop(),
+                },
+                child: const Text("LEAVE")),
+          ],
+        );
+      },
+    );
+  }
   Future<void> handleClick(int item) async {
     switch (item) {
       case 1:
@@ -615,42 +468,14 @@ class _EditListsScreenState extends State<EditListScreen> {
           context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
           context.read<ShoppingTrip>().removeBeneficiary(context.read<Cowboy>().uuid);
           Navigator.of(context).pop();
-        }
+
     }
-  }
+  }}
 
-  check_leave(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Confirm"),
-          content: const Text("Are you sure you wish to leave this trip?"),
-          actions: <Widget>[
-            FlatButton(
-                onPressed: () => {
-                  leave_list = true,
-                  Navigator.of(context).pop(),
-                },
-                child: const Text("Leave")),
-            FlatButton(
-              onPressed: () => {
-                leave_list = false,
-                Navigator.of(context).pop(),
-              },
-              child: const Text("CANCEL"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-  @override
+
+
+    @override
   Widget build(BuildContext context) {
-    return Masterlist(context);
-  }
-
-  Widget Masterlist(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -680,80 +505,107 @@ class _EditListsScreenState extends State<EditListScreen> {
 
 
       ),
-      body: StreamBuilder<DocumentSnapshot<Object?>>(
-          stream: tripCollection.doc(tripUUID).snapshots(),
-          builder:
-              (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
-            if (snapshot.hasError) {
-              return Text('Something went wrong StreamBuilder');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            }
-            //readInData(snapshot.data!);
-            _queryCurrentTrip(snapshot.data!);
-            return SingleChildScrollView(
-              child: Container(
-                  child: Column(
-                //padding: const EdgeInsets.all(25),
-                children: [
-                  SizedBox(
-                    height: 20,
-                  ),
+      body: Container(
+        child: StreamBuilder<DocumentSnapshot<Object?>>(
+            stream: listStream,
+            builder:
+                (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Something went wrong StreamBuilder');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return SizedBox.shrink();
+              }
+              //readInData(snapshot.data!);
+              _queryCurrentTrip(snapshot.data!);
+              if(!context.watch<ShoppingTrip>().beneficiaries.contains(context.read<Cowboy>().uuid)) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                'You have been removed from this trip',
+                                style: TextStyle(
+                                  fontSize: 40.0,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+              }
+              return SingleChildScrollView(
+                child: Container(
+                    child: Column(
+                  //padding: const EdgeInsets.all(25),
+                  children: [
+                    SizedBox(
+                      height: 20,
+                    ),
 
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 10.0,
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        Text(
+                          //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                          // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                          'Host - ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                          ),
+                        ),
+                        UserName(context.read<ShoppingTrip>().host, false, true),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Card(
+                      color: light_cream,
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                        borderRadius: BorderRadius.circular(30.0),
                       ),
-                      Text(
-                        //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
-                        // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                        'Host - ',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
+                      child: Theme(
+                        data: Theme.of(context)
+                            .copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          title: Text(
+                            "Beneficiaries",
+                          ),
+                          children: [
+                            // TODO error right vvvvvvv should be watching beneficaries from firebase not from context
+                            for (String name in context.watch<ShoppingTrip>().beneficiaries)
+                              ListTile(
+                                title: UserName(name, false, true),
+                              )
+                          ],
                         ),
                       ),
-                      UserName(context.read<ShoppingTrip>().host, false, true),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Card(
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(
-                          color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                      borderRadius: BorderRadius.circular(30.0),
                     ),
-                    child: Theme(
-                      data: Theme.of(context)
-                          .copyWith(dividerColor: Colors.transparent),
-                      child: ExpansionTile(
-                        title: Text(
-                          "Beneficiaries",
-                        ),
-                        children: [
-                          // TODO error right vvvvvvv should be watching beneficaries from firebase not from context
-                          for (String name in context.watch<ShoppingTrip>().beneficiaries)
-                            ListTile(
-                              title: UserName(name, false, true),
-                            )
-                        ],
-                      ),
-                    ),
-                  ),
-                  //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
-                  ItemsAddition(
-                    tripUUID: tripUUID,
-                  )
+                    //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
+                    ItemsAddition(
+                      tripUUID: tripUUID,
+                    )
 
-                  //SizedBox(height: 10),
-                ],
-              )),
-            );
-          }),
+                    //SizedBox(height: 10),
+                  ],
+                )),
+              );
+            }),
+      ),
     );
   }
 }
@@ -876,6 +728,7 @@ class _ItemsAdditionState extends State<ItemsAddition> {
         SizedBox(
           height: 10.0,
         ),
+        
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -883,18 +736,6 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             SizedBox(
               width: 40.0,
             ),
-            Container(
-              height: 70,
-              width: 150,
-              child: RoundedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, PersonalListScreen.id);
-                },
-                title: "Personal List",
-                color: Colors.blueAccent,
-              ),
-            ),
-            Spacer(),
             if (context.read<ShoppingTrip>().host ==
                 context.read<Cowboy>().uuid) ...[
               Container(
@@ -909,6 +750,7 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                 ),
               ),
             ],
+            Spacer(),
             SizedBox(
               width: 40.0,
             ),

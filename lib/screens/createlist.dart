@@ -9,10 +9,7 @@ import 'package:grocery_mule/screens/lists.dart';
 import 'package:provider/provider.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:number_inc_dec/number_inc_dec.dart';
-import 'dart:io';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 
@@ -217,7 +214,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   bool delete_list = false;
   bool invite_guest = false;
   late ShoppingTrip cur_trip;
-  List<String> uid_name = [];
+  //List<String> uid_name = [];
   List<String> friend_bene = [];
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
@@ -227,6 +224,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     trip_uuid = widget.trip_uuid;
 
     newList = widget.newList;
+    context.read<ShoppingTrip>().clearField();
     cur_trip = context.read<ShoppingTrip>();
     if (trip_uuid != "dummy") {
       _tripTitleController = TextEditingController(text: cur_trip.title);
@@ -254,11 +252,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   void _loadCurrentTrip(DocumentSnapshot snapshot) {
     DateTime date = DateTime.now();
     List<String> beneficiaries = <String>[];
-    Map<String, Item> items = <String, Item>{};
+    //Map<String, Item> items = <String, Item>{};
     date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
     localTime = date;
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
-      uid_name.add(uid);
+      friend_bene.add(uid);
+    });
+    friend_bene.forEach((element) {
+      beneficiaries.add(element);
     });
     // setState(() {
     cur_trip.initializeTripFromDB(
@@ -267,81 +268,52 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         date,
         (snapshot.data() as Map<String, dynamic>)['description'],
         (snapshot.data() as Map<String, dynamic>)['host'],
-        uid_name);
+        beneficiaries);
     // });
-
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: context.read<ShoppingTrip>().date,
-      firstDate: DateTime(2022),
-      lastDate: DateTime(2050),
-      builder: (context, child) => Theme(
-          data: ThemeData().copyWith(
-            colorScheme: ColorScheme.light(
-              primary:  Colors.amber,
-              onPrimary: Colors.white,
-              onSurface: Colors.black
-            )
-          ),
-          child: child!,
-       )
-    );
-    if (picked != null && picked != context.read<ShoppingTrip>().date && picked != localTime) {
-      context.read<ShoppingTrip>().editTripDate(picked);
-      // TODO temporary fix only, encapsulating within class should fix
-      if (newList) {
-        setState(() {
-          print('overwrite localTime: $localTime');
-          localTime = picked;
-        });
-      } else {
-        localTime = picked;
-        context.read<ShoppingTrip>().editTripDateSync(picked);
-        print('synced provider: $localTime');
-      }
-      //localTime = picked;
-    }
+    print(context.read<ShoppingTrip>().beneficiaries);
   }
 
   Future<void> updateGridView(bool new_trip) async {
     if (new_trip) {
       print("made here");
+      friend_bene.add(hostUUID);
       await context.read<ShoppingTrip>().initializeTrip(
           context.read<ShoppingTrip>().title,
           context.read<ShoppingTrip>().date,
           context.read<ShoppingTrip>().description,
-          uid_name,
+          friend_bene,
           curUser!.uid);
-      context.read<ShoppingTrip>().addBeneficiary(hostUUID);
+      friend_bene.remove(hostUUID);
       for (var friend in friend_bene) {
-        context.read<ShoppingTrip>().addBeneficiary(friend);
+        //context.read<ShoppingTrip>().addBeneficiary(friend, true);
         context
             .read<Cowboy>()
             .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
         //addTripToBene(String bene_uuid, String trip_uuid)
       }
+      //context.read<ShoppingTrip>().addBeneficiary(hostUUID);
+
       context.read<Cowboy>().addTrip(
             context.read<ShoppingTrip>().uuid,
           );
     } else {
+      print(context.read<ShoppingTrip>().beneficiaries);
       print("starting to edit list");
       List<String> removeList = [];
+      print(friend_bene);
       context.read<ShoppingTrip>().beneficiaries.forEach((old_bene) {
         if(!friend_bene.contains(old_bene) && old_bene != context.read<Cowboy>().uuid) {
           print("remove: " + old_bene);
           removeList.add(old_bene);
         }
       });
+
       //check if any bene needs to be removed
       print("removeList: " + removeList.toString());
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
 
       //check if new bene need to be added
       for (var friend in friend_bene) {
-
         if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
           //print(friend);
           print("adding new bene: " + friend);
@@ -350,6 +322,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
       }
+      print(context.read<ShoppingTrip>().beneficiaries);
       context.read<ShoppingTrip>().updateTripMetadata(
         context.read<ShoppingTrip>().title,
         context.read<ShoppingTrip>().date,
@@ -587,10 +560,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               ),
                               onConfirm: (results) {
                                 //print(results.toList());
+                                /*
                                 results.forEach((friend) {
                                   if (!friend_bene.contains(friend.toString()))
                                     friend_bene.add(friend.toString());
                                 });
+
+                                 */
+                                friend_bene = results.map((e) => e.toString()).toList();
+                                print(context.read<ShoppingTrip>().beneficiaries);
                               },
                             );
                           }),
@@ -633,7 +611,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               if (context.read<ShoppingTrip>().title != '') {
                                 print("editing list");
                                 await updateGridView(newList);
-                                setState(() {});
+                                //setState(() {});
                                 Navigator.pop(context);
                                 if (newList) {
                                   Navigator.push(

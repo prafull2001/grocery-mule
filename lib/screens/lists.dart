@@ -6,16 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
-import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/dev/migration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/user_info.dart';
-import 'package:async/async.dart';
 import 'package:provider/provider.dart';
 import 'editlist.dart';
-import 'dart:math';
+
 
 class ListsScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
@@ -30,7 +29,7 @@ class ShoppingTripQuery extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   late String listUUID;
 
-  ShoppingTripQuery(String listUUID) {
+  ShoppingTripQuery(String listUUID, { required Key key}) : super(key: key){
     this.listUUID = listUUID;
   }
 
@@ -120,17 +119,18 @@ class ShoppingCollectionQuery extends StatefulWidget {
 }
 
 class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
-  //late List<String> personalTrips;
+  late Stream<QuerySnapshot> personalTrips;
   @override
   void initState() {
-    //personalTrips = widget.personalTrips;
+    personalTrips = tripCollection.orderBy('date',descending: true).snapshots();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return StreamBuilder<QuerySnapshot>(
-        stream: tripCollection.orderBy('date',descending: true).snapshots(),
+        stream: personalTrips,
         builder:
             (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -162,8 +162,9 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 7),
                 itemBuilder: (context, int index) {
-                  return new ShoppingTripQuery(sortedList[
-                  index]); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
+                  return new ShoppingTripQuery(
+                      sortedList[index],key: Key(sortedList[index])
+                  ); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
                 },
               ),
             ),
@@ -174,7 +175,7 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
 class _ListsScreenState extends State<ListsScreen> {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-
+  late Stream<DocumentSnapshot> personalTrip = userCollection.doc(curUser!.uid).snapshots();
   Future<void>? Cowsnapshot;
   List<String> dev = [
     "NYxh0dZXDya9VAdSYnOeWkY2wv83",
@@ -183,8 +184,8 @@ class _ListsScreenState extends State<ListsScreen> {
   ];
   @override
   void initState() {
-    // TODO: implement initState
     Cowsnapshot = _loadCurrentCowboy();
+    //personalTrip = userCollection.doc(curUser!.uid).snapshots();
     super.initState();
   }
 
@@ -298,6 +299,7 @@ class _ListsScreenState extends State<ListsScreen> {
                   if (currentUser != null) {
                     //clearUserField();
                     context.read<Cowboy>().clearData();
+                    context.read<ShoppingTrip>().clearField();
                     await _auth.signOut();
                     print('User signed out');
                   }
@@ -320,7 +322,7 @@ class _ListsScreenState extends State<ListsScreen> {
           ),
         ),
         body: StreamBuilder<DocumentSnapshot<Object?>>(
-            stream: userCollection.doc(curUser!.uid).snapshots(),
+            stream: personalTrip,
             builder:
                 (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
               if (snapshot.hasError) {
