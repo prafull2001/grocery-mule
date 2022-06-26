@@ -16,6 +16,10 @@ class ShoppingTrip with ChangeNotifier {
   List<String> itemUUID = [];
   late Receipt _receipt;
 
+
+  void clearField(){
+    _uuid = "";
+  }
   // from user creation screen for metadata
   Future<void> initializeTrip(String title, DateTime date, String description,
       List<String> bene_list, String host) async {
