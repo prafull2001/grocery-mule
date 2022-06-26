@@ -227,6 +227,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     trip_uuid = widget.trip_uuid;
 
     newList = widget.newList;
+    context.read<ShoppingTrip>().clearField();
     cur_trip = context.read<ShoppingTrip>();
     if (trip_uuid != "dummy") {
       _tripTitleController = TextEditingController(text: cur_trip.title);
