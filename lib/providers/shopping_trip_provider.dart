@@ -14,6 +14,7 @@ class ShoppingTrip with ChangeNotifier {
   String _host = ''; // host uuid
   List<String> _beneficiaries = [];
   List<String> itemUUID = [];
+  bool lock = false;
   late Receipt _receipt;
 
 
@@ -46,13 +47,14 @@ class ShoppingTrip with ChangeNotifier {
 
   // takes in formatted data from snapshot to directly update the provider
   initializeTripFromDB(String uuid, String title, DateTime date,
-      String description, String host, List<String> beneficiaries) {
+      String description, String host, List<String> beneficiaries, bool raw_lock) {
     _uuid = uuid;
     _title = title;
     _date = date;
     _description = description;
     _host = host;
     _beneficiaries = beneficiaries;
+    lock = raw_lock as bool;
   }
 
   initializeItemUIDFromDB(List<String> itemUUID) {
@@ -116,11 +118,6 @@ class ShoppingTrip with ChangeNotifier {
   setBeneficiary(List<String> new_bene_list) {
     _beneficiaries = new_bene_list;
   }
-
-  // setLiveBeneList(List<String> new_bene_list) {
-  //   _beneficiaries = new_bene_list;
-  //   notifyListeners();
-  // }
 
   // adds beneficiary, notifies listeners, updates database
   addBeneficiary(String beneficiary_uuid) {
@@ -206,7 +203,8 @@ class ShoppingTrip with ChangeNotifier {
       'quantity': 0,
       'subitems': bene_subitem,
       'uuid': item_uid,
-      'timeStamp': DateTime.now().microsecondsSinceEpoch
+      'timeStamp': DateTime.now().microsecondsSinceEpoch,
+      'check': false,
     });
     itemUUID.add(item_uid);
     notifyListeners();
@@ -248,6 +246,7 @@ class ShoppingTrip with ChangeNotifier {
       'description': _description,
       'host': _host,
       'beneficiaries': _beneficiaries,
+      'lock': false,
     });
   }
 
@@ -257,6 +256,27 @@ class ShoppingTrip with ChangeNotifier {
     tripCollection.doc(_uuid).update({'date': _date});
   }
 
+  changeTripLock() async {
+    //switch lock
+    lock = !lock;
+    await tripCollection.doc(_uuid).update({'lock': lock});
+  }
+
+  setAllCheckFalse() async {
+    tripCollection.doc(_uuid).collection('items').get().then((collection) => {
+      collection.docs.forEach((doc) {
+        tripCollection.doc(_uuid).collection('items').doc(doc['uuid']).update({'check':false});
+      })
+    }
+    );
+  }
+  changeItemCheck(String itemID) async {
+    DocumentSnapshot item = await tripCollection.doc(_uuid).collection('items').doc(itemID).get();
+    bool curCheck = item['check'];
+    //switch the checkmark
+    curCheck = !curCheck;
+    await tripCollection.doc(_uuid).collection('items').doc(itemID).update({'check': curCheck});
+  }
   deleteTripDB() async {
     print(_uuid);
     itemUUID.forEach((uid) {
@@ -297,6 +317,7 @@ class ShoppingTrip with ChangeNotifier {
 class Item {
   late String name;
   late int quantity;
+  late bool check;
   Map<String, int> subitems =
       <String, int>{}; // uuid to individual quantity needed
   Item(this.name, this.quantity, List<String> beneficiaries) {
