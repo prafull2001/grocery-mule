@@ -122,9 +122,18 @@ class _PayPalPageSate extends State<PayPalPage>{
                       ),
                     ),
                     children: [
-                      ListTile(
-                        title: Text("Type: \'paypal.me\' in a browser window")
+                      RoundedButton(
+                        onPressed: () async {
+                          String paypalStr = "https://www.paypal.com/paypalme/";
+                          Uri paypal_link = Uri.parse(paypalStr);
+                          if(await canLaunchUrl(paypal_link)){
+                          launchUrl(paypal_link);
+                          }
+                        },
+                        title: "Visit \'paypal.me\'",
+                        color: Colors.blueAccent,
                       ),
+
                       Card(
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(
