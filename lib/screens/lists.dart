@@ -63,15 +63,16 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
           if (snapshot.data!.data() != null) {
             String desc_short = snapshot.data!['description'];
             String title_short = snapshot.data!['title'];
-            if(title_short.length > 12){
+            if(title_short.length > 30){
               title_short = title_short.substring(0,11) + "...";
             }
-            if(desc_short.length > 12){
+            if(desc_short.length > 50){
               desc_short = desc_short.substring(0,11) + "...";
             }
             return Container(
+              margin: const EdgeInsets.all(10.0),
               width: 80,
-              height: 80,
+              height: 100,
               decoration: BoxDecoration(
                 color: const Color(0xFFf57f17),
                 borderRadius: BorderRadius.circular(15),
@@ -103,7 +104,9 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
                       MaterialPageRoute(
                           builder: (context) => EditListScreen(listUUID)));
                 },
+
               ),
+
             );
           }
           return Container();
@@ -152,23 +155,31 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
           }
           print(sortedList);
           return SafeArea(
-            child: Scrollbar(
-              isAlwaysShown: true,
-              child: GridView.builder(
-                padding: EdgeInsets.all(8),
+            //child: Scrollbar(
+              //isAlwaysShown: true,
+              // child: GridView.builder(
+              //   padding: EdgeInsets.all(8),
+              //   itemCount: sortedList.length,
+              //   gridDelegate:
+              //   const SliverGridDelegateWithFixedCrossAxisCount(
+              //       crossAxisCount: 3,
+              //       mainAxisSpacing: 10,
+              //       crossAxisSpacing: 7),
+              //   itemBuilder: (context, int index) {
+              //     return new ShoppingTripQuery(
+              //         sortedList[index],key: Key(sortedList[index])
+              //     ); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
+              //   },
+              // ),
+              child: ListView.builder(
+                //scrollDirection: Axis.vertical,
+                shrinkWrap: true,
                 itemCount: sortedList.length,
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 7),
-                itemBuilder: (context, int index) {
-                  return new ShoppingTripQuery(
-                      sortedList[index],key: Key(sortedList[index])
-                  ); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
+                itemBuilder: (context, int index){
+                  return new ShoppingTripQuery(sortedList[index],key: Key(sortedList[index]));
                 },
               ),
-            ),
+            // ),
           );
         });
   }
