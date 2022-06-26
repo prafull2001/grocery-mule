@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
+import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/dev/migration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -62,15 +63,16 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
           if (snapshot.data!.data() != null) {
             String desc_short = snapshot.data!['description'];
             String title_short = snapshot.data!['title'];
-            if(title_short.length > 12){
+            if(title_short.length > 30){
               title_short = title_short.substring(0,11) + "...";
             }
-            if(desc_short.length > 12){
+            if(desc_short.length > 50){
               desc_short = desc_short.substring(0,11) + "...";
             }
             return Container(
+              margin: const EdgeInsets.all(10.0),
               width: 80,
-              height: 80,
+              height: 100,
               decoration: BoxDecoration(
                 color: const Color(0xFFf57f17),
                 borderRadius: BorderRadius.circular(15),
@@ -83,18 +85,32 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
                 ],
               ),
               child: ListTile(
-                title: Text(
-                  '\n${title_short}\n'
-                          '${desc_short}\n\n'
-                          '${(snapshot.data!['date'] as Timestamp).toDate().month}' +
-                      '/' +
-                      '${(snapshot.data!['date'] as Timestamp).toDate().day}' +
-                      '/' +
-                      '${(snapshot.data!['date'] as Timestamp).toDate().year}',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
+                title: Container(
+                  child: Text(
+                    '${title_short}',
+                    style: TextStyle(color: Colors.black,
+                      fontSize: 25,
+                    ),
                   ),
+                ),
+                subtitle: Row(
+                  children: [
+                    Text(
+                      '${desc_short}\n\n'
+                '${(snapshot.data!['date'] as Timestamp).toDate().month}' +
+                    '/' +
+                    '${(snapshot.data!['date'] as Timestamp).toDate().day}' +
+                    '/' +
+                    '${(snapshot.data!['date'] as Timestamp).toDate().year}',
+                      style: TextStyle(color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+
+                  ]
                 ),
                 onTap: () async {
                   await Navigator.push(
@@ -102,7 +118,9 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
                       MaterialPageRoute(
                           builder: (context) => EditListScreen(listUUID)));
                 },
+                isThreeLine: true,
               ),
+
             );
           }
           return Container();
@@ -151,23 +169,15 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
           }
           print(sortedList);
           return SafeArea(
-            child: Scrollbar(
-              isAlwaysShown: true,
-              child: GridView.builder(
-                padding: EdgeInsets.all(8),
+              child: ListView.builder(
+                //scrollDirection: Axis.vertical,
+                shrinkWrap: true,
                 itemCount: sortedList.length,
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 7),
-                itemBuilder: (context, int index) {
-                  return new ShoppingTripQuery(
-                      sortedList[index],key: Key(sortedList[index])
-                  ); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
+                itemBuilder: (context, int index){
+                  return new ShoppingTripQuery(sortedList[index],key: Key(sortedList[index]));
                 },
               ),
-            ),
+            // ),
           );
         });
   }
@@ -293,7 +303,7 @@ class _ListsScreenState extends State<ListsScreen> {
                 },
               ),
               ListTile(
-                title: const Text('Log Out'),
+                title: const Text('Log Out'), //
                 onTap: () async {
                   var currentUser = FirebaseAuth.instance.currentUser;
                   if (currentUser != null) {
