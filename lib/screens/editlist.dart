@@ -20,8 +20,6 @@ import 'lists.dart';
 
 typedef StringVoidFunc = void Function(String, int);
 
-var userNameTextGroup = AutoSizeGroup();
-
 class UserName extends StatefulWidget {
   late final String userUUID;
   UserName(String userUUID, [bool spec=false, bool strng=false]) {
@@ -212,17 +210,14 @@ class _IndividualItemState extends State<IndividualItem> {
       key: Key(itemID),
       child: ListTile(
         title: Container(
-          child:
-
-          Text(
+          child: Text(
             '${name}',
             style: TextStyle(color: Colors.black,
               fontSize: 20,
             ),
           ),
         ),
-        subtitle:
-        Row(
+        subtitle: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -253,8 +248,7 @@ class _IndividualItemState extends State<IndividualItem> {
                     })),
           ],
         ),
-        trailing:
-        (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
+        trailing: (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
         IconButton(
           icon: Icon(Icons.delete),
           onPressed: (){setState(() {

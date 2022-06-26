@@ -85,18 +85,32 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
                 ],
               ),
               child: ListTile(
-                title: Text(
-                  '\n${title_short}\n'
-                          '${desc_short}\n\n'
-                          '${(snapshot.data!['date'] as Timestamp).toDate().month}' +
-                      '/' +
-                      '${(snapshot.data!['date'] as Timestamp).toDate().day}' +
-                      '/' +
-                      '${(snapshot.data!['date'] as Timestamp).toDate().year}',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
+                title: Container(
+                  child: Text(
+                    '${title_short}',
+                    style: TextStyle(color: Colors.black,
+                      fontSize: 25,
+                    ),
                   ),
+                ),
+                subtitle: Row(
+                  children: [
+                    Text(
+                      '${desc_short}\n\n'
+                '${(snapshot.data!['date'] as Timestamp).toDate().month}' +
+                    '/' +
+                    '${(snapshot.data!['date'] as Timestamp).toDate().day}' +
+                    '/' +
+                    '${(snapshot.data!['date'] as Timestamp).toDate().year}',
+                      style: TextStyle(color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+
+                  ]
                 ),
                 onTap: () async {
                   await Navigator.push(
@@ -104,7 +118,7 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery>{
                       MaterialPageRoute(
                           builder: (context) => EditListScreen(listUUID)));
                 },
-
+                isThreeLine: true,
               ),
 
             );
@@ -155,22 +169,6 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
           }
           print(sortedList);
           return SafeArea(
-            //child: Scrollbar(
-              //isAlwaysShown: true,
-              // child: GridView.builder(
-              //   padding: EdgeInsets.all(8),
-              //   itemCount: sortedList.length,
-              //   gridDelegate:
-              //   const SliverGridDelegateWithFixedCrossAxisCount(
-              //       crossAxisCount: 3,
-              //       mainAxisSpacing: 10,
-              //       crossAxisSpacing: 7),
-              //   itemBuilder: (context, int index) {
-              //     return new ShoppingTripQuery(
-              //         sortedList[index],key: Key(sortedList[index])
-              //     ); //renderList(context.watch<Cowboy>().shoppingTrips[index]);
-              //   },
-              // ),
               child: ListView.builder(
                 //scrollDirection: Axis.vertical,
                 shrinkWrap: true,

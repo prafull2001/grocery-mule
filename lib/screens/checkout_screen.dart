@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -121,8 +122,6 @@ class _CheckoutScreen extends State<CheckoutScreen> {
   Map<String, Map<String,int>> aggre_raw_list = {};
   Map<String, Map<String,int>> aggre_clean_list = {};
   Map<String, String> paypalLinks = {};
-  CollectionReference tripCollection = FirebaseFirestore.instance.collection('paypal_shopping_trips');
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
   late CollectionReference itemSubCollection;
   //map each bene uuid to their own map
   //@override
