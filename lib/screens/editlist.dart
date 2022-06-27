@@ -610,7 +610,8 @@ class _EditListsScreenState extends State<EditListScreen> {
 
                     //SizedBox(height: 10),
                   ],
-                )),
+                )
+                ),
               );
             }),
       ),
