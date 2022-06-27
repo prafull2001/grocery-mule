@@ -175,7 +175,7 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
 
     return Card(
       key: Key(userUUID),
-      color: orange,
+      color: light_orange,
       child: ListTile(
         title: Container(
           child: UserName(userUUID),
@@ -247,44 +247,6 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     super.initState();
   }
 
-
-
-/*
-Column(
-        children: <Widget>[
-          Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-             UserName(uuid)
-            ],
-          ),
-          if(aggre_raw_list[uuid]!.isNotEmpty)...[
-          for (var entry in aggre_raw_list[uuid]!.entries)
-            simple_item(entry.key, entry.value),
-             if(context.read<Cowboy>().uuid != uuid)...[
-               PayPalButton(uuid)
-             ]
-
-          ]else...[
-            Container(
-              height: 40,
-              width: 400,
-
-              child: Column(
-                  children: [
-                  Text('No items found',
-                    style: TextStyle(
-                      color: Colors.red,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w400,
-                    )
-                    ),
-                  ]
-              ),
-            )
-          ]
-        ]
- */
 
   @override
   Widget build(BuildContext context) {
