@@ -323,14 +323,22 @@ Column(
           });
 
 
-          return ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemCount: aggre_raw_list.length,
-            itemBuilder: (context, int index){
-              return ItemsPerPerson(aggre_raw_list.keys.toList()[index],aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,key: Key(aggre_raw_list.keys.toList()[index]));
-            },
-          );
+          return
+            Column(
+              children: [
+                SizedBox(
+                  height: 10.0,
+                ),
+                ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: aggre_raw_list.length,
+                  itemBuilder: (context, int index){
+                    return ItemsPerPerson(aggre_raw_list.keys.toList()[index],aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,key: Key(aggre_raw_list.keys.toList()[index]));
+                  },
+                ),
+              ],
+            );
         }
       ),
     );

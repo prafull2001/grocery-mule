@@ -277,6 +277,7 @@ class ShoppingTrip with ChangeNotifier {
     curCheck = !curCheck;
     await tripCollection.doc(_uuid).collection('items').doc(itemID).update({'check': curCheck});
   }
+
   deleteTripDB() async {
     print(_uuid);
     itemUUID.forEach((uid) {

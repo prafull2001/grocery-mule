@@ -274,6 +274,7 @@ class _IndividualItemState extends State<IndividualItem> {
       ),
     );
   }
+
   Color getColor(Set<MaterialState> states) {
     const Set<MaterialState> interactiveStates = <MaterialState>{
       MaterialState.pressed,
@@ -461,6 +462,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       },
     );
   }
+
   Future<void> handleClick(int item) async {
     switch (item) {
       case 1:
@@ -476,7 +478,6 @@ class _EditListsScreenState extends State<EditListScreen> {
           context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
           context.read<ShoppingTrip>().removeBeneficiary(context.read<Cowboy>().uuid);
           Navigator.of(context).pop();
-
     }
   }}
 
