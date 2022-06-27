@@ -23,8 +23,6 @@ typedef StringVoidFunc = void Function(String, int);
 class UserName extends StatefulWidget {
   late final String userUUID;
   UserName(String userUUID, [bool spec=false, bool strng=false]) {
-    // if (spec)rint('spec uuid: $userUUID');
-    // if (strng) print('strng uuid: $userUUID');
     this.userUUID = userUUID;
   }
 
@@ -111,9 +109,6 @@ class _ItemsListState extends State<ItemsList> {
               },
             ),
           );
-//context.watch<ShoppingTrip>().itemUUID
-//                 .map((itemUid) => IndividualItem(tripUUID,itemUid))
-//                 .toList()
         });
   }
 
@@ -167,7 +162,6 @@ class _IndividualItemState extends State<IndividualItem> {
     tripID = widget.tripID;
     index = widget.index;
     curItem = Item.nothing();
-    //getItemStream = ;
     super.initState();
   }
 
@@ -194,6 +188,7 @@ class _IndividualItemState extends State<IndividualItem> {
     curItem.name = snapshot['name'];
     curItem.quantity = snapshot['quantity'];
     curItem.subitems = {};
+    curItem.check = snapshot['check'] as bool;
     (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
       int count = curItem.subitems.keys.length;
       // print('loadItem (individual) called with uid: {$uid}, value: {$value}, length: {$count}');
@@ -206,7 +201,9 @@ class _IndividualItemState extends State<IndividualItem> {
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
 
     return Card(
-      color: (index % 2 == 0 )? card_yellow : card_orange,
+      color: (context.watch<ShoppingTrip>().lock == true && context.watch<Cowboy>().uuid != context.watch<ShoppingTrip>().host)?
+          beige:
+      (index % 2 == 0 )? card_yellow : card_orange,
       key: Key(itemID),
       child: ListTile(
         title: Container(
@@ -221,7 +218,7 @@ class _IndividualItemState extends State<IndividualItem> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
+            if(context.read<ShoppingTrip>().lock == false)...[
             Container(
                 child: IconButton(
                     icon: const Icon(Icons.remove_circle),
@@ -231,13 +228,14 @@ class _IndividualItemState extends State<IndividualItem> {
                     )
                 )
             ),
+            ],
             Container(
               child:
                 Text(
                     '${quantity}'
                 ),
             ),
-
+            if(context.read<ShoppingTrip>().lock == false)...[
             Container(
                 child: IconButton(
                     icon: const Icon(Icons.add_circle),
@@ -246,20 +244,47 @@ class _IndividualItemState extends State<IndividualItem> {
                         updateUsrQuantity(context.read<Cowboy>().uuid, quantity +1);
                       });
                     })),
+            ],
           ],
+
         ),
         trailing: (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
-        IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: (){setState(() {
-            context.read<ShoppingTrip>().removeItem(itemID);
+        (context.read<ShoppingTrip>().lock == false)?
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: (){setState(() {
+              context.read<ShoppingTrip>().removeItem(itemID);
+            });},
+          ) :
+        Checkbox(
+          checkColor: Colors.white,
+          fillColor: MaterialStateProperty.resolveWith(getColor),
+          value: curItem.check,
+          onChanged: (bool? value) {
+            setState(() {
+              curItem.check = value!;
+              context.read<ShoppingTrip>().changeItemCheck(itemID);
+            });
+          },
+        )
 
-          });},
-        ):SizedBox.shrink()
+        :SizedBox.shrink()
         ,
         isThreeLine: true,
       ),
     );
+  }
+
+  Color getColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+    };
+    if (states.any(interactiveStates.contains)) {
+      return Colors.blue;
+    }
+    return Colors.green;
   }
   void updateUsrQuantity(String person, int number) {
     curItem.subitems[person] = number;
@@ -334,28 +359,18 @@ class _EditListsScreenState extends State<EditListScreen> {
       temp_bene_uid.add(uid.toString());
       if (!bene_uid.contains(uid)) bene_uid.add(uid.toString());
     });
-    //if the current user is contained in the beneficiary list
-    //pop out the editList
-    print("current beneficiaries: ${bene_uid}");
-    /*
-    if(!bene_uid.contains(context.read<Cowboy>().uuid)) {
-      print("kick");
-      Navigator.of(context).popUntil((route) {
-        return route.settings.name == ListsScreen.id;
-      });
-      Navigator.pushNamed(context, ListsScreen.id);
-    }
 
-     */
     bene_uid = temp_bene_uid;
-
+    //bool cur_lock = curTrip['lock'] as bool;
     context.read<ShoppingTrip>().initializeTripFromDB(
         curTrip['uuid'],
         curTrip['title'],
         date,
         curTrip['description'],
         curTrip['host'],
-        bene_uid);
+        bene_uid,
+        curTrip['lock'] as bool
+    );
   }
 
   Widget create_item() {
@@ -447,6 +462,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       },
     );
   }
+
   Future<void> handleClick(int item) async {
     switch (item) {
       case 1:
@@ -462,7 +478,6 @@ class _EditListsScreenState extends State<EditListScreen> {
           context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
           context.read<ShoppingTrip>().removeBeneficiary(context.read<Cowboy>().uuid);
           Navigator.of(context).pop();
-
     }
   }}
 
@@ -596,7 +611,8 @@ class _EditListsScreenState extends State<EditListScreen> {
 
                     //SizedBox(height: 10),
                   ],
-                )),
+                )
+                ),
               );
             }),
       ),
@@ -707,14 +723,17 @@ class _ItemsAdditionState extends State<ItemsAddition> {
               ),
             ),
             Container(
-                child: IconButton(
-              icon: const Icon(Icons.add_circle),
-              onPressed: () {
-                setState(() {
-                  isAdd = true;
-                });
-              },
-            )),
+                child: (context.read<ShoppingTrip>().lock == false)?
+                IconButton(
+                  icon: const Icon(Icons.add_circle),
+                  onPressed: () {
+                    setState(() {
+                      isAdd = true;
+                    });
+                  },
+                ):
+                 const Icon(Icons.lock_outlined),
+            )
           ],
         ),
         if (isAdd) create_item(),
@@ -722,7 +741,8 @@ class _ItemsAdditionState extends State<ItemsAddition> {
         SizedBox(
           height: 10.0,
         ),
-        
+    if (context.read<ShoppingTrip>().host ==
+    context.read<Cowboy>().uuid) ...[
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -730,9 +750,24 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             SizedBox(
               width: 40.0,
             ),
-            if (context.read<ShoppingTrip>().host ==
-                context.read<Cowboy>().uuid) ...[
-              Container(
+            Container(
+              height: 70,
+              width: 150,
+              child: RoundedButton(
+                onPressed: () {
+                  context.read<ShoppingTrip>().changeTripLock();
+                  context.read<ShoppingTrip>().setAllCheckFalse();
+                },
+                title: (context.watch<ShoppingTrip>().lock == false)? "Shopping Mode"
+                    : "Unlock Trip"
+                ,
+                color: Colors.blueAccent,
+              ),
+            ),
+            SizedBox(
+              width: 10.0,
+            ),
+            Container(
                 height: 70,
                 width: 150,
                 child: RoundedButton(
@@ -743,13 +778,13 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                   color: Colors.blueAccent,
                 ),
               ),
-            ],
             Spacer(),
             SizedBox(
               width: 40.0,
             ),
           ],
         ),
+    ]
       ],
     );
   }

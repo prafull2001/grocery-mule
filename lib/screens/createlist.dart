@@ -264,11 +264,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     // setState(() {
     cur_trip.initializeTripFromDB(
         snapshot['uuid'],
-        (snapshot.data() as Map<String, dynamic>)['title'],
+      snapshot['title'],
         date,
-        (snapshot.data() as Map<String, dynamic>)['description'],
-        (snapshot.data() as Map<String, dynamic>)['host'],
-        beneficiaries);
+      snapshot['description'],
+      snapshot['host'],
+        beneficiaries,
+        snapshot['lock'] as bool,
+    );
     // });
     print(context.read<ShoppingTrip>().beneficiaries);
   }

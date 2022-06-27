@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
@@ -21,7 +20,6 @@ class UserName extends StatefulWidget {
 
 class _UserNameState extends State<UserName>{
   late String userUUID;
-  CollectionReference userCollection = FirebaseFirestore.instance.collection('paypal_users');
   @override
   void initState(){
     userUUID = widget.userUUID;
@@ -107,30 +105,30 @@ class _PayPalButtonState extends State<PayPalButton>{
   }
   }
 
+class ItemsPerPerson extends StatefulWidget{
+  late final String userUUID;
+  late Map<String,int> itemMapping;
 
-
-
-
-class CheckoutScreen extends StatefulWidget {
-  static String id = 'checkout_screen';
-
+  ItemsPerPerson(this.userUUID, this.itemMapping,{ required Key key}): super(key: key);
   @override
-  _CheckoutScreen createState() => _CheckoutScreen();
+  _ItemsPerPersonState createState() => _ItemsPerPersonState();
 }
 
-class _CheckoutScreen extends State<CheckoutScreen> {
-  Map<String, Map<String,int>> aggre_raw_list = {};
-  Map<String, Map<String,int>> aggre_clean_list = {};
-  Map<String, String> paypalLinks = {};
-  late CollectionReference itemSubCollection;
-  //map each bene uuid to their own map
+class _ItemsPerPersonState extends State<ItemsPerPerson>{
+  late final String userUUID;
+  late Map<String,int> itemMapping;
+  bool expand = false;
   //@override
   void initState() {
-    String tripUUID = context.read<ShoppingTrip>().uuid;
-    itemSubCollection = tripCollection.doc(tripUUID).collection('items');
-
+    userUUID = widget.userUUID;
+    itemMapping = widget.itemMapping;
+    super.initState();
   }
-
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+   return personalList();
+  }
   Widget simple_item(String item_name, int item_quantity){
     String name = item_name;
     int quantity = item_quantity;
@@ -139,7 +137,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
-        color: dark_beige,
+
       ),
       child: Column(
           children: [
@@ -168,34 +166,37 @@ class _CheckoutScreen extends State<CheckoutScreen> {
 
               ],
             ),
-            Container(
-              height: 2.5,
-              width: 400,
-              color: Colors.white,
-            ),
           ]
       ),
     );
   }
 
-  Widget personalList(String uuid){
-    // String name = uuid;//context.read<ShoppingTrip>().beneficiaries[uuid]!.split('|~|')[1].split(' ')[0];
+  Widget personalList() {
 
-    return Column(
+    return Card(
+      key: Key(userUUID),
+      color: light_orange,
+      child: ListTile(
+        title: Container(
+          child: UserName(userUUID),
+        ),
+        trailing: IconButton(
+          onPressed: () {
+            print("heelo");
+            setState(() {
+              expand = !expand;
+            });
+          },
+          icon: (expand == false)? Icon(Icons.expand_more):Icon(Icons.expand_less) ,
+        ),
+        subtitle: (expand == true)? Column(
         children: <Widget>[
-          Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-             UserName(uuid)
-            ],
-          ),
-          if(aggre_raw_list[uuid]!.isNotEmpty)...[
-          for (var entry in aggre_raw_list[uuid]!.entries)
-            simple_item(entry.key, entry.value),
-             if(context.read<Cowboy>().uuid != uuid)...[
-               PayPalButton(uuid)
-             ]
-
+          if(itemMapping.isNotEmpty)...[
+            for (var entry in itemMapping.entries)
+              simple_item(entry.key, entry.value),
+            if(userUUID!= context.read<ShoppingTrip>().host)...[
+              PayPalButton(userUUID)
+            ]
           ]else...[
             Container(
               height: 40,
@@ -205,7 +206,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   children: [
                   Text('No items found',
                     style: TextStyle(
-                      color: Colors.red,
+                      color: Colors.blueGrey,
                     fontSize: 20.0,
                     fontWeight: FontWeight.w400,
                     )
@@ -213,12 +214,38 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   ]
               ),
             )
-          ]
-        ]
+          ],
+
+        ])
+        :
+        SizedBox.shrink(),
+      ),
     );
-
   }
+}
 
+
+
+class CheckoutScreen extends StatefulWidget {
+  static String id = 'checkout_screen';
+
+  @override
+  _CheckoutScreen createState() => _CheckoutScreen();
+}
+
+class _CheckoutScreen extends State<CheckoutScreen> {
+  Map<String, Map<String,int>> aggre_raw_list = {};
+  Map<String, Map<String,int>> aggre_clean_list = {};
+  Map<String, String> paypalLinks = {};
+
+  late CollectionReference itemSubCollection;
+  //map each bene uuid to their own map
+  //@override
+  void initState() {
+    String tripUUID = context.read<ShoppingTrip>().uuid;
+    itemSubCollection = tripCollection.doc(tripUUID).collection('items');
+    super.initState();
+  }
 
 
   @override
@@ -258,16 +285,25 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           });
 
 
-          return ListView(
-            padding: const EdgeInsets.all(25),
-            children: [
-              for (var entry in aggre_raw_list.entries)
-                personalList(entry.key),
-            ],
-          );
+          return
+            Column(
+              children: [
+                SizedBox(
+                  height: 10.0,
+                ),
+                ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: aggre_raw_list.length,
+                  itemBuilder: (context, int index){
+                    return ItemsPerPerson(aggre_raw_list.keys.toList()[index],aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,key: Key(aggre_raw_list.keys.toList()[index]));
+                  },
+                ),
+              ],
+            );
         }
       ),
     );
   }
-
+//,
 }
