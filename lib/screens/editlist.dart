@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:badges/badges.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
@@ -196,7 +197,6 @@ class _IndividualItemState extends State<IndividualItem> {
   Widget simple_item() {
     String name = curItem.name;
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
-
     return Card(
       color: (context.watch<ShoppingTrip>().lock == true && context.watch<Cowboy>().uuid != context.watch<ShoppingTrip>().host)?
           beige:
@@ -205,7 +205,10 @@ class _IndividualItemState extends State<IndividualItem> {
       child: ListTile(
         title: Container(
           child: Text(
-            '${name}',
+            (context.read<ShoppingTrip>().lock == false)?
+            '${name}':
+            '${name} (total)'
+            ,
             style: TextStyle(color: Colors.black,
               fontSize: 20,
             ),
@@ -228,8 +231,10 @@ class _IndividualItemState extends State<IndividualItem> {
             ],
             Container(
               child:
-                Text(
-                    '${quantity}'
+                Text(//curItem.quantity
+                    (context.read<ShoppingTrip>().lock == false)?
+                    '${quantity}':
+                    '${curItem.quantity}'
                 ),
             ),
             if(context.read<ShoppingTrip>().lock == false)...[
@@ -547,63 +552,131 @@ class _EditListsScreenState extends State<EditListScreen> {
               return SingleChildScrollView(
                 child: Container(
                     child: Column(
-                  //padding: const EdgeInsets.all(25),
-                  children: [
-                    SizedBox(
-                      height: 20,
-                    ),
-
-                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      //padding: const EdgeInsets.all(25),
                       children: [
                         SizedBox(
-                          width: 10.0,
+                          height: 20,
                         ),
-                        Text(
-                          //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
-                          // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                          'Host - ',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                          ),
-                        ),
-                        UserName(context.read<ShoppingTrip>().host, false, true),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Card(
-                      color: light_cream,
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      child: Theme(
-                        data: Theme.of(context)
-                            .copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          title: Text(
-                            "Beneficiaries",
-                          ),
+
+                        Row(
                           children: [
-                            // TODO error right vvvvvvv should be watching beneficaries from firebase not from context
-                            for (String name in context.watch<ShoppingTrip>().beneficiaries)
-                              ListTile(
-                                title: UserName(name, false, true),
-                              )
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                              // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                              'Host - ',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                              ),
+                            ),
+                            UserName(context.read<ShoppingTrip>().host, false, true),
                           ],
                         ),
-                      ),
-                    ),
-                    //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
-                    ItemsAddition(
-                      tripUUID: tripUUID,
-                    )
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              'Beneficiaries - ',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                              ),
+                            ),
 
-                    //SizedBox(height: 10),
-                  ],
+                            Badge(
+                            showBadge: false,
+                            child: TextButton(
+                              child: Icon(Icons.person_add_alt),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(orange),
+                                foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                              ),
+                              onPressed: (){
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context){
+                                      return AlertDialog(
+                                        content: Container(
+                                          width: double.maxFinite,
+                                          height: 60.0+(context.watch<ShoppingTrip>().beneficiaries.length*50.0),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 25.0,
+                                                child: Text(
+                                                  'Beneficiaries',
+                                                  style: TextStyle(fontSize: 20.0),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10.0,
+                                              ),
+                                              Column(
+                                                children: [
+                                                  for(String uid in context.watch<ShoppingTrip>().beneficiaries)
+                                                    Column(
+                                                      children:[
+                                                        Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 20.0,
+                                                          ),
+                                                          (uid == context.watch<ShoppingTrip>().host)?
+                                                          Icon(Icons.face_sharp)
+                                                              :
+                                                          Icon(Icons.person_pin_outlined),
+                                                          SizedBox(
+                                                            width: 25.0,
+                                                          ),
+                                                          UserName(uid),
+                                                        ],
+                                                      ),
+                                                        SizedBox(
+                                                          height: 10.0,
+                                                        ),
+                                                      ]
+                                                    ),
+                                                ],
+
+                                              )
+                                            ],
+                                          ),
+                                          // decoration: BoxDecoration(
+                                          //   color: dark_beige,
+                                          //   border: Border.all(
+                                          //     color: darker_beige,
+                                          //     width: 5.0,
+                                          //   ),
+                                          //   borderRadius: BorderRadius.circular(10),
+                                          // ),
+                                        ),
+                                      );
+                                    }
+                                );
+                              },
+                            ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+
+                        //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
+                        ItemsAddition(
+                          tripUUID: tripUUID,
+                        )
+
+                        //SizedBox(height: 10),
+                      ],
                 )
                 ),
               );

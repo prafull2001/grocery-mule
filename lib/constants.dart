@@ -10,6 +10,7 @@ const red = Color(0xFFEF5350);
 const beige = Color(0xFFb6a8a0);
 const dark_beige = Color(0xff97877E);
 const darker_beige = Color(0xff49413D);
+const light_amber = Color(0xFFFFE082);
 
 const kSendButtonTextStyle = TextStyle(
   fontWeight: FontWeight.bold,

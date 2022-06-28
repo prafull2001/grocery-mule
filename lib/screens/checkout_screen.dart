@@ -176,51 +176,47 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
 
     return Card(
       key: Key(userUUID),
-      color: light_orange,
-      child: ListTile(
-        title: Container(
-          child: UserName(userUUID),
-        ),
-        trailing: IconButton(
-          onPressed: () {
-            print("heelo");
-            setState(() {
-              expand = !expand;
-            });
-          },
-          icon: (expand == false)? Icon(Icons.expand_more):Icon(Icons.expand_less) ,
-        ),
-        subtitle: (expand == true)? Column(
-        children: <Widget>[
-          if(itemMapping.isNotEmpty)...[
-            for (var entry in itemMapping.entries)
-              simple_item(entry.key, entry.value),
-            if(userUUID!= context.read<ShoppingTrip>().host)...[
-              PayPalButton(userUUID)
-            ]
-          ]else...[
-            Container(
-              height: 40,
-              width: 400,
-
-              child: Column(
-                  children: [
-                  Text('No items found',
-                    style: TextStyle(
-                      color: Colors.blueGrey,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w400,
-                    )
-                    ),
-                  ]
-              ),
-            )
-          ],
-
-        ])
-        :
-        SizedBox.shrink(),
+      shape: RoundedRectangleBorder(
+        side: const BorderSide(
+            color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+        borderRadius: BorderRadius.circular(30.0),
       ),
+      color: Colors.blueGrey[400],
+      child: Theme(
+        data: Theme.of(context)
+            .copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          title: Container(
+            child: UserName(userUUID),
+          ),
+          children: <Widget>[
+            if(itemMapping.isNotEmpty)...[
+              for (var entry in itemMapping.entries)
+                simple_item(entry.key, entry.value),
+              if(userUUID!= context.read<ShoppingTrip>().host)...[
+                PayPalButton(userUUID)
+              ]
+            ]else...[
+              Container(
+                height: 40,
+                width: 400,
+
+                child: Column(
+                    children: [
+                    Text('No items found',
+                      style: TextStyle(
+                        color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w400,
+                      )
+                      ),
+                    ]
+                ),
+              )
+            ],
+
+          ])
+        ),
     );
   }
 }
@@ -255,7 +251,12 @@ class _CheckoutScreen extends State<CheckoutScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Checkout Screen'),
+        title: const Text('Checkout Screen',
+          style: TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+        ),
+        ),
         backgroundColor: light_orange,
       ),
       body: StreamBuilder<QuerySnapshot>(
