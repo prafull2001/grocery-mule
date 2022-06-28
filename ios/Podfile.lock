@@ -693,7 +693,7 @@ PODS:
   - GoogleMLKit/TextRecognitionKorean (2.6.0):
     - GoogleMLKit/MLKitCore
     - MLKitTextRecognitionKorean (~> 1.0.0-beta3)
-  - GoogleSignIn (6.2.1):
+  - GoogleSignIn (6.2.2):
     - AppAuth (~> 1.5)
     - GTMAppAuth (~> 1.3)
     - GTMSessionFetcher/Core (~> 1.1)
@@ -838,7 +838,7 @@ PODS:
   - nanopb/decode (2.30908.0)
   - nanopb/encode (2.30908.0)
   - PromisesObjC (2.1.0)
-  - Protobuf (3.21.0)
+  - Protobuf (3.21.1)
   - shared_preferences_ios (0.0.1):
     - Flutter
   - Toast (4.0.0)
@@ -937,7 +937,7 @@ SPEC CHECKSUMS:
   google_sign_in_ios: 90eec6616c4c2105b9f9fe5c774773d13565b504
   GoogleDataTransport: 5fffe35792f8b96ec8d6775f5eccd83c998d5a3b
   GoogleMLKit: 755661c46990a85e42278015f26400286d98ad95
-  GoogleSignIn: 9c69f4188921d8f789816e4c99ba2a1f5f868ddc
+  GoogleSignIn: 3c68388ac221f379676e8f1cb115df3aaf73b93f
   GoogleToolboxForMac: 8bef7c7c5cf7291c687cf5354f39f9db6399ad34
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
   GoogleUtilitiesComponents: 679b2c881db3b615a2777504623df6122dd20afe
@@ -959,15 +959,11 @@ SPEC CHECKSUMS:
   MLKitVision: e87dc3f2e456a6ab32361ebd985e078dd2746143
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
-  Protobuf: a205ef72105f3f024786a06589f1ca54b70265c4
+  Protobuf: 9e88c1e667d75aa2491d211f26ccddde4e8ad4cf
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
 
-<<<<<<< HEAD
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
-=======
-PODFILE CHECKSUM: ce3d50c2ad1c0e9a47fe74c16182333df14aceb0
->>>>>>> e22109b (image picker implemented)
+PODFILE CHECKSUM: a065f8d70ef016bea07fff42f7c49fb1883a48bf
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.11.2
