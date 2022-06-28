@@ -14,30 +14,23 @@ import '../constants.dart';
 
 class ReceiptItem extends StatefulWidget {
   String name = '';
+  String price = '0.00';
 
   ReceiptItem(String name) {
     this.name = name;
   }
 
   @override
-  _ReceiptItemState createState() => _ReceiptItemState(this.name);
+  _ReceiptItemState createState() => _ReceiptItemState();
 }
 
 class _ReceiptItemState extends State<ReceiptItem> {
-
-  String name = '';
-  String price = '0.00';
-
-  _ReceiptItemState(String name) {
-    this.name = name;
-  }
-
   @override
   Widget build(BuildContext context) {
     return DragTarget<String>(
       onAccept: (String newprice) {
         setState(() {
-          price = newprice;
+          widget.price = newprice;
         });
       },
       builder: (BuildContext context, accepted, rejected) {
@@ -47,7 +40,7 @@ class _ReceiptItemState extends State<ReceiptItem> {
           child: Row(
             children: [
               Text(
-                '${name}: ',
+                '${widget.name}: ',
                 style: TextStyle(
                   fontSize: 20.0,
                 ),
@@ -55,7 +48,7 @@ class _ReceiptItemState extends State<ReceiptItem> {
               // TODO get price to go as right as possible
               // SizedBox.expand(),
               Text(
-                '${price}',
+                '${widget.price}',
                 style: TextStyle(
                   fontSize: 20.0,
                 ),
@@ -75,46 +68,39 @@ class _ReceiptItemState extends State<ReceiptItem> {
 
 class ReceiptItems extends StatefulWidget {
   late Stream<QuerySnapshot> itemstream;
+  List<ReceiptItem> rilist = [];
 
-  ReceiptItems(Stream<QuerySnapshot> itemstream) {
+  ReceiptItems(List<ReceiptItem> rilist, Stream<QuerySnapshot> itemstream) {
+    this.rilist = rilist;
     this.itemstream = itemstream;
     // print('got to constructor in ReceiptItems');
   }
 
   @override
-  _ReceiptItemsState createState() => _ReceiptItemsState(this.itemstream);
+  _ReceiptItemsState createState() => _ReceiptItemsState();
 }
 
 class _ReceiptItemsState extends State<ReceiptItems> {
 
-  late List<String> items;
-  Stream<QuerySnapshot> itemstream = Stream.empty();
-
-  _ReceiptItemsState(Stream<QuerySnapshot> itemstream) {
-    this.items = [];
-    this.itemstream = itemstream;
-    // print('got to constructor in ReceiptItemsState');
-  }
-
   loadItems(QuerySnapshot snapshot) {
     // print('gpt to loadItems ReceiptItemsState');
-    this.items = [];
+    widget.rilist = [];
     snapshot.docs.forEach((document) {
       // print('0');
       if (document['uuid'] != 'dummy') {
         String item_name = document['name'];
-        items.add(item_name);
+        widget.rilist.add(ReceiptItem(item_name));
       }
     });
-    items.add('tax');
-    items.add('add. fees');
+    widget.rilist.add(ReceiptItem('tax'));
+    widget.rilist.add(ReceiptItem('add. fees'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
-        stream: itemstream,
+        stream: widget.itemstream,
         builder: (context, snapshot) {
           // print('build ReceiptItemsState: ${items.length}');
           if (snapshot.hasError) {
@@ -131,9 +117,9 @@ class _ReceiptItemsState extends State<ReceiptItems> {
               padding: const EdgeInsets.all(4.0),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: items.length,
+              itemCount: widget.rilist.length,
               itemBuilder: (context, index) {
-                return ReceiptItem(items[index]);
+                return widget.rilist[index];
               },
               separatorBuilder: (context, index) {
                 return SizedBox(height: 4.0);
@@ -286,11 +272,8 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
 class ReceiptPrices extends StatefulWidget {
   List<ReceiptPrice> rplist = [];
 
-  ReceiptPrices(List<String> prices) {
-    rplist = [];
-    prices.forEach((price) {
-      rplist.add(ReceiptPrice(price));
-    });
+  ReceiptPrices(List<ReceiptPrice> prices) {
+    this.rplist = prices;
     // print('initialized prices ReceiptPrices: ${this.prices.length}');
   }
 
@@ -336,8 +319,8 @@ class ReceiptScanning extends StatefulWidget {
 class _ReceiptScanningState extends State<ReceiptScanning> {
   File? receipt_image;
   //final inputImage;
-  List<String> prices = [];
-  List<String> items = [];
+  List<ReceiptPrice> rplist = [];
+  List<ReceiptItem> rilist = [];
   late Stream<QuerySnapshot> itemstream;
 
   @override
@@ -380,7 +363,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
     return true;
   }
 
-  Future<List<String>> pickImage() async{
+  Future pickImage() async{
     try{
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return [];
@@ -392,8 +375,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
       final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
 
-      String text = recognizedText.text;
-      List<String> prices = [];
+      List<ReceiptPrice> prices = [];
       for (TextBlock block in recognizedText.blocks) {
         // print('----- BLOCK -----');
         for (TextLine line in block.lines) {
@@ -402,18 +384,18 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
           for (TextElement element in line.elements) {
             // Same getters as TextBlock
             if (element.text != null && isPrice(element.text)) {
-              prices.add(element.text);
+              prices.add(ReceiptPrice(element.text));
             }
             // print(element.text);
           }
         }
       }
-      print('~~~~~~~~~~~~~prices~~~~~~~~~~~~~\n$prices');
+      // print('~~~~~~~~~~~~~prices~~~~~~~~~~~~~\n$prices');
       textRecognizer.close();
       setState(() {
-        this.prices = prices;
+        this.rplist = prices;
       });
-      return prices;
+      // return prices;
 
     } on PlatformException catch(e){
       print('Failed to pick image: $e');
@@ -468,7 +450,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                         ),
                         onPressed: () {
                           setState(() {
-                            prices.add('0.00');
+                            rplist.add(ReceiptPrice('0.00'));
                           });
                         },
                       ),
@@ -482,9 +464,9 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
             child: Row(
               children: [
                 // items
-                ReceiptItems(itemstream),
+                ReceiptItems(rilist, itemstream),
                 // prices
-                ReceiptPrices(prices),
+                ReceiptPrices(rplist),
               ],
             ),
           ),
