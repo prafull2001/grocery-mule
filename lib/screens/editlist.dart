@@ -583,95 +583,100 @@ class _EditListsScreenState extends State<EditListScreen> {
                             UserName(context.read<ShoppingTrip>().host, false, true),
                           ],
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              'Beneficiaries - ',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                              ),
+                            ),
+
+                            Badge(
+                            showBadge: false,
+                            child: TextButton(
+                              child: Icon(Icons.person_add_alt),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all<Color>(orange),
+                                foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                              ),
+                              onPressed: (){
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context){
+                                      return AlertDialog(
+                                        content: Container(
+                                          width: double.maxFinite,
+                                          height: 60.0+(context.watch<ShoppingTrip>().beneficiaries.length*50.0),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 25.0,
+                                                child: Text(
+                                                  'Beneficiaries',
+                                                  style: TextStyle(fontSize: 20.0),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 10.0,
+                                              ),
+                                              Column(
+                                                children: [
+                                                  for(String uid in context.watch<ShoppingTrip>().beneficiaries)
+                                                    Column(
+                                                      children:[
+                                                        Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 20.0,
+                                                          ),
+                                                          (uid == context.watch<ShoppingTrip>().host)?
+                                                          Icon(Icons.face_sharp)
+                                                              :
+                                                          Icon(Icons.person_pin_outlined),
+                                                          SizedBox(
+                                                            width: 25.0,
+                                                          ),
+                                                          UserName(uid),
+                                                        ],
+                                                      ),
+                                                        SizedBox(
+                                                          height: 10.0,
+                                                        ),
+                                                      ]
+                                                    ),
+                                                ],
+
+                                              )
+                                            ],
+                                          ),
+                                          // decoration: BoxDecoration(
+                                          //   color: dark_beige,
+                                          //   border: Border.all(
+                                          //     color: darker_beige,
+                                          //     width: 5.0,
+                                          //   ),
+                                          //   borderRadius: BorderRadius.circular(10),
+                                          // ),
+                                        ),
+                                      );
+                                    }
+                                );
+                              },
+                            ),
+                            ),
+                          ],
+                        ),
                         SizedBox(
                           height: 10,
                         ),
 
-                        Card(
-                          color: light_cream,
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                                color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          child: Theme(
-                            data: Theme.of(context)
-                                .copyWith(dividerColor: Colors.transparent),
-                            child: ExpansionTile(
-                              title: Text(
-                                "Beneficiaries",
-                              ),
-                              children: [
-                                // TODO error right vvvvvvv should be watching beneficaries from firebase not from context
-                                for (String name in context.watch<ShoppingTrip>().beneficiaries)
-                                  ListTile(
-                                    title: UserName(name, false, true),
-                                  )
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        /*Badge(
-                          // TODO add live update on number // old VVVVVV
-                          //badgeContent: Text(context.watch<ShoppingTrip>().beneficiaries.length.toString()), // context.watch<Cowboy>().requests.length.toString()
-                          child: TextButton(
-                            child: Icon(Icons.person_add_alt),
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(orange),
-                              foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      content: Container(
-                                        width: double.maxFinite,
-                                        height: 60.0+(context.watch<ShoppingTrip>().beneficiaries.length*50.0),
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 25.0,
-                                              child: Text(
-                                                'Beneficiaries',
-                                                style: TextStyle(fontSize: 20.0),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 10.0,
-                                            ),
-                                            ListView.separated(
-                                              shrinkWrap: true,
-                                              itemCount: context.watch<ShoppingTrip>().beneficiaries.length,
-                                              controller: ScrollController(),
-                                              itemBuilder: (BuildContext context, int index) {
-                                                return ListTile(
-                                                  title: UserName(context.watch<ShoppingTrip>().beneficiaries[index], false, true),
-                                                );
-                                              },
-                                              separatorBuilder: (context, index) {
-                                                return SizedBox(height: 2.0,);
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                        // decoration: BoxDecoration(
-                                        //   color: dark_beige,
-                                        //   border: Border.all(
-                                        //     color: darker_beige,
-                                        //     width: 5.0,
-                                        //   ),
-                                        //   borderRadius: BorderRadius.circular(10),
-                                        // ),
-                                      ),
-                                    );
-                                  }
-                              );
-                            }, // onPressed
-                          ),
-                        ),
-                         */
                         //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
                         ItemsAddition(
                           tripUUID: tripUUID,
