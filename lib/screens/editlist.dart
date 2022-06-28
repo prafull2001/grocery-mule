@@ -10,6 +10,7 @@ import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/personal_list.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_mule/screens/receipt_scanning.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -52,7 +53,6 @@ class _UserNameState extends State<UserName> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SizedBox.shrink();
           }
-          // print('name for uuid ($userUUID): ' + snapshot.data!['first_name']);
           return Text(
             '${snapshot.data!['first_name']} ',
             style: TextStyle(fontSize: 20, color: Colors.black),
@@ -73,7 +73,6 @@ class ItemsList extends StatefulWidget {
 
 class _ItemsListState extends State<ItemsList> {
   late String tripUUID;
-
 
   late Stream<QuerySnapshot> getItemsStream;
 
@@ -136,7 +135,6 @@ class _ItemsListState extends State<ItemsList> {
         .removeWhere((element) => tobeDeleted.contains(element));
   }
 
-
 }
 //ignore: must_be_immutable
 class IndividualItem extends StatefulWidget {
@@ -175,7 +173,6 @@ class _IndividualItemState extends State<IndividualItem> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const SizedBox.shrink();
           }
-
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
           return simple_item();
@@ -246,7 +243,6 @@ class _IndividualItemState extends State<IndividualItem> {
                     })),
             ],
           ],
-
         ),
         trailing: (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
         (context.read<ShoppingTrip>().lock == false)?
@@ -321,7 +317,6 @@ class _EditListsScreenState extends State<EditListScreen> {
   var _tripDescriptionController;
   User? curUser = FirebaseAuth.instance.currentUser;
   late String tripUUID;
-
   bool isAdd = false;
   bool invite_guest = false;
   late String hostFirstName;
@@ -511,8 +506,6 @@ class _EditListsScreenState extends State<EditListScreen> {
             ],
           ),
         ],
-
-
       ),
       body: Container(
         child: StreamBuilder<DocumentSnapshot<Object?>>(

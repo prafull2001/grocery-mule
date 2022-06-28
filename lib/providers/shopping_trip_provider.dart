@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:grocery_mule/dev/collection_references.dart';
 
 
+
 // shopping trip provider
 class ShoppingTrip with ChangeNotifier {
   String _uuid = ''; // shopping trip uuid
@@ -94,7 +95,6 @@ class ShoppingTrip with ChangeNotifier {
 
   clearCachedItem() {
     itemUUID.clear();
-    // notifyListeners();
   }
 
   // when date field is edited, this method should be called

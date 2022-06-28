@@ -26,6 +26,7 @@ class UserName extends StatefulWidget {
 class _UserNameState extends State<UserName> {
   late String userUUID;
   late String name;
+
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -176,6 +177,7 @@ class _DatePickerState extends State<DatePicker> {
   }
 }
 
+
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
@@ -185,6 +187,7 @@ class CreateListScreen extends StatefulWidget {
   late String initDescription;
   late DateTime initDate;
   late bool newList;
+
   //createList has the ids
   //when createList has a list that's already filled
   //keep a field of the original id, but generate a new id
@@ -205,7 +208,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   late String trip_uuid;
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
-
   var _tripDescriptionController;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
@@ -219,6 +221,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
   DateTime localTime = DateTime.now();
+
+
   @override
   void initState() {
     trip_uuid = widget.trip_uuid;
@@ -255,6 +259,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     //Map<String, Item> items = <String, Item>{};
     date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
     localTime = date;
+
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
       friend_bene.add(uid);
     });
@@ -345,6 +350,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         .toList();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -381,6 +387,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 _loadCurrentTrip(snapshot.data!);
               }
               print(localTime);
+
               return Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Column(
@@ -435,22 +442,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           width: 10.0,
                         ),
                         DatePicker(newList, trip_uuid),
-                        // Text('${context.read<ShoppingTrip>().date}'
-                        //       .split(' ')[0]
-                        //       .replaceAll('-', '/'),
-                        //   style: TextStyle(
-                        //     fontSize: 20,
-                        //     fontWeight: FontWeight.w400,
-                        //   ),
-                        // ),
-                        // //SizedBox(width: 5.0,),
-                        // IconButton(
-                        //   icon: Icon(
-                        //     Icons.calendar_today,
-                        //     color: orange,
-                        //   ),
-                        //   onPressed: () => _selectDate(context),
-                        // ),
                       ],
                     ),
 
@@ -532,6 +523,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                     document['first_name']));
                               }
                             });
+
                             return MultiSelectDialogField(
                               searchable: true,
                               items: friends,
@@ -562,13 +554,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               ),
                               onConfirm: (results) {
                                 //print(results.toList());
-                                /*
-                                results.forEach((friend) {
-                                  if (!friend_bene.contains(friend.toString()))
-                                    friend_bene.add(friend.toString());
-                                });
-
-                                 */
                                 friend_bene = results.map((e) => e.toString()).toList();
                                 print(context.read<ShoppingTrip>().beneficiaries);
                               },
@@ -635,7 +620,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                         TextButton(
                                           child: Text("OK"),
                                           onPressed: () {
-                                            // Navigator.pop(context);
                                             Navigator.of(context).pop();
                                           },
                                         ),
