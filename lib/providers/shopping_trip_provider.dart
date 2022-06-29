@@ -68,7 +68,7 @@ class ShoppingTrip with ChangeNotifier {
     });
     notifyListeners();
   }
-  
+
   String get uuid => _uuid;
   String get title => _title;
   DateTime get date => _date;
