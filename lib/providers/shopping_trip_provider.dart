@@ -62,6 +62,13 @@ class ShoppingTrip with ChangeNotifier {
     itemUUID = itemUUID;
   }
 
+  updateItemPrice(String item_uid, double price) async {
+    await tripCollection.doc(_uuid).collection('items').doc(item_uid).update({
+      "price": price,
+    });
+    notifyListeners();
+  }
+  
   String get uuid => _uuid;
   String get title => _title;
   DateTime get date => _date;
@@ -205,6 +212,7 @@ class ShoppingTrip with ChangeNotifier {
       'uuid': item_uid,
       'timeStamp': DateTime.now().microsecondsSinceEpoch,
       'check': false,
+      'price': 0,
     });
     itemUUID.add(item_uid);
     notifyListeners();

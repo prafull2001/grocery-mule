@@ -15,9 +15,11 @@ import '../constants.dart';
 class ReceiptItem extends StatefulWidget {
   String name = '';
   String price = '0.00';
+  String receiptItemUUID = '';
 
-  ReceiptItem(String name) {
+  ReceiptItem(String name, String receiptItemUUID) {
     this.name = name;
+    this.receiptItemUUID = receiptItemUUID;
   }
 
   @override
@@ -30,6 +32,7 @@ class _ReceiptItemState extends State<ReceiptItem> {
     return DragTarget<String>(
       onAccept: (String newprice) {
         setState(() {
+          context.read<ShoppingTrip>().updateItemPrice(widget.receiptItemUUID, double.parse(newprice));
           widget.price = newprice;
         });
       },
@@ -89,11 +92,11 @@ class _ReceiptItemsState extends State<ReceiptItems> {
       // print('0');
       if (document['uuid'] != 'dummy') {
         String item_name = document['name'];
-        widget.rilist.add(ReceiptItem(item_name));
+        widget.rilist.add(ReceiptItem(item_name, document['uuid']));
       }
     });
-    widget.rilist.add(ReceiptItem('tax'));
-    widget.rilist.add(ReceiptItem('add. fees'));
+    widget.rilist.add(ReceiptItem('tax', 'dummy'));
+    widget.rilist.add(ReceiptItem('add. fees', 'dummy'));
   }
 
   @override

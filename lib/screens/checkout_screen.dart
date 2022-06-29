@@ -253,9 +253,9 @@ class _CheckoutScreen extends State<CheckoutScreen> {
         centerTitle: true,
         title: const Text('Checkout Screen',
           style: TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-        ),
+            color: Colors.black,
+            fontSize: 20,
+          ),
         ),
         backgroundColor: light_orange,
       ),
