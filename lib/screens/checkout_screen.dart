@@ -225,7 +225,7 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
                   foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
                 ),
                 onPressed: () { },
-                child: Text('${calculate_total()}'),
+                child: Text('\$' + '${calculate_total()}'),
               ),
               if(userUUID!= context.read<ShoppingTrip>().host)...[
                 PayPalButton(userUUID)
