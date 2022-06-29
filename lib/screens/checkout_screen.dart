@@ -8,6 +8,10 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/services.dart';
+
+
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -222,9 +226,15 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
                 simple_item(entry.key, entry.value),
               TextButton(
                 style: ButtonStyle(
-                  foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
+                  backgroundColor: MaterialStateProperty.all<Color>(orange)
                 ),
-                onPressed: () { },
+                onPressed: () {
+                  beneficiary_subtotal = calculate_total();
+                  print(beneficiary_subtotal);
+                  Clipboard.setData(ClipboardData(text: beneficiary_subtotal.toString()));
+                  Fluttertoast.showToast(msg: 'Price copied to clipboard!');
+                },
                 child: Text('\$' + '${calculate_total()}'),
               ),
               if(userUUID!= context.read<ShoppingTrip>().host)...[
