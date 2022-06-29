@@ -212,7 +212,7 @@ class ShoppingTrip with ChangeNotifier {
       'uuid': item_uid,
       'timeStamp': DateTime.now().microsecondsSinceEpoch,
       'check': false,
-      'price': 0,
+      'price': 0.0,
     });
     itemUUID.add(item_uid);
     notifyListeners();

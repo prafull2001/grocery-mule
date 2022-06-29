@@ -107,34 +107,62 @@ class _PayPalButtonState extends State<PayPalButton>{
   }
 
 class ItemsPerPerson extends StatefulWidget{
+  late final Map<String, double> itemPrices;
   late final String userUUID;
   late Map<String,int> itemMapping;
+  late Map<String,int> itemUUIDMapping;
 
-  ItemsPerPerson(this.userUUID, this.itemMapping,{ required Key key}): super(key: key);
+  ItemsPerPerson(this.itemPrices, this.userUUID, this.itemMapping,this.itemUUIDMapping, { required Key key}): super(key: key);
   @override
   _ItemsPerPersonState createState() => _ItemsPerPersonState();
 }
 
 class _ItemsPerPersonState extends State<ItemsPerPerson>{
+  late Map<String, double> itemPrices;
   late final String userUUID;
   late Map<String,int> itemMapping;
+  late Map<String,int> itemUUIDMapping;
   bool expand = false;
+  double beneficiary_subtotal = 0;
   //@override
   void initState() {
+    itemPrices = widget.itemPrices;
     userUUID = widget.userUUID;
     itemMapping = widget.itemMapping;
+    itemUUIDMapping = widget.itemUUIDMapping;
     super.initState();
+
+    // beneficiary_subtotal = calculate_total();
+    // print(userUUID + ' total: ' + beneficiary_subtotal.toString());
   }
+
+  double calculate_total(){
+    double total = 0;
+    //print(userUUID + ' | ' + itemPrices.toString() + ' | '  + itemUUIDMapping.toString());
+    // print(itemUUIDMapping.toString());
+    if(itemUUIDMapping.isNotEmpty){
+      print('item map not empty: ' + itemUUIDMapping.toString());
+      itemUUIDMapping.forEach((itemUUID, quantity) {
+        double unitPrice = itemPrices[itemUUID]!;
+        double subTotal = unitPrice * quantity;
+        total += subTotal;
+      });
+    } else {
+      print('item map empty');
+    }
+
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
    return personalList();
   }
+
   Widget simple_item(String item_name, int item_quantity){
     String name = item_name;
     int quantity = item_quantity;
-
-
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.rectangle,
@@ -173,7 +201,6 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
   }
 
   Widget personalList() {
-
     return Card(
       key: Key(userUUID),
       shape: RoundedRectangleBorder(
@@ -193,6 +220,13 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
             if(itemMapping.isNotEmpty)...[
               for (var entry in itemMapping.entries)
                 simple_item(entry.key, entry.value),
+              TextButton(
+                style: ButtonStyle(
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                ),
+                onPressed: () { },
+                child: Text('${calculate_total()}'),
+              ),
               if(userUUID!= context.read<ShoppingTrip>().host)...[
                 PayPalButton(userUUID)
               ]
@@ -221,8 +255,6 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
   }
 }
 
-
-
 class CheckoutScreen extends StatefulWidget {
   static String id = 'checkout_screen';
 
@@ -232,8 +264,11 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreen extends State<CheckoutScreen> {
   Map<String, Map<String,int>> aggre_raw_list = {};
+  Map<String, Map<String,int>> aggre_item_list = {};
   Map<String, Map<String,int>> aggre_clean_list = {};
   Map<String, String> paypalLinks = {};
+  Map<String, double> itemPrices = {};
+  Map<String, dynamic> beneItems = {};
 
   late CollectionReference itemSubCollection;
   //map each bene uuid to their own map
@@ -273,19 +308,26 @@ class _CheckoutScreen extends State<CheckoutScreen> {
 
           bene_uuid_list.forEach((bene_uuid) { // initialize empty bene mapping to aggre_cleaned_list
             aggre_raw_list[bene_uuid] = {};
+            aggre_item_list[bene_uuid] = {};
           });
           itemColQuery.data!.docs.forEach((doc) {
             if(doc['uuid'] != 'dummy'){
               Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems'])); // get map of subitems for cur item
+              //print('curSubitems: ' + curSubitems.toString());
               curSubitems.forEach((key, value) { // add item name & quantity if user UUIDs match & quantity > 0
                 if(curSubitems[key] > 0) {
                   dynamic curItemName = doc.get(FieldPath(['name']));
+                  dynamic curItemID = doc.get(FieldPath(['uuid']));
                   aggre_raw_list[key]![curItemName] = curSubitems[key];
+                  aggre_item_list[key]![curItemID] = curSubitems[key] = curSubitems[key];
                 }
               });
+              itemPrices[doc['uuid']] = doc['price'];
             }
           });
 
+          // print('aggrelist: ' + aggre_raw_list.toString());
+          // print('aggre_item_list: ' + aggre_item_list.toString());
 
           return
             Column(
@@ -298,7 +340,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   shrinkWrap: true,
                   itemCount: aggre_raw_list.length,
                   itemBuilder: (context, int index){
-                    return ItemsPerPerson(aggre_raw_list.keys.toList()[index],aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,key: Key(aggre_raw_list.keys.toList()[index]));
+                    return ItemsPerPerson(itemPrices, aggre_raw_list.keys.toList()[index],aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,
+                        aggre_item_list[aggre_item_list.keys.toList()[index]]!, key: Key(aggre_raw_list.keys.toList()[index]));
                   },
                 ),
                 Container(
