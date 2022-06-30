@@ -332,7 +332,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   aggre_item_list[key]![curItemID] = curSubitems[key] = curSubitems[key];
                 }
               });
-              itemPrices[doc['uuid']] = doc['price'];
+              itemPrices[doc['uuid']] = doc['price']/doc['quantity'];
             }
           });
 
