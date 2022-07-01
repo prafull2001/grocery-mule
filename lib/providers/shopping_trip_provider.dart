@@ -62,6 +62,13 @@ class ShoppingTrip with ChangeNotifier {
     itemUUID = itemUUID;
   }
 
+  updateItemPrice(String item_uid, double price) async {
+    await tripCollection.doc(_uuid).collection('items').doc(item_uid).update({
+      "price": price,
+    });
+    notifyListeners();
+  }
+
   String get uuid => _uuid;
   String get title => _title;
   DateTime get date => _date;
@@ -175,14 +182,24 @@ class ShoppingTrip with ChangeNotifier {
     itemUUID.forEach((item) {
       tripCollection.doc(_uuid).collection('items').get().then((collection) => {
         collection.docs.forEach((document) async {
+          late int newItemTotal;
+          late int beneItemTotal;
           Map<String, int> bene_items= {};
           (document.data()['subitems'] as Map<String, dynamic>)
               .forEach((uuid, quantity) {
             bene_items[uuid] = int.parse(quantity.toString());
+            if(uuid == bene_uuid){
+              beneItemTotal = quantity;
+            }
+            newItemTotal = document.data()['quantity'];
           });
           bene_items.remove(bene_uuid);
           print(bene_items);
-          await document.reference.update({"subitems": bene_items});
+          newItemTotal = newItemTotal - beneItemTotal;
+          await document.reference.update({
+            "quantity": newItemTotal,
+            "subitems": bene_items
+          });
         })
       });
       // tripCollection.doc(_uuid).collection('items').doc(item).update({'subitems':}));
@@ -205,6 +222,7 @@ class ShoppingTrip with ChangeNotifier {
       'uuid': item_uid,
       'timeStamp': DateTime.now().microsecondsSinceEpoch,
       'check': false,
+      'price': 0.0,
     });
     itemUUID.add(item_uid);
     notifyListeners();

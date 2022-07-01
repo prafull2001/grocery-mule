@@ -12,12 +12,54 @@ import 'package:provider/provider.dart';
 import '../components/rounded_ button.dart';
 import '../constants.dart';
 
+class DBItemPrice extends StatefulWidget {
+  late final String itemUUID;
+  DBItemPrice(String itemUUID, [bool spec=false, bool strng=false]) {
+    this.itemUUID = itemUUID;
+  }
+
+  @override
+  _DBItemPriceState createState() => _DBItemPriceState();
+}
+
+class _DBItemPriceState extends State<DBItemPrice> {
+  late String itemUUID;
+  late Stream<DocumentSnapshot> personalshot;
+
+  @override
+  void initState() {
+    itemUUID = widget.itemUUID;
+    personalshot = tripCollection.doc(context.read<ShoppingTrip>().uuid).collection('items').doc(itemUUID).snapshots();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+        stream: personalshot,
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SizedBox.shrink();
+          }
+          return Text(
+            '${snapshot.data!['price']} ',
+            style: TextStyle(fontSize: 20, color: Colors.black),
+          );
+        });
+  }
+}
+
 class ReceiptItem extends StatefulWidget {
   String name = '';
   String price = '0.00';
+  String receiptItemUUID = '';
 
-  ReceiptItem(String name) {
+  ReceiptItem(String name, String receiptItemUUID) {
     this.name = name;
+    this.receiptItemUUID = receiptItemUUID;
   }
 
   @override
@@ -30,7 +72,9 @@ class _ReceiptItemState extends State<ReceiptItem> {
     return DragTarget<String>(
       onAccept: (String newprice) {
         setState(() {
+          context.read<ShoppingTrip>().updateItemPrice(widget.receiptItemUUID, double.parse(newprice));
           widget.price = newprice;
+          print(widget.name + ', ' + widget.price);
         });
       },
       builder: (BuildContext context, accepted, rejected) {
@@ -47,12 +91,10 @@ class _ReceiptItemState extends State<ReceiptItem> {
               ),
               // TODO get price to go as right as possible
               // SizedBox.expand(),
-              Text(
-                '${widget.price}',
-                style: TextStyle(
-                  fontSize: 20.0,
-                ),
-              ),
+              if(widget.receiptItemUUID != 'dummy')...[
+                DBItemPrice(widget.receiptItemUUID),
+              ]
+
             ],
           ),
           decoration: BoxDecoration(
@@ -89,11 +131,11 @@ class _ReceiptItemsState extends State<ReceiptItems> {
       // print('0');
       if (document['uuid'] != 'dummy') {
         String item_name = document['name'];
-        widget.rilist.add(ReceiptItem(item_name));
+        widget.rilist.add(ReceiptItem(item_name, document['uuid']));
       }
     });
-    widget.rilist.add(ReceiptItem('tax'));
-    widget.rilist.add(ReceiptItem('add. fees'));
+    widget.rilist.add(ReceiptItem('tax', 'dummy'));
+    widget.rilist.add(ReceiptItem('add. fees', 'dummy'));
   }
 
   @override
