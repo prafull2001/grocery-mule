@@ -182,14 +182,24 @@ class ShoppingTrip with ChangeNotifier {
     itemUUID.forEach((item) {
       tripCollection.doc(_uuid).collection('items').get().then((collection) => {
         collection.docs.forEach((document) async {
+          late int newItemTotal;
+          late int beneItemTotal;
           Map<String, int> bene_items= {};
           (document.data()['subitems'] as Map<String, dynamic>)
               .forEach((uuid, quantity) {
             bene_items[uuid] = int.parse(quantity.toString());
+            if(uuid == bene_uuid){
+              beneItemTotal = quantity;
+            }
+            newItemTotal = document.data()['quantity'];
           });
           bene_items.remove(bene_uuid);
           print(bene_items);
-          await document.reference.update({"subitems": bene_items});
+          newItemTotal = newItemTotal - beneItemTotal;
+          await document.reference.update({
+            "quantity": newItemTotal,
+            "subitems": bene_items
+          });
         })
       });
       // tripCollection.doc(_uuid).collection('items').doc(item).update({'subitems':}));

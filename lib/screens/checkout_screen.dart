@@ -145,7 +145,6 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
     //print(userUUID + ' | ' + itemPrices.toString() + ' | '  + itemUUIDMapping.toString());
     // print(itemUUIDMapping.toString());
     if(itemUUIDMapping.isNotEmpty){
-      print('item map not empty: ' + itemUUIDMapping.toString());
       itemUUIDMapping.forEach((itemUUID, quantity) {
         double unitPrice = itemPrices[itemUUID]!;
         double subTotal = unitPrice * quantity;
@@ -231,7 +230,6 @@ class _ItemsPerPersonState extends State<ItemsPerPerson>{
                 ),
                 onPressed: () {
                   beneficiary_subtotal = calculate_total();
-                  print(beneficiary_subtotal);
                   Clipboard.setData(ClipboardData(text: beneficiary_subtotal.toString()));
                   Fluttertoast.showToast(msg: 'Price copied to clipboard!');
                 },
