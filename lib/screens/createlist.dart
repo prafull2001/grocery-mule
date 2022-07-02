@@ -1,17 +1,17 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
-import 'package:grocery_mule/providers/cowboy_provider.dart';
-import 'package:grocery_mule/screens/editlist.dart';
-import 'dart:async';
-import 'package:grocery_mule/screens/lists.dart';
-import 'package:provider/provider.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_mule/screens/editlist.dart';
+import 'package:grocery_mule/screens/lists.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:grocery_mule/dev/collection_references.dart';
+import 'package:provider/provider.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -73,7 +73,6 @@ class DatePicker extends StatefulWidget {
 }
 
 class _DatePickerState extends State<DatePicker> {
-
   bool newlist = false;
   String tripid = '';
   DateTime date = DateTime.now();
@@ -93,16 +92,13 @@ class _DatePickerState extends State<DatePicker> {
         firstDate: DateTime(2022),
         lastDate: DateTime(2050),
         builder: (context, child) => Theme(
-          data: ThemeData().copyWith(
-              colorScheme: ColorScheme.light(
-                  primary:  Colors.amber,
-                  onPrimary: Colors.white,
-                  onSurface: Colors.black
-              )
-          ),
-          child: child!,
-        )
-    );
+              data: ThemeData().copyWith(
+                  colorScheme: ColorScheme.light(
+                      primary: Colors.amber,
+                      onPrimary: Colors.white,
+                      onSurface: Colors.black)),
+              child: child!,
+            ));
     if (picked != null && picked != context.read<ShoppingTrip>().date) {
       context.read<ShoppingTrip>().editTripDate(picked);
       setState(() {
@@ -118,9 +114,8 @@ class _DatePickerState extends State<DatePicker> {
     if (newlist) {
       return Row(
         children: [
-          Text('$date'
-              .split(' ')[0]
-              .replaceAll('-', '/'),
+          Text(
+            '$date'.split(' ')[0].replaceAll('-', '/'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w400,
@@ -138,45 +133,43 @@ class _DatePickerState extends State<DatePicker> {
       );
     }
     return FutureBuilder<DocumentSnapshot>(
-      future: tripCollection.doc(tripid).get(),
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-
-        if (snapshot.hasError) {
-          return const Text('Something went wrong');
-        }
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
-        String tdate = context.read<ShoppingTrip>().date.toString();
-        if (!clicked) {
-          tdate = (snapshot.data!['date'] as Timestamp).toDate().toString();
-          clicked = true;
-        }
-        return Row(
-          children: [
-            Text('$tdate'
-                .split(' ')[0]
-                .replaceAll('-', '/'),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w400,
+        future: tripCollection.doc(tripid).get(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          String tdate = context.read<ShoppingTrip>().date.toString();
+          if (!clicked) {
+            tdate = (snapshot.data!['date'] as Timestamp).toDate().toString();
+            clicked = true;
+          }
+          return Row(
+            children: [
+              Text(
+                '$tdate'.split(' ')[0].replaceAll('-', '/'),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
-            //SizedBox(width: 5.0,),
-            IconButton(
-              icon: Icon(
-                Icons.calendar_today,
-                color: orange,
+              //SizedBox(width: 5.0,),
+              IconButton(
+                icon: Icon(
+                  Icons.calendar_today,
+                  color: orange,
+                ),
+                onPressed: () =>
+                    _selectDate(context, context.read<ShoppingTrip>().date),
               ),
-              onPressed: () => _selectDate(context, context.read<ShoppingTrip>().date),
-            ),
-          ],
-        );
-      }
-    );
+            ],
+          );
+        });
   }
 }
-
 
 class CreateListScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
@@ -221,7 +214,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
   DateTime localTime = DateTime.now();
-
 
   @override
   void initState() {
@@ -268,13 +260,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     });
     // setState(() {
     cur_trip.initializeTripFromDB(
-        snapshot['uuid'],
+      snapshot['uuid'],
       snapshot['title'],
-        date,
+      date,
       snapshot['description'],
       snapshot['host'],
-        beneficiaries,
-        snapshot['lock'] as bool,
+      beneficiaries,
+      snapshot['lock'] as bool,
     );
     // });
     print(context.read<ShoppingTrip>().beneficiaries);
@@ -309,7 +301,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       List<String> removeList = [];
       print(friend_bene);
       context.read<ShoppingTrip>().beneficiaries.forEach((old_bene) {
-        if(!friend_bene.contains(old_bene) && old_bene != context.read<Cowboy>().uuid) {
+        if (!friend_bene.contains(old_bene) &&
+            old_bene != context.read<Cowboy>().uuid) {
           print("remove: " + old_bene);
           removeList.add(old_bene);
         }
@@ -331,11 +324,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       }
       print(context.read<ShoppingTrip>().beneficiaries);
       context.read<ShoppingTrip>().updateTripMetadata(
-        context.read<ShoppingTrip>().title,
-        context.read<ShoppingTrip>().date,
-        context.read<ShoppingTrip>().description,
-        context.read<ShoppingTrip>().beneficiaries,
-      );
+            context.read<ShoppingTrip>().title,
+            context.read<ShoppingTrip>().date,
+            context.read<ShoppingTrip>().description,
+            context.read<ShoppingTrip>().beneficiaries,
+          );
       // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
     }
   }
@@ -349,7 +342,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         .map((uid) => MultiSelectItem<String>(uid, friendsName[uid]!))
         .toList();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -519,8 +511,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                   .friends
                                   .contains(document['uuid'])) {
                                 friends.add(MultiSelectItem<String>(
-                                    document['uuid'],
-                                    document['first_name']));
+                                    document['uuid'], document['first_name']));
                               }
                             });
 
@@ -554,8 +545,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               ),
                               onConfirm: (results) {
                                 //print(results.toList());
-                                friend_bene = results.map((e) => e.toString()).toList();
-                                print(context.read<ShoppingTrip>().beneficiaries);
+                                friend_bene =
+                                    results.map((e) => e.toString()).toList();
+                                print(
+                                    context.read<ShoppingTrip>().beneficiaries);
                               },
                             );
                           }),
@@ -658,7 +651,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               if (delete_list) {
                                 if (!newList) {
                                   print('delete');
-                                  context.read<ShoppingTrip>().removeStaleTripUUIDS();
+                                  context
+                                      .read<ShoppingTrip>()
+                                      .removeStaleTripUUIDS();
                                   context.read<ShoppingTrip>().deleteTripDB();
                                   context.read<Cowboy>().removeTrip(
                                       context.read<ShoppingTrip>().uuid);
@@ -679,8 +674,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                   ],
                 ),
               );
-            })
-    );
+            }));
   }
 
   check_delete(BuildContext context) {
@@ -691,13 +685,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           title: const Text("Confirm"),
           content: const Text("Are you sure you wish to delete this list?"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
                 onPressed: () => {
                       delete_list = true,
                       Navigator.of(context).pop(),
                     },
                 child: const Text("DELETE")),
-            FlatButton(
+            TextButton(
               onPressed: () => {
                 delete_list = false,
                 Navigator.of(context).pop(),
