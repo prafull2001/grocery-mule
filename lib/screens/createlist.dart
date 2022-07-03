@@ -17,6 +17,7 @@ import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../components/text_buttons.dart';
 import '../components/text_fields.dart';
 
 class UserName extends StatefulWidget {
@@ -605,27 +606,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: TextButton(
-                            child: (newList)
-                                ? Text(
-                                    'Create List',
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.black),
-                                  )
-                                : Text(
-                                    'Save Changes',
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.black),
-                                  ),
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(orange),
-                              shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25.0)),
-                              ),
-                            ),
+                          child: RectangularTextButton(
+                            buttonColor: Colors.green,
+                            textColor: Colors.white,
                             onPressed: () async {
                               if (context.read<ShoppingTrip>().title != '') {
                                 print("editing list");
@@ -661,6 +644,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 );
                               }
                             },
+                            text: (newList) ? 'Create List' : 'Save Changes',
                           ),
                         ),
                         Spacer(),
@@ -670,21 +654,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25.0),
                           ),
-                          child: TextButton(
-                            child: Text(
-                              'Delete List',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.black),
-                            ),
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(red),
-                              shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25.0)),
-                              ),
-                            ),
+                          child: RectangularTextButton(
+                            buttonColor: Colors.redAccent,
+                            textColor: Colors.white,
+                            text: "Delete List",
                             onPressed: () async {
                               await check_delete(context);
                               if (delete_list) {

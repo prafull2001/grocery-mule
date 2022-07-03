@@ -22,22 +22,20 @@ class HomeHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
-        child: ClipPath(
-          clipper: OvalBottomBorderClipper(),
-          child: Container(
-            decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadiusDirectional.circular(10)),
-            height: 50.h,
-            width: 400.w,
-            child: Center(
-              child: Text(title,
-                  style: titleBlack.copyWith(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  )),
-            ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.r),
+            color: color,
+          ),
+          height: 45.h,
+          width: 300.w,
+          child: Center(
+            child: Text(title,
+                style: titleBlack.copyWith(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                )),
           ),
         ),
       ),

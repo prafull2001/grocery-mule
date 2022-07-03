@@ -205,8 +205,8 @@ class _IndividualItemState extends State<IndividualItem> {
                   context.watch<ShoppingTrip>().host)
           ? beige
           : (index % 2 == 0)
-              ? darkBrown
-              : darkBrown,
+              ? Colors.blueGrey
+              : beige,
       key: Key(itemID),
       child: ListTile(
         title: Container(
@@ -573,8 +573,13 @@ class _EditListsScreenState extends State<EditListScreen> {
                     // SizedBox(
                     //   height: 20,
                     // ),
-                    HomeHeader2(
-                      title: "Trip Details",
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: HomeHeader(
+                        title: "Trip Details",
+                        textColor: Colors.white,
+                        color: appOrange,
+                      ),
                     ),
 
                     // Row(
@@ -604,7 +609,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                         color: Colors.white,
                         child: ListTile(
                           leading: Icon(
-                            FontAwesomeIcons.userNinja,
+                            FontAwesomeIcons.userLarge,
                             color: appOrange,
                           ),
                           title: Text(

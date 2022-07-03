@@ -162,7 +162,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 text: "Continue With Google",
                 icon: Icon(
                   FontAwesomeIcons.google,
-                  color: Colors.redAccent,
+                  // color: Colors.redAccent,
                 ),
                 buttonColor: Colors.white,
                 textColor: Colors.black,

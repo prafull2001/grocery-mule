@@ -88,9 +88,9 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                     ),
                     Center(
                       child: Icon(
-                        FontAwesomeIcons.userNinja,
+                        FontAwesomeIcons.userGroup,
                         color: appOrange,
-                        size: 100.h,
+                        size: 80.h,
                       ),
                     ),
                     SizedBox(
@@ -100,7 +100,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                       decoration: InputDecoration(
                         icon: Icon(
                           Icons.email,
-                          color: darkBrown,
+                          color: Colors.blueGrey,
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
