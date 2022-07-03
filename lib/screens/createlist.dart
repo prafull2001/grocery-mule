@@ -4,14 +4,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:grocery_mule/components/header.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/lists.dart';
+import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
+
+import '../components/text_fields.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -116,10 +122,7 @@ class _DatePickerState extends State<DatePicker> {
         children: [
           Text(
             '$date'.split(' ')[0].replaceAll('-', '/'),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w400,
-            ),
+            style: appFontStyle.copyWith(color: Colors.black),
           ),
           //SizedBox(width: 5.0,),
           IconButton(
@@ -345,6 +348,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController textControl = TextEditingController();
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -381,184 +385,219 @@ class _CreateListsScreenState extends State<CreateListScreen> {
               print(localTime);
 
               return Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(15.0),
                 child: Column(
                   children: [
                     // list name
-                    Row(
-                      children: [
-                        Text(
-                          'List Name:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            child: TextField(
-                                keyboardType: TextInputType.text,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
-                                decoration: InputDecoration(
-                                  fillColor: darker_beige,
-                                ),
-                                controller: _tripTitleController,
-                                onChanged: (value) {
-                                  context
+
+                    Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r)),
+                      color: appColorLight,
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          child: StreamBuilder<QuerySnapshot>(
+                              stream: userCollection
+                                  // .where('uuid',
+                                  //     whereIn:
+                                  //         context.read<Cowboy>().friends.isEmpty
+                                  //             ? ['']
+                                  //             : context.read<Cowboy>().friends)
+                                  .snapshots(),
+                              builder: (context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text(
+                                      'Something went wrong StreamBuilder');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                }
+                                List<MultiSelectItem<String>> friends = [];
+                                //print("first friend: ${snapshot.data!.docs[1].get('uuid')}");
+
+                                snapshot.data!.docs.forEach((document) {
+                                  if (context
+                                      .read<Cowboy>()
+                                      .friends
+                                      .contains(document['uuid'])) {
+                                    friends.add(MultiSelectItem<String>(
+                                        document['uuid'],
+                                        document['first_name']));
+                                  }
+                                });
+
+                                return MultiSelectDialogField(
+                                  searchable: true,
+                                  items: friends,
+                                  initialValue: context
                                       .read<ShoppingTrip>()
-                                      .editTripTitle(value);
-                                }),
-                          ),
+                                      .beneficiaries,
+                                  title: Text('Friends'),
+                                  selectedColor: dark_beige,
+                                  decoration: BoxDecoration(
+                                    color: dark_beige.withOpacity(0.25),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(12)),
+                                    // border: Border.all(
+                                    //   color: darker_beige,
+                                    //   width: 2,
+                                    // ),
+                                  ),
+                                  buttonIcon: Icon(
+                                    Icons.person,
+                                    color: Colors.blueGrey,
+                                  ),
+                                  buttonText: Text(
+                                    'Selected Friends',
+                                    style: appFontStyle.copyWith(
+                                        color: Colors.black),
+                                  ),
+                                  onConfirm: (results) {
+                                    //print(results.toList());
+                                    friend_bene = results
+                                        .map((e) => e.toString())
+                                        .toList();
+                                    print(context
+                                        .read<ShoppingTrip>()
+                                        .beneficiaries);
+                                  },
+                                );
+                              }),
                         ),
-                      ],
+                      ),
                     ),
 
-                    SizedBox(
-                      height: 10.0,
-                    ),
-
-                    // trip date
-                    Row(
-                      children: [
-                        Text(
-                          'Trip Date:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10.0,
-                        ),
-                        DatePicker(newList, trip_uuid),
-                      ],
-                    ),
-
-                    SizedBox(
-                      height: 10.0,
-                    ),
-
-                    // description header
-                    Row(
-                      children: [
-                        Text(
-                          'Description',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // description body
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            child: TextField(
-                                keyboardType: TextInputType.text,
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
-                                decoration: InputDecoration(
-                                  fillColor: darker_beige,
-                                ),
-                                controller: _tripDescriptionController,
-                                onChanged: (value) {
-                                  context
-                                      .read<ShoppingTrip>()
-                                      .editTripDescription(value);
-                                }),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(
-                      height: 10.0,
-                    ),
-
-                    // selected friends
-                    Container(
-                      child: StreamBuilder<QuerySnapshot>(
-                          stream: userCollection
-                              // .where('uuid',
-                              //     whereIn:
-                              //         context.read<Cowboy>().friends.isEmpty
-                              //             ? ['']
-                              //             : context.read<Cowboy>().friends)
-                              .snapshots(),
-                          builder:
-                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (snapshot.hasError) {
-                              return Text('Something went wrong StreamBuilder');
-                            }
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            }
-                            List<MultiSelectItem<String>> friends = [];
-                            //print("first friend: ${snapshot.data!.docs[1].get('uuid')}");
-
-                            snapshot.data!.docs.forEach((document) {
-                              if (context
-                                  .read<Cowboy>()
-                                  .friends
-                                  .contains(document['uuid'])) {
-                                friends.add(MultiSelectItem<String>(
-                                    document['uuid'], document['first_name']));
-                              }
-                            });
-
-                            return MultiSelectDialogField(
-                              searchable: true,
-                              items: friends,
-                              initialValue:
-                                  context.read<ShoppingTrip>().beneficiaries,
-                              title: Text('Friends'),
-                              selectedColor: dark_beige,
-                              decoration: BoxDecoration(
-                                color: dark_beige.withOpacity(0.25),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(40)),
-                                border: Border.all(
-                                  color: darker_beige,
-                                  width: 2,
-                                ),
-                              ),
-                              buttonIcon: Icon(
-                                Icons.person,
-                                color: orange,
-                              ),
-                              buttonText: Text(
-                                'Selected Friends',
-                                style: TextStyle(
-                                  color: darker_beige,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              onConfirm: (results) {
-                                //print(results.toList());
-                                friend_bene =
-                                    results.map((e) => e.toString()).toList();
-                                print(
-                                    context.read<ShoppingTrip>().beneficiaries);
-                              },
-                            );
-                          }),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: HomeHeader(
+                          title: "Trip Details",
+                          color: appOrange,
+                          textColor: Colors.white),
                     ),
 
                     // spacer
-                    Spacer(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFields(
+                            inSquare: false,
+                            controller: _tripTitleController,
+                            borderColor: appOrange,
+                            context: context,
+                            enabled: true,
+                            focusColor: Colors.black,
+                            helpText: "List Name",
+                            hintText: "",
+                            show: IconButton(
+                                onPressed: () {},
+                                icon: Icon(Icons.verified_user_outlined)),
+                            icon: Tab(icon: Icon(Icons.abc_outlined)),
+                            input: TextInputType.text,
+                            secureText: false,
+                            onChanged: (value) {
+                              context.read<ShoppingTrip>().editTripTitle(value);
+                            },
+                            suffix: Container(),
+                            onTap1: () {},
+                          ),
+                        ),
+                        // Expanded(
+                        //   child: Container(
+                        //     child: TextField(
+                        //         keyboardType: TextInputType.text,
+                        //         textAlign: TextAlign.center,
+                        //         style: TextStyle(
+                        //           color: Colors.black,
+                        //         ),
+                        //         decoration: InputDecoration(
+                        //           fillColor: darker_beige,
+                        //         ),
+                        //         controller: _tripTitleController,
+                        //         onChanged: (value) {
+                        //           context
+                        //               .read<ShoppingTrip>()
+                        //               .editTripTitle(value);
+                        //         }),
+                        //   ),
+                        // ),
+                      ],
+                    ),
+
+                    SizedBox(
+                      height: 10.h,
+                    ),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFields(
+                            inSquare: false,
+                            controller: _tripDescriptionController,
+                            borderColor: appOrange,
+                            context: context,
+                            enabled: true,
+                            focusColor: Colors.black,
+                            helpText: "Description",
+                            hintText: "",
+                            show: IconButton(
+                                onPressed: () {},
+                                icon: Icon(Icons.verified_user_outlined)),
+                            icon: Tab(icon: Icon(Icons.abc_outlined)),
+                            input: TextInputType.text,
+                            secureText: false,
+                            onChanged: (value) {
+                              context
+                                  .read<ShoppingTrip>()
+                                  .editTripDescription(value);
+                            },
+                            suffix: Container(),
+                            onTap1: () {},
+                          ),
+                        ),
+
+                        // Expanded(
+                        //   child: Container(
+                        //     child: TextField(
+                        //         keyboardType: TextInputType.text,
+                        //         textAlign: TextAlign.center,
+                        //         style: TextStyle(
+                        //           color: Colors.black,
+                        //         ),
+                        //         decoration: InputDecoration(
+                        //           fillColor: darker_beige,
+                        //         ),
+                        //         controller: _tripTitleController,
+                        //         onChanged: (value) {
+                        //           context
+                        //               .read<ShoppingTrip>()
+                        //               .editTripTitle(value);
+                        //         }),
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: HomeHeader(
+                          title: "Date",
+                          color: appOrange,
+                          textColor: Colors.white),
+                    ),
+                    Center(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        DatePicker(newList, trip_uuid),
+                      ],
+                    )),
 
                     // create/delete buttons
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
                           width: 180,

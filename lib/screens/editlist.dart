@@ -6,14 +6,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
+import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 
+import '../components/header.dart';
 import 'createlist.dart';
 
 typedef StringVoidFunc = void Function(String, int);
@@ -200,20 +205,17 @@ class _IndividualItemState extends State<IndividualItem> {
                   context.watch<ShoppingTrip>().host)
           ? beige
           : (index % 2 == 0)
-              ? card_yellow
-              : card_orange,
+              ? darkBrown
+              : darkBrown,
       key: Key(itemID),
       child: ListTile(
         title: Container(
           child: Text(
-            (context.read<ShoppingTrip>().lock == false)
-                ? '${name}'
-                : '${name} (total)',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-            ),
-          ),
+              (context.read<ShoppingTrip>().lock == false)
+                  ? '${name}'
+                  : '${name} (total)',
+              style:
+                  appFontStyle.copyWith(color: Colors.white, fontSize: 16.sp)),
         ),
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -222,22 +224,29 @@ class _IndividualItemState extends State<IndividualItem> {
             if (context.read<ShoppingTrip>().lock == false) ...[
               Container(
                   child: IconButton(
-                      icon: const Icon(Icons.remove_circle),
+                      icon: const Icon(
+                        Icons.remove_circle,
+                        color: Colors.white,
+                      ),
                       onPressed: () => (setState(() {
                             updateUsrQuantity(context.read<Cowboy>().uuid,
                                 max(0, quantity - 1));
                           })))),
             ],
             Container(
-              child: Text(//curItem.quantity
-                  (context.read<ShoppingTrip>().lock == false)
-                      ? '${quantity}'
-                      : '${curItem.quantity}'),
+              child: Text(
+                //curItem.quantity
+                (context.read<ShoppingTrip>().lock == false)
+                    ? '${quantity}'
+                    : '${curItem.quantity}',
+                style: appFontStyle.copyWith(color: Colors.white),
+              ),
             ),
             if (context.read<ShoppingTrip>().lock == false) ...[
               Container(
                   child: IconButton(
                       icon: const Icon(Icons.add_circle),
+                      color: Colors.white,
                       onPressed: () {
                         setState(() {
                           updateUsrQuantity(
@@ -251,7 +260,10 @@ class _IndividualItemState extends State<IndividualItem> {
                 context.read<ShoppingTrip>().host)
             ? (context.read<ShoppingTrip>().lock == false)
                 ? IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: Icon(
+                      Icons.delete,
+                      color: appColor,
+                    ),
                     onPressed: () {
                       setState(() {
                         context.read<ShoppingTrip>().removeItem(itemID);
@@ -394,7 +406,6 @@ class _EditListsScreenState extends State<EditListScreen> {
           ),
           Container(
             height: 45,
-            width: 100,
             child: TextField(
               style: TextStyle(color: darker_beige),
               cursorColor: darker_beige,
@@ -404,9 +415,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                     color: darker_beige,
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: darker_beige, width: 2),
-                ),
+                // focusedBorder: OutlineInputBorder(
+                //   borderSide: BorderSide(color: darker_beige, width: 2),
+                // ),
                 hintText: 'EX: Apple',
               ),
               onChanged: (text) {
@@ -559,52 +570,61 @@ class _EditListsScreenState extends State<EditListScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   //padding: const EdgeInsets.all(25),
                   children: [
-                    SizedBox(
-                      height: 20,
+                    // SizedBox(
+                    //   height: 20,
+                    // ),
+                    HomeHeader2(
+                      title: "Trip Details",
                     ),
 
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 10.0,
-                        ),
-                        Text(
-                          //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
-                          // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                          'Host - ',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
+                    // Row(
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 10.0,
+                    //     ),
+                    //     Text(
+                    //       //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                    //       // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                    //       'Host - ',
+                    //       style: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 20,
+                    //       ),
+                    //     ),
+                    //     UserName(
+                    //         context.read<ShoppingTrip>().host, false, true),
+                    //   ],
+                    // ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        color: Colors.white,
+                        child: ListTile(
+                          leading: Icon(
+                            FontAwesomeIcons.userNinja,
+                            color: appOrange,
                           ),
+                          title: Text(
+                            "Host",
+                            style: titleBlack.copyWith(fontSize: 18.sp),
+                          ),
+                          trailing: UserName(
+                              context.read<ShoppingTrip>().host, false, true),
                         ),
-                        UserName(
-                            context.read<ShoppingTrip>().host, false, true),
-                      ],
+                      ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 10.0,
-                        ),
-                        Text(
-                          'Beneficiaries - ',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                          ),
-                        ),
-                        Badge(
-                          showBadge: false,
-                          child: TextButton(
-                            child: Icon(Icons.person_add_alt),
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(orange),
-                              foregroundColor: MaterialStateProperty.all<Color>(
-                                  Colors.black),
-                            ),
-                            onPressed: () {
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        color: Colors.white,
+                        child: ListTile(
+                            onTap: () {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -679,13 +699,58 @@ class _EditListsScreenState extends State<EditListScreen> {
                                     );
                                   });
                             },
-                          ),
-                        ),
-                      ],
+                            leading: Icon(
+                              Icons.supervised_user_circle,
+                              color: appOrange,
+                            ),
+                            title: Text(
+                              "Beneficiaries",
+                              style: titleBlack.copyWith(fontSize: 18.sp),
+                            ),
+                            trailing: IconButton(
+                                onPressed: null,
+                                icon: CircleAvatar(
+                                  backgroundColor: appColor,
+                                  child: Icon(
+                                    Icons.list_outlined,
+                                    color: appOrange,
+                                  ),
+                                ))),
+                      ),
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 10.0,
+                    //     ),
+                    //     Text(
+                    //       'Beneficiaries - ',
+                    //       style: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 20,
+                    //       ),
+                    //     ),
+                    //     Badge(
+                    //       showBadge: false,
+                    //       child: TextButton(
+                    //         child: Icon(Icons.person_add_alt),
+                    //         style: ButtonStyle(
+                    //           backgroundColor:
+                    //               MaterialStateProperty.all<Color>(orange),
+                    //           foregroundColor: MaterialStateProperty.all<Color>(
+                    //               Colors.black),
+                    //         ),
+                    //         onPressed: () {
+
+                    //         },
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // SizedBox(
+                    //   height: 10,
+                    // ),
 
                     //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
                     ItemsAddition(
@@ -735,12 +800,15 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             padding: EdgeInsets.all(20),
           ),
           Container(
-            height: 45,
-            width: 100,
+            height: 55.h,
+            width: 100.w,
             child: TextField(
+              autofocus: true,
               style: TextStyle(color: darker_beige),
               cursorColor: darker_beige,
               decoration: InputDecoration(
+                // isCollapsed: true,
+                isDense: true,
                 border: OutlineInputBorder(
                   borderSide: BorderSide(
                     color: darker_beige,
@@ -782,27 +850,22 @@ class _ItemsAdditionState extends State<ItemsAddition> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 40,
-          width: double.maxFinite,
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
           child: Divider(
-            color: Colors.black,
-            thickness: 1.5,
-            indent: 75,
-            endIndent: 75,
+            endIndent: 50,
+            indent: 50,
+            thickness: 2,
+            color: appOrange,
           ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Container(
-              child: Text(
-                'Add Item',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
+              child: Text('Add Item',
+                  style: appFontStyle.copyWith(
+                      fontSize: 18.sp, fontWeight: FontWeight.w500)),
             ),
             Container(
               child: (context.read<ShoppingTrip>().lock == false)
@@ -821,50 +884,44 @@ class _ItemsAdditionState extends State<ItemsAddition> {
         if (isAdd) create_item(),
         ItemsList(widget.tripUUID),
         SizedBox(
-          height: 10.0,
+          height: 4.0,
         ),
         if (context.read<ShoppingTrip>().host ==
             context.read<Cowboy>().uuid) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              //comment
-              SizedBox(
-                width: 40.0,
-              ),
-              Container(
-                height: 70,
-                width: 150,
-                child: RoundedButton(
-                  onPressed: () {
-                    context.read<ShoppingTrip>().changeTripLock();
-                    context.read<ShoppingTrip>().setAllCheckFalse();
-                  },
-                  title: (context.watch<ShoppingTrip>().lock == false)
-                      ? "Shopping Mode"
-                      : "Unlock Trip",
-                  color: Colors.blueAccent,
+          Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //comment
+
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () {
+                      context.read<ShoppingTrip>().changeTripLock();
+                      context.read<ShoppingTrip>().setAllCheckFalse();
+                    },
+                    title: (context.watch<ShoppingTrip>().lock == false)
+                        ? "Shopping Mode"
+                        : "Unlock Trip",
+                    color: appOrange,
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 10.0,
-              ),
-              Container(
-                height: 70,
-                width: 150,
-                child: RoundedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, CheckoutScreen.id);
-                  },
-                  title: "Checkout",
-                  color: Colors.blueAccent,
+
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, CheckoutScreen.id);
+                      },
+                      title: "Checkout",
+                      color: Colors.green),
                 ),
-              ),
-              Spacer(),
-              SizedBox(
-                width: 40.0,
-              ),
-            ],
+              ],
+            ),
           ),
         ]
       ],
