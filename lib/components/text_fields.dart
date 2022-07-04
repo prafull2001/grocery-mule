@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 
@@ -166,6 +168,46 @@ class TextFields2 extends StatelessWidget {
               ),
             ),
           )),
+    );
+  }
+}
+
+class TextFieldLogin extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final IconData icon;
+  final bool isSecure;
+
+  const TextFieldLogin({
+    required this.controller,
+    required this.isSecure,
+    required this.hintText,
+    required this.icon,
+  }) : super();
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      obscureText: isSecure,
+      controller: controller,
+      style: GoogleFonts.cairo(color: Colors.white),
+      decoration: InputDecoration(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: appOrange),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: appOrange),
+          ),
+          border: UnderlineInputBorder(
+            borderSide: BorderSide(color: appOrange),
+          ),
+          icon: Icon(
+            icon,
+            color: Colors.black,
+          ),
+          hintStyle: GoogleFonts.cairo(color: Colors.black, fontSize: 15.sp),
+          labelStyle: GoogleFonts.cairo(color: Colors.black),
+          labelText: hintText),
     );
   }
 }

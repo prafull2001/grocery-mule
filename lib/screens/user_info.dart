@@ -5,6 +5,7 @@ import 'package:grocery_mule/components/header.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -112,7 +113,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                       ),
                       keyboardType: TextInputType.emailAddress,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.black),
+                      style: appFontStyle,
                       initialValue: prevEmail,
                       onChanged: (value) {
                         email = value;
@@ -139,7 +140,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                       onChanged: (value) {
                         firstName = value;
                       },
-                      style: TextStyle(color: Colors.black),
+                      style: appFontStyle,
                     ),
                     SizedBox(
                       height: 8.0,
@@ -179,7 +180,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                       onChanged: (value) {
                         payPal = value;
                       },
-                      style: TextStyle(color: Colors.black),
+                      style: appFontStyle,
                     ),
                     SizedBox(
                       height: 30.h,

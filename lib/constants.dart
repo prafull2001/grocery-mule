@@ -30,6 +30,7 @@ const kMessageContainerDecoration = BoxDecoration(
 );
 
 const kTextFieldDecoration = InputDecoration(
+  
   hintText: 'Placeholder Text',
   hintStyle: TextStyle(fontSize: 20.0, color: dark_beige),
   contentPadding:
