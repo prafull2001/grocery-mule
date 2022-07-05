@@ -110,9 +110,9 @@ class _PayPalPageSate extends State<PayPalPage> {
                   data: Theme.of(context)
                       .copyWith(dividerColor: Colors.transparent),
                   child: ExpansionTile(
-                    textColor: Colors.white,
+                    textColor: Colors.black,
                     backgroundColor: appColorLight,
-                    collapsedTextColor: Colors.white,
+                    collapsedTextColor: Colors.black,
                     title: Text(
                       "Finding your PayPal.me link",
                       style: appFontStyle,
@@ -129,53 +129,68 @@ class _PayPalPageSate extends State<PayPalPage> {
                         title: "Visit \'paypal.me\'",
                         color: Colors.blueAccent,
                       ),
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          side: const BorderSide(
-                              color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        child: Theme(
-                          data: Theme.of(context)
-                              .copyWith(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            title: Text(
-                              "Step 1'",
-                              style: appFontStyle,
-                            ),
-                            children: [
-                              Image(
-                                image: AssetImage('images/step1.png'),
-                              ),
-                            ],
-                          ),
-                        ),
+                      Image.asset(
+                        "images/infoPaypal.gif",
+                        // loadingBuilder: (BuildContext context, Widget child,
+                        //     ImageChunkEvent? loadingProgress) {
+                        //   if (loadingProgress == null) return child;
+                        //   return Center(
+                        //     child: CircularProgressIndicator(
+                        //       value: loadingProgress.expectedTotalBytes != null
+                        //           ? loadingProgress.cumulativeBytesLoaded /
+                        //               loadingProgress.expectedTotalBytes!
+                        //           : null,
+                        //     ),
+                        //   );
+                        // },
                       ),
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          side: const BorderSide(
-                              color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                          borderRadius: BorderRadius.circular(30.0),
-                        ),
-                        child: Theme(
-                          data: Theme.of(context)
-                              .copyWith(dividerColor: Colors.transparent),
-                          child: ExpansionTile(
-                            title: Text(
-                              "Tap \'copy link\'",
-                              style: TextStyle(
-                                fontSize: 17.0,
-                                //fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            children: [
-                              Image(
-                                image: AssetImage('images/step2.png'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // Card(
+                      //   shape: RoundedRectangleBorder(
+                      //     side: const BorderSide(
+                      //         color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                      //     borderRadius: BorderRadius.circular(30.0),
+                      //   ),
+                      //   child: Theme(
+                      //     data: Theme.of(context)
+                      //         .copyWith(dividerColor: Colors.transparent),
+                      //     child: ExpansionTile(
+                      //       title: Text(
+                      //         "Step 1'",
+                      //         style: appFontStyle,
+                      //       ),
+                      //       children: [
+                      //         Image(
+                      //           image: AssetImage('images/step1.png'),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
+                      // Card(
+                      //   shape: RoundedRectangleBorder(
+                      //     side: const BorderSide(
+                      //         color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                      //     borderRadius: BorderRadius.circular(30.0),
+                      //   ),
+                      //   child: Theme(
+                      //     data: Theme.of(context)
+                      //         .copyWith(dividerColor: Colors.transparent),
+                      //     child: ExpansionTile(
+                      //       title: Text(
+                      //         "Tap \'copy link\'",
+                      //         style: TextStyle(
+                      //           fontSize: 17.0,
+                      //           //fontWeight: FontWeight.w700,
+                      //         ),
+                      //       ),
+                      //       children: [
+                      //         Image(
+                      //           image: AssetImage('images/step2.png'),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                       ListTile(title: Text("Paste your link below")),
                     ],
                   ),
