@@ -376,9 +376,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.hasError) {
                 return const Text('Something went wrong');
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: const CircularProgressIndicator());
               }
               if (snapshot.data!.exists) {
                 _loadCurrentTrip(snapshot.data!);

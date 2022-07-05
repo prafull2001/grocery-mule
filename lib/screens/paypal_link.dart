@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,20 +13,18 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'lists.dart';
 
-class PayPalPage extends StatefulWidget{
+class PayPalPage extends StatefulWidget {
   static String id = 'paypal_page';
-
 
   @override
   _PayPalPageSate createState() => _PayPalPageSate();
 }
 
-
-class _PayPalPageSate extends State<PayPalPage>{
+class _PayPalPageSate extends State<PayPalPage> {
   String paypal_link = '';
   bool link_valid = false;
 
-  void checkStringValidity(String input){
+  void checkStringValidity(String input) {
     String paypal_prefix = "https://www.paypal.com/paypalme/";
 
     if (input.startsWith(paypal_prefix) && input.length > 32) {
@@ -39,7 +40,6 @@ class _PayPalPageSate extends State<PayPalPage>{
                 child: Text("OK"),
                 onPressed: () {
                   Navigator.of(context).pop();
-
                 },
               ),
             ],
@@ -59,7 +59,6 @@ class _PayPalPageSate extends State<PayPalPage>{
                 child: Text("OK"),
                 onPressed: () {
                   Navigator.of(context).pop();
-
                 },
               ),
             ],
@@ -76,11 +75,9 @@ class _PayPalPageSate extends State<PayPalPage>{
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-            'Add PayPal.me Link',
-            style: TextStyle(
-              color: Colors.black,
-            ),
+        title: Text(
+          'Link PayPal Account',
+          style: appFontStyle.copyWith(color: Colors.black),
         ),
         backgroundColor: light_orange,
       ),
@@ -96,44 +93,42 @@ class _PayPalPageSate extends State<PayPalPage>{
               ),
               Text(
                 'Add your full \'https\' PayPal.me link to your profile!',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: appFontStyle,
               ),
               SizedBox(
                 height: 30.0,
               ),
               Card(
+                color: appColorLight,
+                elevation: 10,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(
-                      color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-                  borderRadius: BorderRadius.circular(30.0),
+                  // side: const BorderSide(
+                  //     color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Theme(
                   data: Theme.of(context)
                       .copyWith(dividerColor: Colors.transparent),
                   child: ExpansionTile(
+                    textColor: Colors.white,
+                    backgroundColor: appColorLight,
+                    collapsedTextColor: Colors.white,
                     title: Text(
                       "Finding your PayPal.me link",
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        //fontWeight: FontWeight.w700,
-                      ),
+                      style: appFontStyle,
                     ),
                     children: [
                       RoundedButton(
                         onPressed: () async {
                           String paypalStr = "https://www.paypal.com/paypalme/";
                           Uri paypal_link = Uri.parse(paypalStr);
-                          if(await canLaunchUrl(paypal_link)){
-                          launchUrl(paypal_link);
+                          if (await canLaunchUrl(paypal_link)) {
+                            launchUrl(paypal_link);
                           }
                         },
                         title: "Visit \'paypal.me\'",
                         color: Colors.blueAccent,
                       ),
-
                       Card(
                         shape: RoundedRectangleBorder(
                           side: const BorderSide(
@@ -145,17 +140,13 @@ class _PayPalPageSate extends State<PayPalPage>{
                               .copyWith(dividerColor: Colors.transparent),
                           child: ExpansionTile(
                             title: Text(
-                              "Tap \'My PayPal.me\'",
-                              style: TextStyle(
-                                fontSize: 17.0,
-                                //fontWeight: FontWeight.w700,
-                              ),
+                              "Step 1'",
+                              style: appFontStyle,
                             ),
                             children: [
                               Image(
                                 image: AssetImage('images/step1.png'),
                               ),
-
                             ],
                           ),
                         ),
@@ -181,19 +172,15 @@ class _PayPalPageSate extends State<PayPalPage>{
                               Image(
                                 image: AssetImage('images/step2.png'),
                               ),
-
                             ],
                           ),
                         ),
                       ),
-                      ListTile(
-                          title: Text("Paste your link below")
-                      ),
+                      ListTile(title: Text("Paste your link below")),
                     ],
                   ),
                 ),
               ),
-
               SizedBox(
                 height: 30.0,
               ),
@@ -215,7 +202,7 @@ class _PayPalPageSate extends State<PayPalPage>{
                   title: 'Add Paypal Link',
                   color: Colors.blueAccent,
                   onPressed: () {
-                    if(paypal_link != ''){
+                    if (paypal_link != '') {
                       checkStringValidity(paypal_link);
                     } else {
                       setState(() {});
@@ -236,13 +223,12 @@ class _PayPalPageSate extends State<PayPalPage>{
                         },
                       );
                     }
-                  }
-              ),
-              if(link_valid)...[
+                  }),
+              if (link_valid) ...[
                 RoundedButton(
                     title: 'Finish Login',
                     color: Colors.blueAccent,
-                    onPressed: () async{
+                    onPressed: () async {
                       Uri link = Uri.parse(paypal_link);
                       print(link);
                       // if(await canLaunchUrl(link)){
@@ -251,8 +237,7 @@ class _PayPalPageSate extends State<PayPalPage>{
                       // }
                       context.read<Cowboy>().updateCowboyPaypal(paypal_link);
                       Navigator.pushNamed(context, ListsScreen.id);
-                    }
-                )
+                    })
               ]
             ],
           ),
@@ -260,5 +245,4 @@ class _PayPalPageSate extends State<PayPalPage>{
       ),
     );
   }
-
 }

@@ -72,7 +72,10 @@ class RectangularTextIconButton extends StatelessWidget {
                   )),
             ),
           ),
-          icon
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: icon,
+          )
         ],
       )),
     );

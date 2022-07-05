@@ -449,6 +449,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: AppBar(
         centerTitle: true,
         title: Text('Receipt Scanning'),

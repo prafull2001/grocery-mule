@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/screens/receipt_scanning.dart';
 import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
@@ -11,6 +14,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
+
+import '../components/text_buttons.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -82,26 +87,20 @@ class _PayPalButtonState extends State<PayPalButton> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              //comment
-              Container(
-                height: 70,
-                width: 150,
-                child: RoundedButton(
-                  onPressed: () async {
-                    String paypalStr = snapshot.data!['paypal'];
-                    Uri paypal_link = Uri.parse(paypalStr);
-                    if (await canLaunchUrl(paypal_link)) {
-                      launchUrl(paypal_link);
-                    }
-                  },
-                  title: "PayPal",
-                  color: Colors.amber,
-                ),
-              ),
-            ],
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 10.h),
+            child: RectangularTextIconButton(
+                text: "PayPal",
+                buttonColor: Colors.blueGrey,
+                icon: Icon(FontAwesomeIcons.paypal),
+                textColor: Colors.white,
+                onPressed: () async {
+                  String paypalStr = snapshot.data!['paypal'];
+                  Uri paypal_link = Uri.parse(paypalStr);
+                  if (await canLaunchUrl(paypal_link)) {
+                    launchUrl(paypal_link);
+                  }
+                }),
           );
         });
   }
@@ -171,29 +170,26 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
         shape: BoxShape.rectangle,
       ),
       child: Column(children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Container(
-              child: Text(
-                '$name',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
+        Card(
+          elevation: 1,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Container(
+                child: Text('$name',
+                    style: appFontStyle.copyWith(
+                        fontSize: 16.sp, color: Colors.white)),
+                padding: EdgeInsets.all(20),
               ),
-              padding: EdgeInsets.all(20),
-            ),
-            Container(
-              child: Text(
-                'x$quantity',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
+              Container(
+                child: Text('x$quantity',
+                    style: appFontStyle.copyWith(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ]),
     );
@@ -203,8 +199,8 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
     return Card(
       key: Key(userUUID),
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
-        borderRadius: BorderRadius.circular(12),
+        // side: const BorderSide(color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       color: darkBrown,
       child: Theme(
@@ -217,20 +213,33 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
                 if (itemMapping.isNotEmpty) ...[
                   for (var entry in itemMapping.entries)
                     simple_item(entry.key, entry.value),
-                  TextButton(
-                    style: ButtonStyle(
-                        foregroundColor:
-                            MaterialStateProperty.all<Color>(Colors.black),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(orange)),
-                    onPressed: () {
-                      beneficiary_subtotal = calculate_total();
-                      Clipboard.setData(
-                          ClipboardData(text: beneficiary_subtotal.toString()));
-                      Fluttertoast.showToast(msg: 'Price copied to clipboard!');
-                    },
-                    child: Text('\$' + '${calculate_total()}'),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RectangularTextButton(
+                      text: 'Total Cost:  \$${calculate_total()}',
+                      onPressed: () {
+                        beneficiary_subtotal = calculate_total();
+                        Clipboard.setData(ClipboardData(
+                            text: beneficiary_subtotal.toString()));
+                        Fluttertoast.showToast(
+                            msg: 'Price copied to clipboard!');
+                      },
+                    ),
                   ),
+                  // TextButton(
+                  //   style: ButtonStyle(
+                  //       foregroundColor:
+                  //           MaterialStateProperty.all<Color>(Colors.black),
+                  //       backgroundColor:
+                  //           MaterialStateProperty.all<Color>(orange)),
+                  //   onPressed: () {
+                  //     beneficiary_subtotal = calculate_total();
+                  //     Clipboard.setData(
+                  //         ClipboardData(text: beneficiary_subtotal.toString()));
+                  //     Fluttertoast.showToast(msg: 'Price copied to clipboard!');
+                  //   },
+                  //   child: Text('\$' + '${calculate_total()}'),
+                  // ),
                   if (userUUID != context.read<ShoppingTrip>().host) ...[
                     PayPalButton(userUUID)
                   ]
@@ -354,17 +363,30 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                         key: Key(aggre_raw_list.keys.toList()[index]));
                   },
                 ),
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
+
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 35.w),
+                  child: RectangularTextIconButton(
+                    text: "Receipt Scanning",
+                    buttonColor: Colors.lightGreen,
+                    icon: Icon(Icons.search_rounded),
+                    textColor: Colors.white,
                     onPressed: () {
                       Navigator.pushNamed(context, ReceiptScanning.id);
                     },
-                    title: "Receipt Scanning",
-                    color: Colors.blueAccent,
                   ),
                 ),
+                // Container(
+                //   height: 70,
+                //   width: 150,
+                //   child: RoundedButton(
+                //     onPressed: () {
+                //       Navigator.pushNamed(context, ReceiptScanning.id);
+                //     },
+                //     title: "Receipt Scanning",
+                //     color: Colors.blueAccent,
+                //   ),
+                // ),
               ],
             );
           }),
