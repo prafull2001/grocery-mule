@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -806,7 +805,7 @@ class _ItemsAdditionState extends State<ItemsAddition> {
           ),
           Container(
             height: 55.h,
-            width: 100.w,
+            width: 200.w,
             child: TextField(
               autofocus: true,
               style: TextStyle(color: darker_beige),
@@ -839,12 +838,6 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                         isAdd = false;
                       });
                   })),
-          Container(
-              child: IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () => (setState(() {
-                        isAdd = false;
-                      })))),
         ],
       )),
     );
@@ -875,10 +868,12 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             Container(
               child: (context.read<ShoppingTrip>().lock == false)
                   ? IconButton(
-                      icon: const Icon(Icons.add_circle),
+                      icon: (isAdd == false)
+                          ? const Icon(Icons.add_circle)
+                          : const Icon(Icons.remove),
                       onPressed: () {
                         setState(() {
-                          isAdd = true;
+                          isAdd = !isAdd;
                         });
                       },
                     )
