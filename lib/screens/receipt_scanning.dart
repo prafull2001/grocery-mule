@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -14,7 +17,7 @@ import '../constants.dart';
 
 class DBItemPrice extends StatefulWidget {
   late final String itemUUID;
-  DBItemPrice(String itemUUID, [bool spec=false, bool strng=false]) {
+  DBItemPrice(String itemUUID, [bool spec = false, bool strng = false]) {
     this.itemUUID = itemUUID;
   }
 
@@ -29,7 +32,11 @@ class _DBItemPriceState extends State<DBItemPrice> {
   @override
   void initState() {
     itemUUID = widget.itemUUID;
-    personalshot = tripCollection.doc(context.read<ShoppingTrip>().uuid).collection('items').doc(itemUUID).snapshots();
+    personalshot = tripCollection
+        .doc(context.read<ShoppingTrip>().uuid)
+        .collection('items')
+        .doc(itemUUID)
+        .snapshots();
   }
 
   @override
@@ -46,7 +53,7 @@ class _DBItemPriceState extends State<DBItemPrice> {
           }
           return Text(
             '${snapshot.data!['price']} ',
-            style: TextStyle(fontSize: 20, color: Colors.black),
+            style: appFontStyle.copyWith(color: Colors.black, fontSize: 15.sp),
           );
         });
   }
@@ -72,35 +79,37 @@ class _ReceiptItemState extends State<ReceiptItem> {
     return DragTarget<String>(
       onAccept: (String newprice) {
         setState(() {
-          context.read<ShoppingTrip>().updateItemPrice(widget.receiptItemUUID, double.parse(newprice));
+          context
+              .read<ShoppingTrip>()
+              .updateItemPrice(widget.receiptItemUUID, double.parse(newprice));
           widget.price = newprice;
           print(widget.name + ', ' + widget.price);
         });
       },
       builder: (BuildContext context, accepted, rejected) {
-        return Container(
-          padding: const EdgeInsets.all(4.0),
-          height: 40.0,
-          child: Row(
-            children: [
-              Text(
-                '${widget.name}: ',
-                style: TextStyle(
-                  fontSize: 20.0,
+        return Card(
+          child: Container(
+            padding: const EdgeInsets.all(4.0),
+            height: 40.h,
+            child: Row(
+              children: [
+                Text(
+                  '${widget.name}: ',
+                  style: appFontStyle.copyWith(
+                      color: Colors.white, fontSize: 15.sp),
                 ),
-              ),
-              // TODO get price to go as right as possible
-              // SizedBox.expand(),
-              if(widget.receiptItemUUID != 'dummy')...[
-                DBItemPrice(widget.receiptItemUUID),
-              ]
-
-            ],
-          ),
-          decoration: BoxDecoration(
-            color: Colors.grey[500],
-            border: Border.all(),
-            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                // TODO get price to go as right as possible
+                // SizedBox.expand(),
+                if (widget.receiptItemUUID != 'dummy') ...[
+                  DBItemPrice(widget.receiptItemUUID),
+                ]
+              ],
+            ),
+            // decoration: BoxDecoration(
+            //   color: Colors.grey[500],
+            //   border: Border.all(),
+            //   borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            // ),
           ),
         );
       },
@@ -123,7 +132,6 @@ class ReceiptItems extends StatefulWidget {
 }
 
 class _ReceiptItemsState extends State<ReceiptItems> {
-
   loadItems(QuerySnapshot snapshot) {
     // print('gpt to loadItems ReceiptItemsState');
     widget.rilist = [];
@@ -146,7 +154,8 @@ class _ReceiptItemsState extends State<ReceiptItems> {
         builder: (context, snapshot) {
           // print('build ReceiptItemsState: ${items.length}');
           if (snapshot.hasError) {
-            return const Text('Something went wrong with item snapshot in receipt_scanning');
+            return const Text(
+                'Something went wrong with item snapshot in receipt_scanning');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             print('waiting for snapshot ReceiptItemsState');
@@ -186,7 +195,6 @@ class ReceiptPrice extends StatefulWidget {
 }
 
 class _ReceiptPriceState extends State<ReceiptPrice> {
-
   String val = '0.00';
 
   @override
@@ -206,58 +214,64 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
             ),
             IconButton(
               onPressed: () {
-                showDialog(context: context, builder: (context) {
-                  return AlertDialog(
-                    backgroundColor: beige,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(
-                        width: 5.0,
-                        color: darker_beige,
-                      ),
-                    ),
-                    content: Container(
-                      width: 100,
-                      height: 150,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Change Price',
-                            style: TextStyle(fontSize: 25),
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        backgroundColor: beige,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                          side: BorderSide(
+                            width: 5.0,
+                            color: darker_beige,
                           ),
-                          TextField(
-                            onChanged: (value) {
-                              val = value;
-                            },
-                            decoration: InputDecoration(hintText: widget.price),
-                          ),
-                          Row(
+                        ),
+                        content: Container(
+                          width: 100,
+                          height: 150,
+                          child: Column(
                             children: [
-                              IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      widget.price = val;
-                                      //price = val;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  icon: Icon(Icons.done),
+                              Text(
+                                'Change Price',
+                                style: TextStyle(fontSize: 25),
                               ),
-                              IconButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
+                              TextField(
+                                onChanged: (value) {
+                                  val = value;
                                 },
-                                icon: Icon(Icons.clear),
+                                decoration:
+                                    InputDecoration(hintText: widget.price),
+                              ),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        widget.price = val;
+                                        //price = val;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    icon: Icon(Icons.done),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    icon: Icon(Icons.clear),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                });
+                        ),
+                      );
+                    });
               },
-              icon: Icon(Icons.create_outlined, size: 20,),
+              icon: Icon(
+                Icons.create_outlined,
+                size: 20,
+              ),
             ),
           ],
         ),
@@ -357,7 +371,6 @@ class ReceiptScanning extends StatefulWidget {
   _ReceiptScanningState createState() => _ReceiptScanningState();
 }
 
-
 class _ReceiptScanningState extends State<ReceiptScanning> {
   File? receipt_image;
   //final inputImage;
@@ -368,16 +381,18 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
   @override
   initState() {
     super.initState();
-    itemstream = tripCollection.doc(context.read<ShoppingTrip>().uuid).collection('items').snapshots();
+    itemstream = tripCollection
+        .doc(context.read<ShoppingTrip>().uuid)
+        .collection('items')
+        .snapshots();
   }
 
   bool isPrice(String text) {
-
     bool dotXX(String tocheck) {
       if (tocheck.length <= 3) {
         return true;
       }
-      String last3 = tocheck.substring(tocheck.length-3);
+      String last3 = tocheck.substring(tocheck.length - 3);
       bool dec = true; // decimal
       bool ret = false; // return var, since can't return from forEach
       last3.runes.forEach((charCode) {
@@ -388,7 +403,8 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
           }
           dec = false;
         } else {
-          if (charCode<48 || charCode>57) { // not integer ascii value
+          if (charCode < 48 || charCode > 57) {
+            // not integer ascii value
             ret = true;
           }
         }
@@ -399,23 +415,25 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
 
     if (!text.contains('.')) {
       return false;
-    }  else if (dotXX(text)) { // checks if last 3 characters are '.XX' where X is an integer
+    } else if (dotXX(text)) {
+      // checks if last 3 characters are '.XX' where X is an integer
       return false;
     }
     return true;
   }
 
-  Future pickImage() async{
-    try{
+  Future pickImage() async {
+    try {
       final image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return [];
       final imageTemp = File(image.path);
       setState(() => receipt_image = imageTemp);
       final inputImage = InputImage.fromFile(receipt_image!);
-      final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+      final textRecognizer =
+          TextRecognizer(script: TextRecognitionScript.latin);
 
-      final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
-
+      final RecognizedText recognizedText =
+          await textRecognizer.processImage(inputImage);
 
       List<ReceiptPrice> prices = [];
       for (TextBlock block in recognizedText.blocks) {
@@ -439,86 +457,103 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
       });
       // return prices;
 
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       print('Failed to pick image: $e');
       return [];
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
         centerTitle: true,
         title: Text('Receipt Scanning'),
         backgroundColor: light_orange,
       ),
-      body: Column(
-        children: [
-          RoundedButton(
-            onPressed: () => pickImage(),
-            title: "Pick Image From Gallery",
-            color: Colors.blueAccent,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Container(
+      body: Column(children: [
+        RoundedButton(
+          onPressed: () => pickImage(),
+          title: "Pick Image From Gallery",
+          color: Colors.blueGrey,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
             padding: const EdgeInsets.all(4.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text(
-                    'Items',
-                    style: TextStyle(
-                      fontSize: 30.0,
+                  child: Center(
+                    child: Text(
+                      'Items',
+                      style: appFontStyle.copyWith(fontSize: 30),
                     ),
                   ),
                 ),
                 Expanded(
-                  child: Row(
-                    children: [
-                      Text(
-                        'Prices ',
-                        style: TextStyle(
-                          fontSize: 30.0,
+                  child: Center(
+                    child: Row(
+                      children: [
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              rplist.add(ReceiptPrice('0.00'));
+                            });
+                          },
+                          icon: Icon(
+                            Icons.add_circle_outline,
+                            size: 30.0,
+                            color: appOrange,
+                          ),
+                          label: Text('Prices',
+                              style: appFontStyle.copyWith(
+                                  fontSize: 30.sp, color: Colors.black)),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.add_circle_outline,
-                          size: 30.0,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            rplist.add(ReceiptPrice('0.00'));
-                          });
-                        },
-                      ),
-                    ],
+
+                        // Text(
+                        //   'Prices ',
+                        //   style: TextStyle(
+                        //     fontSize: 30.0,
+                        //   ),
+                        // ),
+                        // IconButton(
+                        //   icon: Icon(
+                        //     Icons.add_circle_outline,
+                        //     size: 30.0,
+                        //   ),
+                        //   onPressed: () {
+                        //     setState(() {
+                        //       rplist.add(ReceiptPrice('0.00'));
+                        //     });
+                        //   },
+                        // ),
+                      ],
+                    ),
                   ),
                 ),
               ],
-            )
-          ),
-          Container(
+            )),
+        Container(
+          child: IntrinsicHeight(
             child: Row(
               children: [
                 // items
                 ReceiptItems(rilist, itemstream),
+                VerticalDivider(
+                  color: Colors.blueGrey,
+                  thickness: 0.7,
+                ),
                 // prices
                 ReceiptPrices(rplist),
               ],
             ),
           ),
-          //receipt_image != null ? Image.file(receipt_image!): Text("no image selected")
-        ]
-      ),
-
+        ),
+        //receipt_image != null ? Image.file(receipt_image!): Text("no image selected")
+      ]),
     );
   }
-
-
 }
