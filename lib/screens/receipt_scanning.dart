@@ -471,16 +471,26 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
         title: Text('Receipt Scanning'),
         backgroundColor: light_orange,
       ),
-      body: Column(children: [
-        RoundedButton(
-          onPressed: () => pickImage(),
-          title: "Pick Image From Gallery",
-          color: Colors.blueGrey,
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Container(
+      body: Column(
+        children: [
+          Row(
+            children: [
+              RoundedButton(
+                onPressed: () => pickImage(),
+                title: "Pick Image from Gallery",
+                color: Colors.blueAccent,
+              ),
+              RoundedButton(
+                onPressed: () => pickImage(),
+                title: "Take Picture with Camera",
+                color: Colors.blueAccent,
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Container(
             padding: const EdgeInsets.all(4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -510,7 +520,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                           ),
                           label: Text('Prices',
                               style: appFontStyle.copyWith(
-                                  fontSize: 30.sp, color: Colors.black)),
+                                  fontSize: 30, color: Colors.black)),
                         ),
 
                         // Text(

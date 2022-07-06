@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_dartobservatory._tcp</string>
+    </array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -35,10 +39,22 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+<<<<<<< HEAD
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+=======
+	<key>NSCameraUsageDescription</key>
+	<string>Photo camera access warning</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access warning</string>
+>>>>>>> 1bcba96 (pre-pull changes)
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -58,8 +74,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+<<<<<<< HEAD
 	<key>NSPhotoLibraryUsageDescription</key> <string>Photo Library Access Warning</string>
 	<key>NSCameraUsageDescription</key> <string>Photo Library Access Warning</string>
 	<key>NSMicrophoneUsageDescription</key> <string>Photo Library Access Warning</string>
+=======
+>>>>>>> 1bcba96 (pre-pull changes)
 </dict>
 </plist>
