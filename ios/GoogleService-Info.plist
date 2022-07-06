@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>656233033461-csgdsik1g456af2cfsfosbn4h9hsope4.apps.googleusercontent.com</string>
+	<string>656233033461-1ntv6lci409g273rmru87qquirqq1uro.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.656233033461-csgdsik1g456af2cfsfosbn4h9hsope4</string>
+	<string>com.googleusercontent.apps.656233033461-1ntv6lci409g273rmru87qquirqq1uro</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>656233033461-0psv12jk151bv0es1m8og6e35tpr8to0.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>net.grocerymule.grocerymule</string>
+	<string>net.mule.grocerymule</string>
 	<key>PROJECT_ID</key>
 	<string>grocerymule-51aab</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:656233033461:ios:99223a1abc30123d0fdfbc</string>
+	<string>1:656233033461:ios:a73d738e16de7a660fdfbc</string>
 </dict>
 </plist>
