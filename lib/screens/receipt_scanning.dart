@@ -236,11 +236,11 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
                                 style: TextStyle(fontSize: 25),
                               ),
                               TextField(
+                                keyboardType: TextInputType.numberWithOptions(decimal: true),
                                 onChanged: (value) {
                                   val = value;
                                 },
-                                decoration:
-                                    InputDecoration(hintText: widget.price),
+                                decoration: InputDecoration(hintText: widget.price),
                               ),
                               Row(
                                 children: [
@@ -422,9 +422,14 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
     return true;
   }
 
-  Future pickImage() async {
+  Future pickImage(bool gallery) async {
     try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      XFile? image;
+      if (gallery) {
+        image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      } else {
+        image = await ImagePicker().pickImage(source: ImageSource.camera);
+      }
       if (image == null) return [];
       final imageTemp = File(image.path);
       setState(() => receipt_image = imageTemp);
@@ -437,26 +442,23 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
 
       List<ReceiptPrice> prices = [];
       for (TextBlock block in recognizedText.blocks) {
-        // print('----- BLOCK -----');
         for (TextLine line in block.lines) {
-          // Same getters as TextBlock
-          // print('- line -');
           for (TextElement element in line.elements) {
-            // Same getters as TextBlock
             if (element.text != null && isPrice(element.text)) {
-              prices.add(ReceiptPrice(element.text));
+              // removes dollar sign if it exists
+              if (element.text.runes.first == 36) {
+                prices.add(ReceiptPrice(element.text.substring(1)));
+              } else {
+                prices.add(ReceiptPrice(element.text));
+              }
             }
-            // print(element.text);
           }
         }
       }
-      // print('~~~~~~~~~~~~~prices~~~~~~~~~~~~~\n$prices');
       textRecognizer.close();
       setState(() {
         this.rplist = prices;
       });
-      // return prices;
-
     } on PlatformException catch (e) {
       print('Failed to pick image: $e');
       return [];
@@ -475,15 +477,19 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
         children: [
           Row(
             children: [
-              RoundedButton(
-                onPressed: () => pickImage(),
-                title: "Pick Image from Gallery",
-                color: Colors.blueAccent,
+              Expanded(
+                child: RoundedButton(
+                  onPressed: () => pickImage(true),
+                  title: "Pick from Gallery",
+                  color: Colors.blueAccent,
+                ),
               ),
-              RoundedButton(
-                onPressed: () => pickImage(),
-                title: "Take Picture with Camera",
-                color: Colors.blueAccent,
+              Expanded(
+                child: RoundedButton(
+                  onPressed: () => pickImage(false),
+                  title: "Take Picture",
+                  color: Colors.blueAccent,
+                ),
               ),
             ],
           ),
