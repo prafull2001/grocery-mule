@@ -20,10 +20,6 @@
             "package_name": "net.grocerymule.grocerymule",
             "certificate_hash": "84c4c3bb0966d45a480ad1132ed3bb0ef329a21d"
           }
-        },
-        {
-          "client_id": "656233033461-m01ahvagbudi70mnn5ldesmtd63b3iq9.apps.googleusercontent.com",
-          "client_type": 3
         }
       ],
       "api_key": [
@@ -35,7 +31,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "656233033461-m01ahvagbudi70mnn5ldesmtd63b3iq9.apps.googleusercontent.com",
+              "client_id": "656233033461-d0hft5b44gh68kvqem4qsp1mlkgqnuhm.apps.googleusercontent.com",
               "client_type": 3
             },
             {

@@ -1,30 +1,30 @@
+import 'dart:async';
 import 'dart:math';
 
-import 'package:badges/badges.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
-import 'dart:async';
+import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
-import 'package:grocery_mule/screens/personal_list.dart';
-import 'package:flutter/services.dart';
-import 'package:grocery_mule/screens/receipt_scanning.dart';
+import 'package:grocery_mule/theme/colors.dart';
+import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:auto_size_text/auto_size_text.dart';
-import 'createlist.dart';
-import 'package:grocery_mule/dev/collection_references.dart';
 
-import 'lists.dart';
+import '../components/header.dart';
+import 'createlist.dart';
 
 typedef StringVoidFunc = void Function(String, int);
 
 class UserName extends StatefulWidget {
   late final String userUUID;
-  UserName(String userUUID, [bool spec=false, bool strng=false]) {
+  UserName(String userUUID, [bool spec = false, bool strng = false]) {
     this.userUUID = userUUID;
   }
 
@@ -71,7 +71,6 @@ class ItemsList extends StatefulWidget {
   _ItemsListState createState() => _ItemsListState();
 }
 
-
 class _ItemsListState extends State<ItemsList> {
   late String tripUUID;
 
@@ -104,8 +103,10 @@ class _ItemsListState extends State<ItemsList> {
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               itemCount: context.watch<ShoppingTrip>().itemUUID.length,
-              itemBuilder: (context, int index){
-                return IndividualItem(tripUUID,context.watch<ShoppingTrip>().itemUUID[index], index, key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
+              itemBuilder: (context, int index) {
+                return IndividualItem(tripUUID,
+                    context.watch<ShoppingTrip>().itemUUID[index], index,
+                    key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
               },
             ),
           );
@@ -135,15 +136,16 @@ class _ItemsListState extends State<ItemsList> {
         .itemUUID
         .removeWhere((element) => tobeDeleted.contains(element));
   }
-
 }
+
 //ignore: must_be_immutable
 class IndividualItem extends StatefulWidget {
   late Item curItem;
   late final String itemID;
   late final String tripID;
   late final int index;
-  IndividualItem(this.tripID, this.itemID, this.index, { required Key key}): super(key: key);
+  IndividualItem(this.tripID, this.itemID, this.index, {required Key key})
+      : super(key: key);
   @override
   _IndividualItemState createState() => _IndividualItemState();
 }
@@ -153,7 +155,8 @@ class _IndividualItemState extends State<IndividualItem> {
   late final String itemID;
   late final String tripID;
   late final int index;
-  late Stream<DocumentSnapshot> getItemStream = tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
+  late Stream<DocumentSnapshot> getItemStream =
+      tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
 
   @override
   void initState() {
@@ -166,7 +169,6 @@ class _IndividualItemState extends State<IndividualItem> {
 
   @override
   Widget build(BuildContext context) {
-
     return StreamBuilder(
         stream: getItemStream,
         builder:
@@ -177,7 +179,6 @@ class _IndividualItemState extends State<IndividualItem> {
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
           return simple_item();
-
         });
   }
 
@@ -198,79 +199,88 @@ class _IndividualItemState extends State<IndividualItem> {
     String name = curItem.name;
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
     return Card(
-      color: (context.watch<ShoppingTrip>().lock == true && context.watch<Cowboy>().uuid != context.watch<ShoppingTrip>().host)?
-          beige:
-      (index % 2 == 0 )? card_yellow : card_orange,
+      color: (context.watch<ShoppingTrip>().lock == true &&
+              context.watch<Cowboy>().uuid !=
+                  context.watch<ShoppingTrip>().host)
+          ? beige
+          : (index % 2 == 0)
+              ? Colors.blueGrey
+              : beige,
       key: Key(itemID),
       child: ListTile(
         title: Container(
           child: Text(
-            (context.read<ShoppingTrip>().lock == false)?
-            '${name}':
-            '${name} (total)'
-            ,
-            style: TextStyle(color: Colors.black,
-              fontSize: 20,
-            ),
-          ),
+              (context.read<ShoppingTrip>().lock == false)
+                  ? '${name}'
+                  : '${name} (total)',
+              style:
+                  appFontStyle.copyWith(color: Colors.white, fontSize: 16.sp)),
         ),
         subtitle: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if(context.read<ShoppingTrip>().lock == false)...[
-            Container(
-                child: IconButton(
-                    icon: const Icon(Icons.remove_circle),
-                    onPressed: () => (setState(() {
-                      updateUsrQuantity(context.read<Cowboy>().uuid, max(0, quantity -1));
-                    })
-                    )
-                )
-            ),
+            if (context.read<ShoppingTrip>().lock == false) ...[
+              Container(
+                  child: IconButton(
+                      icon: const Icon(
+                        Icons.remove_circle,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => (setState(() {
+                            updateUsrQuantity(context.read<Cowboy>().uuid,
+                                max(0, quantity - 1));
+                          })))),
             ],
             Container(
-              child:
-                Text(//curItem.quantity
-                    (context.read<ShoppingTrip>().lock == false)?
-                    '${quantity}':
-                    '${curItem.quantity}'
-                ),
+              child: Text(
+                //curItem.quantity
+                (context.read<ShoppingTrip>().lock == false)
+                    ? '${quantity}'
+                    : '${curItem.quantity}',
+                style: appFontStyle.copyWith(color: Colors.white),
+              ),
             ),
-            if(context.read<ShoppingTrip>().lock == false)...[
-            Container(
-                child: IconButton(
-                    icon: const Icon(Icons.add_circle),
-                    onPressed: () {
-                      setState(() {
-                        updateUsrQuantity(context.read<Cowboy>().uuid, quantity +1);
-                      });
-                    })),
+            if (context.read<ShoppingTrip>().lock == false) ...[
+              Container(
+                  child: IconButton(
+                      icon: const Icon(Icons.add_circle),
+                      color: Colors.white,
+                      onPressed: () {
+                        setState(() {
+                          updateUsrQuantity(
+                              context.read<Cowboy>().uuid, quantity + 1);
+                        });
+                      })),
             ],
           ],
         ),
-        trailing: (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
-        (context.read<ShoppingTrip>().lock == false)?
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: (){setState(() {
-              context.read<ShoppingTrip>().removeItem(itemID);
-            });},
-          ) :
-        Checkbox(
-          checkColor: Colors.white,
-          fillColor: MaterialStateProperty.resolveWith(getColor),
-          value: curItem.check,
-          onChanged: (bool? value) {
-            setState(() {
-              curItem.check = value!;
-              context.read<ShoppingTrip>().changeItemCheck(itemID);
-            });
-          },
-        )
-
-        :SizedBox.shrink()
-        ,
+        trailing: (context.read<Cowboy>().uuid ==
+                context.read<ShoppingTrip>().host)
+            ? (context.read<ShoppingTrip>().lock == false)
+                ? IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                      color: appColor,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        context.read<ShoppingTrip>().removeItem(itemID);
+                      });
+                    },
+                  )
+                : Checkbox(
+                    checkColor: Colors.white,
+                    fillColor: MaterialStateProperty.resolveWith(getColor),
+                    value: curItem.check,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        curItem.check = value!;
+                        context.read<ShoppingTrip>().changeItemCheck(itemID);
+                      });
+                    },
+                  )
+            : SizedBox.shrink(),
         isThreeLine: true,
       ),
     );
@@ -287,6 +297,7 @@ class _IndividualItemState extends State<IndividualItem> {
     }
     return Colors.green;
   }
+
   void updateUsrQuantity(String person, int number) {
     curItem.subitems[person] = number;
     context.read<ShoppingTrip>().editItem(
@@ -297,7 +308,6 @@ class _IndividualItemState extends State<IndividualItem> {
     // TODO update database here for quant
   }
 }
-
 
 class EditListScreen extends StatefulWidget {
   static String id = 'edit_list_screen';
@@ -369,8 +379,7 @@ class _EditListsScreenState extends State<EditListScreen> {
         curTrip['description'],
         curTrip['host'],
         bene_uid,
-        curTrip['lock'] as bool
-    );
+        curTrip['lock'] as bool);
   }
 
   Widget create_item() {
@@ -396,7 +405,6 @@ class _EditListsScreenState extends State<EditListScreen> {
           ),
           Container(
             height: 45,
-            width: 100,
             child: TextField(
               style: TextStyle(color: darker_beige),
               cursorColor: darker_beige,
@@ -406,9 +414,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                     color: darker_beige,
                   ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: darker_beige, width: 2),
-                ),
+                // focusedBorder: OutlineInputBorder(
+                //   borderSide: BorderSide(color: darker_beige, width: 2),
+                // ),
                 hintText: 'EX: Apple',
               ),
               onChanged: (text) {
@@ -436,6 +444,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       )),
     );
   }
+
   check_leave(BuildContext context) {
     return showDialog(
       context: context,
@@ -444,18 +453,18 @@ class _EditListsScreenState extends State<EditListScreen> {
           title: const Text("Confirm"),
           content: const Text("Are you sure you wish to leave this trip?"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () => {
                 leave_list = false,
                 Navigator.of(context).pop(),
               },
               child: const Text("CANCEL"),
             ),
-            FlatButton(
+            TextButton(
                 onPressed: () => {
-                  leave_list = true,
-                  Navigator.of(context).pop(),
-                },
+                      leave_list = true,
+                      Navigator.of(context).pop(),
+                    },
                 child: const Text("LEAVE")),
           ],
         );
@@ -467,23 +476,25 @@ class _EditListsScreenState extends State<EditListScreen> {
     switch (item) {
       case 1:
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CreateListScreen(
-                    false, context.read<ShoppingTrip>().uuid))).then((_) => setState(() {}));
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CreateListScreen(
+                        false, context.read<ShoppingTrip>().uuid)))
+            .then((_) => setState(() {}));
         break;
       case 2:
         await check_leave(context);
-        if(leave_list){
+        if (leave_list) {
           context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
-          context.read<ShoppingTrip>().removeBeneficiary(context.read<Cowboy>().uuid);
+          context
+              .read<ShoppingTrip>()
+              .removeBeneficiary(context.read<Cowboy>().uuid);
           Navigator.of(context).pop();
+        }
     }
-  }}
+  }
 
-
-
-    @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -505,9 +516,9 @@ class _EditListsScreenState extends State<EditListScreen> {
               handleClick(item),
             },
             itemBuilder: (context) => [
-              (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)?
-              PopupMenuItem<int>(value: 1, child: Text('Trip Settings')):
-              PopupMenuItem<int>(value: 2, child: Text('Leave Trip')),
+              (context.read<Cowboy>().uuid == context.read<ShoppingTrip>().host)
+                  ? PopupMenuItem<int>(value: 1, child: Text('Trip Settings'))
+                  : PopupMenuItem<int>(value: 2, child: Text('Leave Trip')),
             ],
           ),
         ],
@@ -525,160 +536,234 @@ class _EditListsScreenState extends State<EditListScreen> {
               }
               //readInData(snapshot.data!);
               _queryCurrentTrip(snapshot.data!);
-              if(!context.watch<ShoppingTrip>().beneficiaries.contains(context.read<Cowboy>().uuid)) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                'You have been removed from this trip',
-                                style: TextStyle(
-                                  fontSize: 40.0,
-                                  fontWeight: FontWeight.w900,
-                                ),
+              if (!context
+                  .watch<ShoppingTrip>()
+                  .beneficiaries
+                  .contains(context.read<Cowboy>().uuid)) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: <Widget>[
+                          Flexible(
+                            child: Text(
+                              'You have been removed from this trip',
+                              style: TextStyle(
+                                fontSize: 40.0,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
               }
               return SingleChildScrollView(
                 child: Container(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      //padding: const EdgeInsets.all(25),
-                      children: [
-                        SizedBox(
-                          height: 20,
-                        ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  //padding: const EdgeInsets.all(25),
+                  children: [
+                    // SizedBox(
+                    //   height: 20,
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: HomeHeader(
+                        title: "Trip Details",
+                        textColor: Colors.white,
+                        color: appOrange,
+                      ),
+                    ),
 
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 10.0,
-                            ),
-                            Text(
-                              //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
-                              // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                              'Host - ',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                              ),
-                            ),
-                            UserName(context.read<ShoppingTrip>().host, false, true),
-                          ],
+                    // Row(
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 10.0,
+                    //     ),
+                    //     Text(
+                    //       //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
+                    //       // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
+                    //       'Host - ',
+                    //       style: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 20,
+                    //       ),
+                    //     ),
+                    //     UserName(
+                    //         context.read<ShoppingTrip>().host, false, true),
+                    //   ],
+                    // ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        color: Colors.white,
+                        child: ListTile(
+                          leading: Icon(
+                            FontAwesomeIcons.userLarge,
+                            color: appOrange,
+                          ),
+                          title: Text(
+                            "Host",
+                            style: titleBlack.copyWith(fontSize: 18.sp),
+                          ),
+                          trailing: UserName(
+                              context.read<ShoppingTrip>().host, false, true),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 10.0,
-                            ),
-                            Text(
-                              'Beneficiaries - ',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                              ),
-                            ),
-
-                            Badge(
-                            showBadge: false,
-                            child: TextButton(
-                              child: Icon(Icons.person_add_alt),
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all<Color>(orange),
-                                foregroundColor: MaterialStateProperty.all<Color>(Colors.black),
-                              ),
-                              onPressed: (){
-                                showDialog(
-                                    context: context,
-                                    builder: (BuildContext context){
-                                      return AlertDialog(
-                                        content: Container(
-                                          width: double.maxFinite,
-                                          height: 60.0+(context.watch<ShoppingTrip>().beneficiaries.length*50.0),
-                                          child: Column(
-                                            children: [
-                                              SizedBox(
-                                                height: 25.0,
-                                                child: Text(
-                                                  'Beneficiaries',
-                                                  style: TextStyle(fontSize: 20.0),
-                                                ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        color: Colors.white,
+                        child: ListTile(
+                            onTap: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: Container(
+                                        width: double.maxFinite,
+                                        height: 60.0 +
+                                            (context
+                                                    .watch<ShoppingTrip>()
+                                                    .beneficiaries
+                                                    .length *
+                                                50.0),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 25.0,
+                                              child: Text(
+                                                'Beneficiaries',
+                                                style:
+                                                    TextStyle(fontSize: 20.0),
                                               ),
-                                              SizedBox(
-                                                height: 10.0,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  for(String uid in context.watch<ShoppingTrip>().beneficiaries)
-                                                    Column(
-                                                      children:[
-                                                        Row(
-                                                        crossAxisAlignment: CrossAxisAlignment.end,
-                                                        children: [
-                                                          SizedBox(
-                                                            width: 20.0,
-                                                          ),
-                                                          (uid == context.watch<ShoppingTrip>().host)?
-                                                          Icon(Icons.face_sharp)
-                                                              :
-                                                          Icon(Icons.person_pin_outlined),
-                                                          SizedBox(
-                                                            width: 25.0,
-                                                          ),
-                                                          UserName(uid),
-                                                        ],
-                                                      ),
+                                            ),
+                                            SizedBox(
+                                              height: 10.0,
+                                            ),
+                                            Column(
+                                              children: [
+                                                for (String uid in context
+                                                    .watch<ShoppingTrip>()
+                                                    .beneficiaries)
+                                                  Column(children: [
+                                                    Row(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .end,
+                                                      children: [
                                                         SizedBox(
-                                                          height: 10.0,
+                                                          width: 20.0,
                                                         ),
-                                                      ]
+                                                        (uid ==
+                                                                context
+                                                                    .watch<
+                                                                        ShoppingTrip>()
+                                                                    .host)
+                                                            ? Icon(Icons
+                                                                .face_sharp)
+                                                            : Icon(Icons
+                                                                .person_pin_outlined),
+                                                        SizedBox(
+                                                          width: 25.0,
+                                                        ),
+                                                        UserName(uid),
+                                                      ],
                                                     ),
-                                                ],
-
-                                              )
-                                            ],
-                                          ),
-                                          // decoration: BoxDecoration(
-                                          //   color: dark_beige,
-                                          //   border: Border.all(
-                                          //     color: darker_beige,
-                                          //     width: 5.0,
-                                          //   ),
-                                          //   borderRadius: BorderRadius.circular(10),
-                                          // ),
+                                                    SizedBox(
+                                                      height: 10.0,
+                                                    ),
+                                                  ]),
+                                              ],
+                                            )
+                                          ],
                                         ),
-                                      );
-                                    }
-                                );
-                              },
+                                        // decoration: BoxDecoration(
+                                        //   color: dark_beige,
+                                        //   border: Border.all(
+                                        //     color: darker_beige,
+                                        //     width: 5.0,
+                                        //   ),
+                                        //   borderRadius: BorderRadius.circular(10),
+                                        // ),
+                                      ),
+                                    );
+                                  });
+                            },
+                            leading: Icon(
+                              Icons.supervised_user_circle,
+                              color: appOrange,
                             ),
+                            title: Text(
+                              "Beneficiaries",
+                              style: titleBlack.copyWith(fontSize: 18.sp),
                             ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
+                            trailing: IconButton(
+                                onPressed: null,
+                                icon: CircleAvatar(
+                                  backgroundColor: appColor,
+                                  child: Icon(
+                                    Icons.list_outlined,
+                                    color: appOrange,
+                                  ),
+                                ))),
+                      ),
+                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   children: [
+                    //     SizedBox(
+                    //       width: 10.0,
+                    //     ),
+                    //     Text(
+                    //       'Beneficiaries - ',
+                    //       style: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 20,
+                    //       ),
+                    //     ),
+                    //     Badge(
+                    //       showBadge: false,
+                    //       child: TextButton(
+                    //         child: Icon(Icons.person_add_alt),
+                    //         style: ButtonStyle(
+                    //           backgroundColor:
+                    //               MaterialStateProperty.all<Color>(orange),
+                    //           foregroundColor: MaterialStateProperty.all<Color>(
+                    //               Colors.black),
+                    //         ),
+                    //         onPressed: () {
 
-                        //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
-                        ItemsAddition(
-                          tripUUID: tripUUID,
-                        )
+                    //         },
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    // SizedBox(
+                    //   height: 10,
+                    // ),
 
-                        //SizedBox(height: 10),
-                      ],
-                )
-                ),
+                    //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
+                    ItemsAddition(
+                      tripUUID: tripUUID,
+                    )
+
+                    //SizedBox(height: 10),
+                  ],
+                )),
               );
             }),
       ),
@@ -719,12 +804,15 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             padding: EdgeInsets.all(20),
           ),
           Container(
-            height: 45,
-            width: 100,
+            height: 55.h,
+            width: 200.w,
             child: TextField(
+              autofocus: true,
               style: TextStyle(color: darker_beige),
               cursorColor: darker_beige,
               decoration: InputDecoration(
+                // isCollapsed: true,
+                isDense: true,
                 border: OutlineInputBorder(
                   borderSide: BorderSide(
                     color: darker_beige,
@@ -750,12 +838,6 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                         isAdd = false;
                       });
                   })),
-          Container(
-              child: IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () => (setState(() {
-                        isAdd = false;
-                      })))),
         ],
       )),
     );
@@ -766,91 +848,82 @@ class _ItemsAdditionState extends State<ItemsAddition> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 40,
-          width: double.maxFinite,
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
           child: Divider(
-            color: Colors.black,
-            thickness: 1.5,
-            indent: 75,
-            endIndent: 75,
+            endIndent: 50,
+            indent: 50,
+            thickness: 2,
+            color: appOrange,
           ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Container(
-              child: Text(
-                'Add Item',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
+              child: Text('Add Item',
+                  style: appFontStyle.copyWith(
+                      fontSize: 18.sp, fontWeight: FontWeight.w500)),
             ),
             Container(
-                child: (context.read<ShoppingTrip>().lock == false)?
-                IconButton(
-                  icon: const Icon(Icons.add_circle),
-                  onPressed: () {
-                    setState(() {
-                      isAdd = true;
-                    });
-                  },
-                ):
-                 const Icon(Icons.lock_outlined),
+              child: (context.read<ShoppingTrip>().lock == false)
+                  ? IconButton(
+                      icon: (isAdd == false)
+                          ? const Icon(Icons.add_circle)
+                          : const Icon(Icons.remove),
+                      onPressed: () {
+                        setState(() {
+                          isAdd = !isAdd;
+                        });
+                      },
+                    )
+                  : const Icon(Icons.lock_outlined),
             )
           ],
         ),
         if (isAdd) create_item(),
         ItemsList(widget.tripUUID),
         SizedBox(
-          height: 10.0,
+          height: 4.0,
         ),
-    if (context.read<ShoppingTrip>().host ==
-    context.read<Cowboy>().uuid) ...[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            //comment
-            SizedBox(
-              width: 40.0,
-            ),
-            Container(
-              height: 70,
-              width: 150,
-              child: RoundedButton(
-                onPressed: () {
-                  context.read<ShoppingTrip>().changeTripLock();
-                  context.read<ShoppingTrip>().setAllCheckFalse();
-                },
-                title: (context.watch<ShoppingTrip>().lock == false)? "Shopping Mode"
-                    : "Unlock Trip"
-                ,
-                color: Colors.blueAccent,
-              ),
-            ),
-            SizedBox(
-              width: 10.0,
-            ),
-            Container(
-                height: 70,
-                width: 150,
-                child: RoundedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, CheckoutScreen.id);
-                  },
-                  title: "Checkout",
-                  color: Colors.blueAccent,
+        if (context.read<ShoppingTrip>().host ==
+            context.read<Cowboy>().uuid) ...[
+          Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                //comment
+
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                    onPressed: () {
+                      context.read<ShoppingTrip>().changeTripLock();
+                      context.read<ShoppingTrip>().setAllCheckFalse();
+                    },
+                    title: (context.watch<ShoppingTrip>().lock == false)
+                        ? "Shopping Mode"
+                        : "Unlock Trip",
+                    color: appOrange,
+                  ),
                 ),
-              ),
-            Spacer(),
-            SizedBox(
-              width: 40.0,
+
+                Container(
+                  height: 70,
+                  width: 150,
+                  child: RoundedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, CheckoutScreen.id);
+                      },
+                      title: "Checkout",
+                      color: Colors.green),
+                ),
+              ],
             ),
-          ],
-        ),
-    ]
+          ),
+        ]
       ],
     );
   }
