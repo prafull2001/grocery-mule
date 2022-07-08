@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -109,28 +111,19 @@ class ItemsPerPerson extends StatefulWidget {
   late final String userUUID;
   late Map<String, int> itemMapping;
   late Map<String, int> itemUUIDMapping;
+  int num_bene = 1;
 
-  ItemsPerPerson(
-      this.itemPrices, this.userUUID, this.itemMapping, this.itemUUIDMapping,
-      {required Key key})
+  ItemsPerPerson(this.itemPrices, this.userUUID, this.itemMapping, this.itemUUIDMapping, this.num_bene, {required Key key})
       : super(key: key);
   @override
   _ItemsPerPersonState createState() => _ItemsPerPersonState();
 }
 
 class _ItemsPerPersonState extends State<ItemsPerPerson> {
-  late Map<String, double> itemPrices;
-  late final String userUUID;
-  late Map<String, int> itemMapping;
-  late Map<String, int> itemUUIDMapping;
   bool expand = false;
   double beneficiary_subtotal = 0;
   //@override
   void initState() {
-    itemPrices = widget.itemPrices;
-    userUUID = widget.userUUID;
-    itemMapping = widget.itemMapping;
-    itemUUIDMapping = widget.itemUUIDMapping;
     super.initState();
 
     // beneficiary_subtotal = calculate_total();
@@ -138,18 +131,27 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
   }
 
   double calculate_total() {
+
+    double dp(double val, int places){
+      num mod = pow(10.0, places);
+      return ((val * mod).round().toDouble() / mod);
+    }
+
     double total = 0;
-    //print(userUUID + ' | ' + itemPrices.toString() + ' | '  + itemUUIDMapping.toString());
+    // print(userUUID + ' | ' + itemPrices.toString() + ' | '  + itemUUIDMapping.toString());
     // print(itemUUIDMapping.toString());
-    if (itemUUIDMapping.isNotEmpty) {
-      itemUUIDMapping.forEach((itemUUID, quantity) {
-        double unitPrice = itemPrices[itemUUID]!;
+    if (widget.itemUUIDMapping.isNotEmpty) {
+      widget.itemUUIDMapping.forEach((itemUUID, quantity) {
+        double unitPrice = widget.itemPrices[itemUUID]!;
         double subTotal = unitPrice * quantity;
         total += subTotal;
       });
     } else {
       print('item map empty');
     }
+    total += double.parse(widget.itemPrices['tax']!.toString()) / widget.num_bene;
+    total += double.parse(widget.itemPrices['add. fees']!.toString()) / widget.num_bene;
+    total = dp(total, 2);
 
     return total;
   }
@@ -195,7 +197,7 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
 
   Widget personalList() {
     return Card(
-      key: Key(userUUID),
+      key: Key(widget.userUUID),
       shape: RoundedRectangleBorder(
         // side: const BorderSide(color: Color.fromARGB(255, 0, 0, 0), width: 2.0),
         borderRadius: BorderRadius.circular(10.r),
@@ -205,22 +207,20 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
               title: Container(
-                child: UserName(userUUID, Colors.white),
+                child: UserName(widget.userUUID, Colors.white),
               ),
               children: <Widget>[
-                if (itemMapping.isNotEmpty) ...[
-                  for (var entry in itemMapping.entries)
+                if (widget.itemMapping.isNotEmpty) ...[
+                  for (var entry in widget.itemMapping.entries)
                     simple_item(entry.key, entry.value),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RectangularTextButton(
-                      text: 'Total Cost:  \$${calculate_total()}',
+                      text: 'Total Cost:  \$${calculate_total().toStringAsFixed(2)}',
                       onPressed: () {
                         beneficiary_subtotal = calculate_total();
-                        Clipboard.setData(ClipboardData(
-                            text: beneficiary_subtotal.toString()));
-                        Fluttertoast.showToast(
-                            msg: 'Price copied to clipboard!');
+                        Clipboard.setData(ClipboardData(text: beneficiary_subtotal.toString()));
+                        Fluttertoast.showToast(msg: 'Price copied to clipboard!');
                       },
                     ),
                   ),
@@ -238,8 +238,8 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
                   //   },
                   //   child: Text('\$' + '${calculate_total()}'),
                   // ),
-                  if (userUUID != context.read<ShoppingTrip>().host) ...[
-                    PayPalButton(userUUID)
+                  if (widget.userUUID != context.read<ShoppingTrip>().host) ...[
+                    PayPalButton(widget.userUUID)
                   ]
                 ] else ...[
                   Container(
@@ -313,8 +313,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
               return const CircularProgressIndicator();
             }
 
-            List<String> bene_uuid_list =
-                context.read<ShoppingTrip>().beneficiaries;
+            List<String> bene_uuid_list = context.read<ShoppingTrip>().beneficiaries;
 
             bene_uuid_list.forEach((bene_uuid) {
               // initialize empty bene mapping to aggre_cleaned_list
@@ -322,9 +321,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
               aggre_item_list[bene_uuid] = {};
             });
             itemColQuery.data!.docs.forEach((doc) {
-              if (doc['uuid'] != 'dummy') {
-                Map<String, dynamic> curSubitems = doc.get(FieldPath(
-                    ['subitems'])); // get map of subitems for cur item
+              if (doc['uuid'] != 'tax' && doc['uuid'] != 'add. fees') {
+                Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems'])); // get map of subitems for cur item
                 //print('curSubitems: ' + curSubitems.toString());
                 curSubitems.forEach((key, value) {
                   // add item name & quantity if user UUIDs match & quantity > 0
@@ -337,6 +335,9 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                   }
                 });
                 itemPrices[doc['uuid']] = doc['price'] / doc['quantity'];
+              } else {
+                // print('price: ${double.parse(doc['price'].toString())} length: ${bene_uuid_list.length}');
+                itemPrices[doc['uuid']] = double.parse(doc['price'].toString());
               }
             });
 
@@ -358,20 +359,21 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                         aggre_raw_list.keys.toList()[index],
                         aggre_raw_list[aggre_raw_list.keys.toList()[index]]!,
                         aggre_item_list[aggre_item_list.keys.toList()[index]]!,
+                        bene_uuid_list.length,
                         key: Key(aggre_raw_list.keys.toList()[index]));
                   },
                 ),
-
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 35.w),
-                  child: RectangularTextIconButton(
-                    text: "Receipt Scanning",
-                    buttonColor: Colors.lightGreen,
-                    icon: Icon(Icons.search_rounded),
-                    textColor: Colors.white,
-                    onPressed: () {
-                      Navigator.pushNamed(context, ReceiptScanning.id);
-                    },
+                GestureDetector(
+                  onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 35.w),
+                    child: RectangularTextIconButton(
+                      text: "Receipt Scanning",
+                      buttonColor: Colors.lightGreen,
+                      icon: Icon(Icons.search_rounded),
+                      textColor: Colors.white,
+                      onPressed: () {},
+                    ),
                   ),
                 ),
                 // Container(

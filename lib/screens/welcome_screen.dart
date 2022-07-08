@@ -139,23 +139,26 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 endIndent: 20,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.h),
-              child: RectangularTextIconButton(
-                onPressed: () async {
-                  try {
-                    await signInWithGoogle();
-                  } catch (e) {
-                    print('error: '+e.toString());
-                  }
-                },
-                text: "Continue With Google",
-                icon: Icon(
-                  FontAwesomeIcons.google,
-                  // color: Colors.redAccent,
+            GestureDetector(
+              onTap: () async {
+                try {
+                  await signInWithGoogle();
+                } catch (e) {
+                  print('error: '+e.toString());
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.h),
+                child: RectangularTextIconButton(
+                  onPressed: () {},
+                  text: "Continue With Google",
+                  icon: Icon(
+                    FontAwesomeIcons.google,
+                    // color: Colors.redAccent,
+                  ),
+                  buttonColor: Colors.white,
+                  textColor: Colors.black,
                 ),
-                buttonColor: Colors.white,
-                textColor: Colors.black,
               ),
             ),
           ],

@@ -38,11 +38,9 @@ class ShoppingTrip with ChangeNotifier {
   }
 
   Future<void> initializeSubCollection() async {
-    await tripCollection
-        .doc(_uuid)
-        .collection("items")
-        .doc("dummy")
-        .set({'uuid': "dummy"});
+    // await tripCollection.doc(_uuid).collection("items").doc("dummy").set({'uuid': ""});
+    await tripCollection.doc(_uuid).collection("items").doc("tax").set({'price': "0.00", 'uuid': 'tax', 'name': 'tax'});
+    await tripCollection.doc(_uuid).collection("items").doc("add. fees").set({'price': "0.00", 'uuid': 'add. fees', 'name': 'add. fees'});
   }
 
   // takes in formatted data from snapshot to directly update the provider
@@ -302,6 +300,8 @@ class ShoppingTrip with ChangeNotifier {
       tripCollection.doc(_uuid).collection('items').doc(uid).delete();
     });
     tripCollection.doc(_uuid).collection('items').doc('dummy').delete();
+    tripCollection.doc(_uuid).collection('items').doc('tax').delete();
+    tripCollection.doc(_uuid).collection('items').doc('add. fees').delete();
     _beneficiaries.forEach((bene) {
       userCollection.doc(bene).collection('shopping_trips').doc(_uuid).delete();
     });

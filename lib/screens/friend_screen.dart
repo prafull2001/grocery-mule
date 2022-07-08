@@ -350,6 +350,7 @@ class _RequestAmigoState extends State<RequestAmigo>
       child: StreamBuilder<DocumentSnapshot>(
         stream: userCollection.doc(uuid).snapshots(),
         builder: (context, snapshot) {
+
           Map<String, dynamic> result =
               snapshot.data?.data() as Map<String, dynamic>;
           name = result['first_name'].toString() +

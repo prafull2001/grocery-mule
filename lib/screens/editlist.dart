@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
@@ -117,12 +118,14 @@ class _ItemsListState extends State<ItemsList> {
     List<String> rawItemList = [];
     itemColQuery.docs.forEach((document) {
       String itemID = document['uuid'];
-      if (itemID != 'dummy') rawItemList.add(itemID);
+      // TODO maybe don't need this check at all
+      if (itemID != 'dummy') {rawItemList.add(itemID);}
     });
     //check if every id from firebase is in local itemUUID
     rawItemList.forEach((itemID) {
-      if (!context.read<ShoppingTrip>().itemUUID.contains(itemID))
+      if (!context.read<ShoppingTrip>().itemUUID.contains(itemID)) {
         context.read<ShoppingTrip>().itemUUID.add(itemID);
+      }
     });
     List<String> tobeDeleted = [];
     //check if any local uuid needs to be deleted
@@ -152,34 +155,30 @@ class IndividualItem extends StatefulWidget {
 
 class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
-  late final String itemID;
-  late final String tripID;
-  late final int index;
-  late Stream<DocumentSnapshot> getItemStream =
-      tripCollection.doc(tripID).collection('items').doc(itemID).snapshots();
+  late Stream<DocumentSnapshot> getItemStream = tripCollection.doc(widget.tripID).collection('items').doc(widget.itemID).snapshots();
 
   @override
   void initState() {
-    itemID = widget.itemID;
-    tripID = widget.tripID;
-    index = widget.index;
     curItem = Item.nothing();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.itemID == 'tax' || widget.itemID == 'add. fees') {
+      return Container();
+    }
     return StreamBuilder(
-        stream: getItemStream,
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SizedBox.shrink();
-          }
-          if (snapshot.hasError) return const CircularProgressIndicator();
-          loadItem(snapshot.data!);
-          return simple_item();
-        });
+      stream: getItemStream,
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
+        if (snapshot.hasError) return const CircularProgressIndicator();
+        loadItem(snapshot.data!);
+        return simple_item();
+      }
+    );
   }
 
   //this function loads stream snapshots into item
@@ -203,10 +202,10 @@ class _IndividualItemState extends State<IndividualItem> {
               context.watch<Cowboy>().uuid !=
                   context.watch<ShoppingTrip>().host)
           ? beige
-          : (index % 2 == 0)
+          : (widget.index % 2 == 0)
               ? Colors.blueGrey
               : beige,
-      key: Key(itemID),
+      key: Key(widget.itemID),
       child: ListTile(
         title: Container(
           child: Text(
@@ -265,7 +264,8 @@ class _IndividualItemState extends State<IndividualItem> {
                     ),
                     onPressed: () {
                       setState(() {
-                        context.read<ShoppingTrip>().removeItem(itemID);
+                        Fluttertoast.showToast(msg: 'removed item');
+                        context.read<ShoppingTrip>().removeItem(widget.itemID);
                       });
                     },
                   )
@@ -276,7 +276,7 @@ class _IndividualItemState extends State<IndividualItem> {
                     onChanged: (bool? value) {
                       setState(() {
                         curItem.check = value!;
-                        context.read<ShoppingTrip>().changeItemCheck(itemID);
+                        context.read<ShoppingTrip>().changeItemCheck(widget.itemID);
                       });
                     },
                   )
@@ -301,7 +301,7 @@ class _IndividualItemState extends State<IndividualItem> {
   void updateUsrQuantity(String person, int number) {
     curItem.subitems[person] = number;
     context.read<ShoppingTrip>().editItem(
-        itemID,
+        widget.itemID,
         curItem.subitems.values.reduce((sum, element) => sum + element),
         person,
         number);
@@ -414,9 +414,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                     color: darker_beige,
                   ),
                 ),
-                // focusedBorder: OutlineInputBorder(
-                //   borderSide: BorderSide(color: darker_beige, width: 2),
-                // ),
                 hintText: 'EX: Apple',
               ),
               onChanged: (text) {
@@ -580,25 +577,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                         color: appOrange,
                       ),
                     ),
-
-                    // Row(
-                    //   children: [
-                    //     SizedBox(
-                    //       width: 10.0,
-                    //     ),
-                    //     Text(
-                    //       //'Host - ${context.watch<ShoppingTrip>().beneficiaries[context.read<ShoppingTrip>().host]?.split("|~|")[1].split(' ')[0]}',
-                    //       // https://pub.dev/documentation/provider/latest/provider/ReadContext/read.html
-                    //       'Host - ',
-                    //       style: TextStyle(
-                    //         color: Colors.black,
-                    //         fontSize: 20,
-                    //       ),
-                    //     ),
-                    //     UserName(
-                    //         context.read<ShoppingTrip>().host, false, true),
-                    //   ],
-                    // ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: Card(

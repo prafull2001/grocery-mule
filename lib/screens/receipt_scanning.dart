@@ -134,16 +134,20 @@ class ReceiptItems extends StatefulWidget {
 class _ReceiptItemsState extends State<ReceiptItems> {
   loadItems(QuerySnapshot snapshot) {
     // print('gpt to loadItems ReceiptItemsState');
+    bool add_fees = false;
     widget.rilist = [];
     snapshot.docs.forEach((document) {
       // print('0');
-      if (document['uuid'] != 'dummy') {
-        String item_name = document['name'];
+      String item_name = document['name'];
+      if (item_name == 'tax') {
+        if (add_fees) widget.rilist.insert(widget.rilist.length-1, ReceiptItem(item_name, document['uuid']));
+      } else if (item_name == 'add. fees') {
         widget.rilist.add(ReceiptItem(item_name, document['uuid']));
+        add_fees = true;
+      } else {
+        widget.rilist.insert(0, ReceiptItem(item_name, document['uuid']));
       }
     });
-    widget.rilist.add(ReceiptItem('tax', 'dummy'));
-    widget.rilist.add(ReceiptItem('add. fees', 'dummy'));
   }
 
   @override
@@ -199,11 +203,11 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
 
   @override
   Widget build(BuildContext context) {
-    return Draggable<String>(
+    return LongPressDraggable<String>(
       data: widget.price,
       child: Container(
         padding: const EdgeInsets.all(4.0),
-        height: 40.0,
+        height: 40.h,
         child: Row(
           children: [
             Text(
@@ -277,7 +281,7 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
         ),
         decoration: BoxDecoration(
           color: Colors.grey[500],
-          border: Border.all(),
+          // border: Border.all(),
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
       ),
@@ -356,7 +360,7 @@ class _ReceiptPricesState extends State<ReceiptPrices> {
             // return rp;
           },
           separatorBuilder: (context, index) {
-            return SizedBox(height: 4.0);
+            return SizedBox(height: 10.0);
           },
         ),
       ),
@@ -477,20 +481,23 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
         children: [
           Row(
             children: [
+              SizedBox(width: 8.0,),
               Expanded(
                 child: RoundedButton(
                   onPressed: () => pickImage(true),
                   title: "Pick from Gallery",
-                  color: Colors.blueAccent,
+                  color: Colors.orange,
                 ),
               ),
+              SizedBox(width: 8.0,),
               Expanded(
                 child: RoundedButton(
                   onPressed: () => pickImage(false),
                   title: "Take Picture",
-                  color: Colors.blueAccent,
+                  color: Colors.orange,
                 ),
               ),
+              SizedBox(width: 8.0,),
             ],
           ),
           SizedBox(
@@ -524,28 +531,11 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                             size: 30.0,
                             color: appOrange,
                           ),
-                          label: Text('Prices',
-                              style: appFontStyle.copyWith(
-                                  fontSize: 30, color: Colors.black)),
+                          label: Text(
+                            'Prices',
+                             style: appFontStyle.copyWith(fontSize: 30, color: Colors.black),
+                          ),
                         ),
-
-                        // Text(
-                        //   'Prices ',
-                        //   style: TextStyle(
-                        //     fontSize: 30.0,
-                        //   ),
-                        // ),
-                        // IconButton(
-                        //   icon: Icon(
-                        //     Icons.add_circle_outline,
-                        //     size: 30.0,
-                        //   ),
-                        //   onPressed: () {
-                        //     setState(() {
-                        //       rplist.add(ReceiptPrice('0.00'));
-                        //     });
-                        //   },
-                        // ),
                       ],
                     ),
                   ),
