@@ -372,7 +372,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                       buttonColor: Colors.lightGreen,
                       icon: Icon(Icons.search_rounded),
                       textColor: Colors.white,
-                      onPressed: () {},
+                      onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
                     ),
                   ),
                 ),

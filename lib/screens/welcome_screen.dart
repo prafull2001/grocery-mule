@@ -150,7 +150,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.h),
                 child: RectangularTextIconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    try {
+                      await signInWithGoogle();
+                    } catch (e) {
+                      print('error: '+e.toString());
+                    }
+                  },
                   text: "Continue With Google",
                   icon: Icon(
                     FontAwesomeIcons.google,
