@@ -21,13 +21,22 @@ class _IntroScreenState extends State<IntroScreen> {
     Navigator.pushNamed(context, WelcomeScreen.id);
   }
 
-  Widget _buildImage(String assetName, [double width = 350]) {
-    return Image.asset('images/$assetName', width: width, scale: 0.9,);
+  Widget _buildImage(String assetName, double thisScale, [double width = 350]) {
+    return Image.asset('images/$assetName', width: width, scale: thisScale,);
   }
 
-  Widget _buildFirstImage(String assetName, [double width = 350]) {
-    return Image.asset('images/$assetName', width: width, scale: 3,);
+  Widget _buildFeedbackImage(String assetName, double thisScale, [double width = 200]) {
+    return Container(
+      height: 300,
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black, width: 2 ),
+      ),
+      child: Image.asset('images/$assetName', width: width, scale: thisScale,)
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,42 +79,49 @@ class _IntroScreenState extends State<IntroScreen> {
           title: "Hey There! 👋",
           body:
           "Nice to meet you. Sign in with Google or your email to get started!",
-          image: _buildFirstImage('logo.png'),
+          image: _buildImage('logo.png', 3),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Feedback and 🐞s",
+          body:
+          "Your feedback directly helps us improve the quality of GroceryMule! Please provide feedback through our Google Form found here!",
+          image: _buildFeedbackImage('bug_reporting.png', 1),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Connect with PayPal 💵",
           body:
           "Add your PayPal.me link to your account to set up future payments",
-          image: _buildFirstImage('logo.png'),
+          image: _buildImage('paypal.png', 7),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Find Your Crowd 🔍",
           body:
           "Head over to the \'Cowamigos\' tab to search for friends and add them to shopping trips!",
-          image: _buildImage('friends.png'),
+          image: _buildImage('friends.png', .9),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Create a List 📝",
           body:
           "Create a list to host a shopping trip by pressing the + sign at the bottom right of your home screen.",
-          image: _buildImage('list.png'),
+          image: _buildImage('list.png', 0.9),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Add Items 🍎",
           body:
           "Add items to your list and click \'Personal List\' to view the items you\'ve added to that list.",
-          image: _buildImage('items.png'),
+          image: _buildImage('items.png', 0.9),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Checkout 💰",
           body:
           "When you\'re done shopping for a list, click \'Checkout\' to send automatically calculated payment requests with the touch of a button!",
-          image: _buildImage('checkout.png'),
+          image: _buildImage('checkout.png', 0.9),
           decoration: pageDecoration,
         ),
       ],
