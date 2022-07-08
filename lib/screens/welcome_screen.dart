@@ -145,18 +145,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 onPressed: () async {
                   try {
                     await signInWithGoogle();
-
-                    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => PayPalPage()));
-
-                    // Navigator.pushNamed(context, ListsScreen.id);
-                    /*if (userCredential != null){
-                      //context.read<Cowboy>().initializeCowboy(userCredential.user.uid, firstName, lastName, email);
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, ListsScreen.id);
-                    }
-                     */
                   } catch (e) {
-                    print(e);
+                    print('error: '+e.toString());
                   }
                 },
                 text: "Continue With Google",

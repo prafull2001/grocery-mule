@@ -119,19 +119,21 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery> {
 }
 
 class ShoppingCollectionQuery extends StatefulWidget {
-  ShoppingCollectionQuery() {}
+  List<String> trips = [];
+
+  ShoppingCollectionQuery(List<String> trips) {
+    this.trips = trips;
+  }
 
   @override
-  _ShoppingCollectionQueryState createState() =>
-      _ShoppingCollectionQueryState();
+  _ShoppingCollectionQueryState createState() => _ShoppingCollectionQueryState();
 }
 
 class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
   late Stream<QuerySnapshot> personalTrips;
   @override
   void initState() {
-    personalTrips =
-        tripCollection.orderBy('date', descending: true).snapshots();
+    personalTrips = tripCollection.orderBy('date', descending: true).snapshots();
     super.initState();
   }
 
@@ -147,17 +149,17 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Text("Loading");
           }
-          print(context.watch<Cowboy>().shoppingTrips);
+          // (context.watch<Cowboy>().shoppingTrips);
           List<String> sortedList = [];
           if (snapshot.hasData) {
             snapshot.data!.docs.forEach((doc) {
-              if (context.watch<Cowboy>().shoppingTrips.contains(doc['uuid'])) {
+              if (widget.trips.contains(doc['uuid'])) {
                 sortedList.add(doc['uuid']);
-                print(doc['uuid']);
+                // print(doc['uuid']);
               }
             });
           }
-          print(sortedList);
+          // print(sortedList);
           return SafeArea(
             child: ListView.builder(
               //scrollDirection: Axis.vertical,
@@ -177,25 +179,25 @@ class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
 class _ListsScreenState extends State<ListsScreen> {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-  late Stream<DocumentSnapshot> personalTrip =
-      userCollection.doc(curUser!.uid).snapshots();
+  late Stream<DocumentSnapshot> personalTrip = userCollection.doc(curUser!.uid).snapshots();
+  late Stream<QuerySnapshot<Map<String, dynamic>>> tripstream;
   Future<void>? Cowsnapshot;
   List<String> dev = [
     "NYxh0dZXDya9VAdSYnOeWkY2wv83",
-    "yTWmoo2Qskf3wFcbxaJYUt9qrZM2",
-    "nW7NnPdQGcXtj1775nrLdB1igjG2"
+    "plXPxFNLEMbJclCzNsyJeE61RKT2",
+    "nW7NnPdQGcXtj1775nrLdB1igjG2",
   ];
   @override
   void initState() {
     Cowsnapshot = _loadCurrentCowboy();
-    //personalTrip = userCollection.doc(curUser!.uid).snapshots();
+    tripstream = userCollection.doc(curUser!.uid).collection('shopping_trips').snapshots();
     super.initState();
   }
 
   Future<void> _loadCurrentCowboy() async {
-    final DocumentSnapshot<Object?>? snapshot =
-        await (_queryCowboy() as Future<DocumentSnapshot<Object?>?>);
+    final DocumentSnapshot<Object?>? snapshot = await (_queryCowboy() as Future<DocumentSnapshot<Object?>?>);
     readInData(snapshot!);
+    // final Stream<QuerySnapshot<Map<String, dynamic>>> tripstream = userCollection.doc(context.read<Cowboy>().uuid).collection('shopping_trips').snapshots();
   }
 
   void readInData(DocumentSnapshot snapshot) {
@@ -204,11 +206,6 @@ class _ListsScreenState extends State<ListsScreen> {
     List<String> friends = [];
     List<String> requests = [];
     // extrapolating data into provider
-    if (!(snapshot['shopping_trips'] as List<dynamic>).isEmpty) {
-      (snapshot['shopping_trips'] as List<dynamic>).forEach((uid) {
-        if (!shoppingTrips.contains(uid)) shoppingTrips.add(uid.trim());
-      });
-    }
     if (!(snapshot['friends'] as List<dynamic>).isEmpty) {
       (snapshot['friends'] as List<dynamic>).forEach((dynamicKey) {
         friends.add(dynamicKey.toString());
@@ -244,6 +241,18 @@ class _ListsScreenState extends State<ListsScreen> {
     } else {
       return null;
     }
+  }
+
+  List<String> readInShoppingTripsData(QuerySnapshot tripshot) {
+    List<String> shopping_trips = [];
+    if (tripshot.docs==null || tripshot.docs.isEmpty) {return [];}
+    tripshot.docs.forEach((element) {
+      if (element.id != 'dummy') {
+        shopping_trips.add(element.id.trim());
+      }
+    });
+    context.read<Cowboy>().setTrips(shopping_trips);
+    return shopping_trips;
   }
 
   @override
@@ -324,20 +333,20 @@ class _ListsScreenState extends State<ListsScreen> {
             ],
           ),
         ),
-        body: StreamBuilder<DocumentSnapshot<Object?>>(
-            stream: personalTrip,
-            builder:
-                (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
+        body: StreamBuilder<QuerySnapshot<Object?>>(
+            stream: tripstream,
+            builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Text('Something went wrong StreamBuilder');
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
               }
-              readInData(snapshot.data!);
-              print(context.watch<Cowboy>().shoppingTrips);
+              // readIn(snapshot.data!);
+              List<String> temptrips = readInShoppingTripsData(snapshot.data!);
+              // print(context.watch<Cowboy>().shoppingTrips);
 
-              return ShoppingCollectionQuery();
+              return ShoppingCollectionQuery(temptrips);
             }),
         floatingActionButton: Container(
           height: 80,

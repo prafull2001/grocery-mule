@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:grocery_mule/dev/collection_references.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
 
 
 
@@ -16,8 +17,6 @@ class ShoppingTrip with ChangeNotifier {
   List<String> _beneficiaries = [];
   List<String> itemUUID = [];
   bool lock = false;
-  late Receipt _receipt;
-
 
   void clearField(){
     _uuid = "";
@@ -88,7 +87,7 @@ class ShoppingTrip with ChangeNotifier {
   editTripDateSync(DateTime date) {
     _date = date;
     notifyListeners();
-    print('notif listeners: $_date');
+    // print('notif listeners: $_date');
   }
 
   editTripDescription(String description) {
@@ -129,7 +128,7 @@ class ShoppingTrip with ChangeNotifier {
   // adds beneficiary, notifies listeners, updates database
   addBeneficiary(String beneficiary_uuid) {
     _beneficiaries.add(beneficiary_uuid);
-    userCollection.doc(beneficiary_uuid).update({'shopping_trips': FieldValue.arrayUnion([_uuid])});
+    userCollection.doc(beneficiary_uuid).collection('shopping_trips').doc(_uuid).set({'user_uuid': beneficiary_uuid});
     //add bene to every item document
     tripCollection.doc(_uuid).collection('items').get().then((collection) => {
           collection.docs.forEach((document) async {
@@ -144,6 +143,7 @@ class ShoppingTrip with ChangeNotifier {
   // removes beneficiary, notifies listeners, updates database
   removeBeneficiary(String beneficiary_uuid) {
     _beneficiaries.remove(beneficiary_uuid);
+    userCollection.doc(beneficiary_uuid).collection('shopping_trips').doc(_uuid).delete();
     tripCollection.doc(_uuid).collection('items').get().then((collection) => {
           collection.docs.forEach((document) async {
             Map<String, int> bene_items = {};
@@ -161,7 +161,7 @@ class ShoppingTrip with ChangeNotifier {
 
   removeStaleTripUUIDS(){
     _beneficiaries.forEach((bene_uuid) {
-      userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([_uuid])});
+      userCollection.doc(bene_uuid).collection('shopping_trips').doc(_uuid).delete();
     });
   }
 
@@ -172,7 +172,7 @@ class ShoppingTrip with ChangeNotifier {
     bene_uuids.forEach((String bene_uuid) {
       removeBeneficiaryFromItems(bene_uuid);
       tripCollection.doc(_uuid).update({'beneficiaries': FieldValue.arrayRemove([bene_uuid])});
-      userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([_uuid])});
+      userCollection.doc(bene_uuid).collection('shopping_trips').doc(_uuid).delete();
     });
     notifyListeners();
   }
@@ -183,7 +183,7 @@ class ShoppingTrip with ChangeNotifier {
       tripCollection.doc(_uuid).collection('items').get().then((collection) => {
         collection.docs.forEach((document) async {
           late int newItemTotal;
-          late int beneItemTotal;
+          int beneItemTotal = 0;
           Map<String, int> bene_items= {};
           (document.data()['subitems'] as Map<String, dynamic>)
               .forEach((uuid, quantity) {
@@ -303,11 +303,7 @@ class ShoppingTrip with ChangeNotifier {
     });
     tripCollection.doc(_uuid).collection('items').doc('dummy').delete();
     _beneficiaries.forEach((bene) {
-      userCollection.doc(bene).update(
-        {
-        'shopping_trips': FieldValue.arrayRemove([_uuid])
-        }
-      );
+      userCollection.doc(bene).collection('shopping_trips').doc(_uuid).delete();
     });
     tripCollection.doc(_uuid).delete();
     notifyListeners();
@@ -358,24 +354,5 @@ class Item {
 
   setSubitems(Map<String, int> subs) {
     this.subitems = subs;
-  }
-}
-
-class Receipt {
-  List<ReceiptItem> items;
-  double final_total;
-  double final_tax;
-
-  Receipt(this.items, this.final_total, this.final_tax);
-}
-
-class ReceiptItem {
-  String name;
-  double price;
-  int quantity;
-  late double total_price;
-
-  ReceiptItem(this.name, this.price, this.quantity) {
-    total_price = price * quantity;
   }
 }

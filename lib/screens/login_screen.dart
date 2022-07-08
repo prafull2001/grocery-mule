@@ -31,26 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: <Widget>[
-            //     Container(
-            //       child: Image.asset('images/logo.png'),
-            //       height: 100.0,
-            //     ),
-            //   ],
-            // ),
-            // Row(
-            //   children: <Widget>[
-            //     Text(
-            //       'Log In',
-            //       style: TextStyle(
-            //         fontSize: 40.0,
-            //         fontWeight: FontWeight.w900,
-            //       ),
-            //     ),
-            //   ],
-            // ),
             Text(
               'Hey,',
               style: appFontStyle.copyWith(
@@ -69,11 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               height: 48.0,
             ),
-            // TextFieldLogin(
-            //     controller: controller,
-            //     isSecure: false,
-            //     hintText: "Email",
-            //     icon: (Icons.alternate_email_outlined)),
             Card(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.r)),

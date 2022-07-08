@@ -78,11 +78,11 @@ class Cowboy with ChangeNotifier {
       'first_name': _firstName,
       'last_name': _lastName,
       'email': _email,
-      'shopping_trips': _shoppingTrips,
       'friends': _friends,
       'requests': _requests,
       'paypal': _paypal,
     });
+    userCollection.doc(_uuid).collection('shopping_trips').doc('dummy').set({'uuid': 'dummy'});
   }
   // only to instantiate during email search
   initializeCowboyFriend(String uuid, String firstName, String lastName, String email) {
@@ -91,6 +91,11 @@ class Cowboy with ChangeNotifier {
     this._lastName = lastName;
     this._email = email;
     notifyListeners();
+  }
+  setTrips(List<String> requests) {
+    _requests = requests;
+    // vvvv might need to comment
+    // notifyListeners();
   }
 
   // getters since '_' identifier makes fields private
@@ -104,46 +109,22 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String trip_uuid) {
-    _shoppingTrips.add(trip_uuid);
-    updateCowboyTrips();
-    notifyListeners();
+  addTrip(String user_uuid, String trip_uuid) {
+    userCollection.doc(user_uuid).collection('shopping_trips').doc(trip_uuid).set({'user_uuid': user_uuid});
+    if (user_uuid == _uuid) {
+      _shoppingTrips.add(trip_uuid);
+      notifyListeners();
+    }
   }
   // only called upon cleanup by system after venmos are sent out or if user gets booted
-  removeTrip(String trip_uuid) {
-    _shoppingTrips.remove(trip_uuid);
-    updateCowboyTrips();
-    notifyListeners();
-  }
-  updateCowboyTrips() {
-    userCollection.doc(_uuid).update({'shopping_trips': _shoppingTrips});
-    //delete trip from the shopping trip collection
-  }
-
-  updateTripForAll(String uuid, String entry, List<String> beneList){
-    //for the host
-    _shoppingTrips.add(uuid);
-    updateCowboyTrips();
-    beneList.forEach((bene) async {
-      Map<String,String> shoppingTrips = await fetchBeneTrip( bene);
-      shoppingTrips[uuid] = entry;
-      print(entry);
-      userCollection.doc(bene).update({'shopping_trips': shoppingTrips});
-    });
-  }
-
-  Future<Map<String, String>> fetchBeneTrip(String bene) async {
-    DocumentSnapshot beneShot = await userCollection.doc(bene).get();
-    Map<String,String> shoppingTrips = {};
-    if(!(beneShot['shopping_trips'] as Map<String, dynamic>).isEmpty) {
-      (beneShot['shopping_trips'] as Map<String, dynamic>)
-          .forEach((uid,entry) {
-        String fields = entry.toString().trim();
-        shoppingTrips[uid.trim()] = fields;
-      });
+  removeTrip(String user_uuid, String trip_uuid) {
+    userCollection.doc(user_uuid).collection('shopping_trips').doc(trip_uuid).delete();
+    if (user_uuid == _uuid) {
+      _shoppingTrips.remove(trip_uuid);
+      notifyListeners();
     }
-    return shoppingTrips;
   }
+
   Future<Map<String, String>> fetchFriendFriends(String friend_uuid) async {
     DocumentSnapshot friendShot = await userCollection.doc(friend_uuid).get();
     Map<String,String> amigos = {};
@@ -174,11 +155,6 @@ class Cowboy with ChangeNotifier {
     userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
   }
 
-  leaveTrip(String tripUid) async {
-    _shoppingTrips.remove(tripUid);
-    userCollection.doc(_uuid).update({'shopping_trips': _shoppingTrips});
-    notifyListeners();
-  }
   removeFriendRequest(String friendUUID) {
     _requests.remove(friendUUID);
     updateCowboyRequestsRemove(friendUUID);
@@ -206,14 +182,6 @@ class Cowboy with ChangeNotifier {
     amigos.remove(_uuid);
     print('amigos: $amigos');
     userCollection.doc(friendUUID).update({'friends': amigos});
-  }
-
-  addTripToBene(String bene_uuid, String trip_uuid){
-    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayUnion([trip_uuid])});
-  }
-  // removes trip with trip_uuid from cowboy with bene_uuid
-  RemoveTripFromBene(String bene_uuid, String trip_uuid) async {
-    userCollection.doc(bene_uuid).update({'shopping_trips': FieldValue.arrayRemove([trip_uuid])});
   }
 
   // adds friend request, notifies listeners, and updates database
