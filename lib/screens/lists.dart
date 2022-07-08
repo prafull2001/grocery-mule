@@ -18,6 +18,8 @@ import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 import 'editlist.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class ListsScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
@@ -302,6 +304,16 @@ class _ListsScreenState extends State<ListsScreen> {
                 onTap: () {
                   //Navigator.pop(context);
                   Navigator.pushNamed(context, UserInfoScreen.id);
+                },
+              ),
+              ListTile(
+                title: const Text('Report a 🐞'),
+                onTap: () async {
+                  String paypalStr = "https://forms.gle/xHy3ixadwacFuFMi9";
+                  Uri paypal_link = Uri.parse(paypalStr);
+                  if (await canLaunchUrl(paypal_link)) {
+                    launchUrl(paypal_link);
+                  }
                 },
               ),
               ListTile(
