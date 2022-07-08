@@ -47,3 +47,7 @@ app.*.map.json
 
 # Podfile
 ios/Podfile.lock
+
+# Firebase files
+ios/firebase_app_id_file.json
+macos/firebase_app_id_file.json
