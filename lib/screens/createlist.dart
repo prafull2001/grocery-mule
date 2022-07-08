@@ -291,14 +291,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         //context.read<ShoppingTrip>().addBeneficiary(friend, true);
         context
             .read<Cowboy>()
-            .addTripToBene(friend, context.read<ShoppingTrip>().uuid);
+            .addTrip(friend, context.read<ShoppingTrip>().uuid);
         //addTripToBene(String bene_uuid, String trip_uuid)
       }
       //context.read<ShoppingTrip>().addBeneficiary(hostUUID);
 
-      context.read<Cowboy>().addTrip(
-            context.read<ShoppingTrip>().uuid,
-          );
+      context.read<Cowboy>().addTrip(context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid,);
     } else {
       print(context.read<ShoppingTrip>().beneficiaries);
       print("starting to edit list");
@@ -666,8 +664,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                       .read<ShoppingTrip>()
                                       .removeStaleTripUUIDS();
                                   context.read<ShoppingTrip>().deleteTripDB();
-                                  context.read<Cowboy>().removeTrip(
-                                      context.read<ShoppingTrip>().uuid);
+                                  context.read<Cowboy>().removeTrip(context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid);
                                 }
                                 Navigator.of(context).popUntil((route) {
                                   return route.settings.name == ListsScreen.id;

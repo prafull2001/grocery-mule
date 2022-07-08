@@ -180,7 +180,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       );
                       userCredential.user!.updateDisplayName(firstName);
                       if (userCredential != null) {
-                        print(email + ' ' + firstName + ' ' + lastName);
+                        // print(email + ' ' + firstName + ' ' + lastName);
                         context.read<Cowboy>().initializeCowboy(
                             userCredential.user?.uid,
                             firstName,
@@ -195,7 +195,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         Navigator.pushNamed(context, PayPalPage.id);
                       }
                     } on FirebaseAuthException catch (e) {
-                      print(e);
+                      print('error: '+e.toString());
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -212,7 +212,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           );
                         },
                       );
-                      print(e);
                     }
                   }),
             ),

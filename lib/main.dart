@@ -82,7 +82,7 @@ void main() async {
             ChangeNotifierProvider(create: (_) => ShoppingTrip()),
           ],
           builder: (context, child) {
-            print(MediaQuery.of(context).size);
+            // print(MediaQuery.of(context).size);
             return MaterialApp(
               theme: ThemeData(
                   primaryColor: dark_beige,

@@ -485,7 +485,7 @@ class _EditListsScreenState extends State<EditListScreen> {
       case 2:
         await check_leave(context);
         if (leave_list) {
-          context.read<Cowboy>().leaveTrip(context.read<ShoppingTrip>().uuid);
+          context.read<Cowboy>().removeTrip(context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid);
           context
               .read<ShoppingTrip>()
               .removeBeneficiary(context.read<Cowboy>().uuid);
