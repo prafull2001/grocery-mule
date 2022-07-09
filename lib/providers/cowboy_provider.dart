@@ -1,11 +1,8 @@
 //import 'dart:html';
 
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
-
 
 class Cowboy with ChangeNotifier {
   String _uuid = '';
@@ -18,7 +15,8 @@ class Cowboy with ChangeNotifier {
   List<String> _requests = []; // uuid
 
   // to call after user fields are updated
-  fillUpdatedInfo(String firstName, String lastName, String email, String paypal) {
+  fillUpdatedInfo(
+      String firstName, String lastName, String email, String paypal) {
     this._firstName = firstName;
     this._lastName = lastName;
     this._email = email;
@@ -29,20 +27,24 @@ class Cowboy with ChangeNotifier {
     setCowboyPaypal();
     notifyListeners();
   }
+
   updateCowboyFirst() {
     userCollection.doc(_uuid).update({'first_name': _firstName});
   }
+
   updateCowboyLast() {
     userCollection.doc(_uuid).update({'last_name': _lastName});
   }
+
   updateCowboyEmail() {
     userCollection.doc(_uuid).update({'email': _email});
   }
+
   setCowboyPaypal() {
     userCollection.doc(_uuid).update({'paypal': _paypal});
   }
 
-  updateCowboyPaypal(String new_link){
+  updateCowboyPaypal(String new_link) {
     this._paypal = new_link;
     setCowboyPaypal();
   }
@@ -51,8 +53,10 @@ class Cowboy with ChangeNotifier {
     this._friends = friends;
     this._requests = requests;
   }
+
   // to initialize fields from StreamBuilder
-  fillFields(String uuid, String firstName, String lastName, String email, List<String> shoppingTrips, List<String> friends, List<String> requests) {
+  fillFields(String uuid, String firstName, String lastName, String email,
+      List<String> shoppingTrips, List<String> friends, List<String> requests) {
     this._uuid = uuid;
     this._firstName = firstName;
     this._lastName = lastName;
@@ -62,8 +66,10 @@ class Cowboy with ChangeNotifier {
     this._requests = requests;
     // notifyListeners();
   }
+
   // to initialize account creation
-  initializeCowboy(String? uuid, String firstName, String lastName, String email) {
+  initializeCowboy(
+      String? uuid, String firstName, String lastName, String email) {
     this._uuid = uuid!;
     this._firstName = firstName;
     this._lastName = lastName;
@@ -71,6 +77,7 @@ class Cowboy with ChangeNotifier {
     intializeCowboyDB();
     //notifyListeners();
   }
+
   // initialize cowboy in database for first time
   intializeCowboyDB() {
     userCollection.doc(_uuid).set({
@@ -82,16 +89,23 @@ class Cowboy with ChangeNotifier {
       'requests': _requests,
       'paypal': _paypal,
     });
-    userCollection.doc(_uuid).collection('shopping_trips').doc('dummy').set({'uuid': 'dummy'});
+    userCollection
+        .doc(_uuid)
+        .collection('shopping_trips')
+        .doc('dummy')
+        .set({'uuid': 'dummy'});
   }
+
   // only to instantiate during email search
-  initializeCowboyFriend(String uuid, String firstName, String lastName, String email) {
+  initializeCowboyFriend(
+      String uuid, String firstName, String lastName, String email) {
     this._uuid = uuid;
     this._firstName = firstName;
     this._lastName = lastName;
     this._email = email;
     notifyListeners();
   }
+
   setTrips(List<String> requests) {
     _requests = requests;
     // vvvv might need to comment
@@ -109,16 +123,27 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String user_uuid, String trip_uuid) {
-    userCollection.doc(user_uuid).collection('shopping_trips').doc(trip_uuid).set({'user_uuid': user_uuid});
+  addTrip(String user_uuid, String trip_uuid, DateTime date) {
+    userCollection
+        .doc(user_uuid)
+        .collection('shopping_trips')
+        .doc(trip_uuid)
+        .set({'date': date});
     if (user_uuid == _uuid) {
       _shoppingTrips.add(trip_uuid);
       notifyListeners();
     }
   }
+
+  updateTripDate(String trip_uid, DateTime newDate) {}
+
   // only called upon cleanup by system after venmos are sent out or if user gets booted
   removeTrip(String user_uuid, String trip_uuid) {
-    userCollection.doc(user_uuid).collection('shopping_trips').doc(trip_uuid).delete();
+    userCollection
+        .doc(user_uuid)
+        .collection('shopping_trips')
+        .doc(trip_uuid)
+        .delete();
     if (user_uuid == _uuid) {
       _shoppingTrips.remove(trip_uuid);
       notifyListeners();
@@ -127,21 +152,22 @@ class Cowboy with ChangeNotifier {
 
   Future<Map<String, String>> fetchFriendFriends(String friend_uuid) async {
     DocumentSnapshot friendShot = await userCollection.doc(friend_uuid).get();
-    Map<String,String> amigos = {};
-    if(!(friendShot['friends'] as Map<String, dynamic>).isEmpty) {
-      (friendShot['friends'] as Map<String, dynamic>)
-          .forEach((uid,entry) {
+    Map<String, String> amigos = {};
+    if (!(friendShot['friends'] as Map<String, dynamic>).isEmpty) {
+      (friendShot['friends'] as Map<String, dynamic>).forEach((uid, entry) {
         String fields = entry.toString().trim();
         amigos[uid.trim()] = fields;
       });
     }
     return amigos;
   }
-  clearData(){
+
+  clearData() {
     _shoppingTrips.clear();
-     _friends.clear(); // uuid to first name
-     _requests.clear();
+    _friends.clear(); // uuid to first name
+    _requests.clear();
   }
+
   // removes friend from requests, adds friend, notifies listeners, updates database
   addFriend(String friend_uuid) {
     _requests.remove(friend_uuid);
@@ -150,9 +176,12 @@ class Cowboy with ChangeNotifier {
     addBothCowboyFriends(friend_uuid);
     notifyListeners();
   }
+
   addBothCowboyFriends(String friendUUID) {
     userCollection.doc(_uuid).update({'friends': _friends});
-    userCollection.doc(friendUUID).update({'friends': FieldValue.arrayUnion([_uuid])});
+    userCollection.doc(friendUUID).update({
+      'friends': FieldValue.arrayUnion([_uuid])
+    });
   }
 
   removeFriendRequest(String friendUUID) {
@@ -160,20 +189,23 @@ class Cowboy with ChangeNotifier {
     updateCowboyRequestsRemove(friendUUID);
     notifyListeners();
   }
+
   // removes friend, notifies listeners, and updates database
   removeFriend(String friendUUID) {
     print('friends: $_friends');
     _friends.remove(friendUUID);
     print('friends again: $_friends');
     updateCowboyFriendsRemove(friendUUID);
-    userCollection.doc(friendUUID).update(
-        {'friends': FieldValue.arrayRemove([_uuid])}
-    );
+    userCollection.doc(friendUUID).update({
+      'friends': FieldValue.arrayRemove([_uuid])
+    });
     notifyListeners();
   }
+
   updateCowboyRequestsRemove(String friendUUID) {
     userCollection.doc(_uuid).update({'requests': _requests});
   }
+
   updateCowboyFriendsRemove(String friendUUID) async {
     userCollection.doc(_uuid).update({'friends': _friends});
     Map<String, String> amigos = {};
@@ -190,7 +222,10 @@ class Cowboy with ChangeNotifier {
     updateCowboyRequestsAdd(friendUUID);
     // notifyListeners();
   }
+
   updateCowboyRequestsAdd(String friendUUID) {
-    userCollection.doc(friendUUID).update({'requests': FieldValue.arrayUnion([_uuid])});
+    userCollection.doc(friendUUID).update({
+      'requests': FieldValue.arrayUnion([_uuid])
+    });
   }
 }

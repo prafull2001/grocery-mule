@@ -289,14 +289,16 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       friend_bene.remove(hostUUID);
       for (var friend in friend_bene) {
         //context.read<ShoppingTrip>().addBeneficiary(friend, true);
-        context
-            .read<Cowboy>()
-            .addTrip(friend, context.read<ShoppingTrip>().uuid);
+        context.read<Cowboy>().addTrip(
+            friend,
+            context.read<ShoppingTrip>().uuid,
+            context.read<ShoppingTrip>().date);
         //addTripToBene(String bene_uuid, String trip_uuid)
       }
       //context.read<ShoppingTrip>().addBeneficiary(hostUUID);
 
-      context.read<Cowboy>().addTrip(context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid,);
+      context.read<Cowboy>().addTrip(context.read<Cowboy>().uuid,
+          context.read<ShoppingTrip>().uuid, context.read<ShoppingTrip>().date);
     } else {
       print(context.read<ShoppingTrip>().beneficiaries);
       print("starting to edit list");
@@ -503,25 +505,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             onTap1: () {},
                           ),
                         ),
-                        // Expanded(
-                        //   child: Container(
-                        //     child: TextField(
-                        //         keyboardType: TextInputType.text,
-                        //         textAlign: TextAlign.center,
-                        //         style: TextStyle(
-                        //           color: Colors.black,
-                        //         ),
-                        //         decoration: InputDecoration(
-                        //           fillColor: darker_beige,
-                        //         ),
-                        //         controller: _tripTitleController,
-                        //         onChanged: (value) {
-                        //           context
-                        //               .read<ShoppingTrip>()
-                        //               .editTripTitle(value);
-                        //         }),
-                        //   ),
-                        // ),
                       ],
                     ),
 
@@ -556,26 +539,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             onTap1: () {},
                           ),
                         ),
-
-                        // Expanded(
-                        //   child: Container(
-                        //     child: TextField(
-                        //         keyboardType: TextInputType.text,
-                        //         textAlign: TextAlign.center,
-                        //         style: TextStyle(
-                        //           color: Colors.black,
-                        //         ),
-                        //         decoration: InputDecoration(
-                        //           fillColor: darker_beige,
-                        //         ),
-                        //         controller: _tripTitleController,
-                        //         onChanged: (value) {
-                        //           context
-                        //               .read<ShoppingTrip>()
-                        //               .editTripTitle(value);
-                        //         }),
-                        //   ),
-                        // ),
                       ],
                     ),
                     Padding(
@@ -664,7 +627,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                       .read<ShoppingTrip>()
                                       .removeStaleTripUUIDS();
                                   context.read<ShoppingTrip>().deleteTripDB();
-                                  context.read<Cowboy>().removeTrip(context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid);
+                                  context.read<Cowboy>().removeTrip(
+                                      context.read<Cowboy>().uuid,
+                                      context.read<ShoppingTrip>().uuid);
                                 }
                                 Navigator.of(context).popUntil((route) {
                                   return route.settings.name == ListsScreen.id;

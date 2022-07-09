@@ -8,17 +8,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
-import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 
 import '../components/header.dart';
+import '../components/rounded_ button.dart';
+import 'checkout_screen.dart';
 import 'createlist.dart';
 
 typedef StringVoidFunc = void Function(String, int);
@@ -119,7 +119,9 @@ class _ItemsListState extends State<ItemsList> {
     itemColQuery.docs.forEach((document) {
       String itemID = document['uuid'];
       // TODO maybe don't need this check at all
-      if (itemID != 'dummy') {rawItemList.add(itemID);}
+      if (itemID != 'dummy') {
+        rawItemList.add(itemID);
+      }
     });
     //check if every id from firebase is in local itemUUID
     rawItemList.forEach((itemID) {
@@ -155,7 +157,11 @@ class IndividualItem extends StatefulWidget {
 
 class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
-  late Stream<DocumentSnapshot> getItemStream = tripCollection.doc(widget.tripID).collection('items').doc(widget.itemID).snapshots();
+  late Stream<DocumentSnapshot> getItemStream = tripCollection
+      .doc(widget.tripID)
+      .collection('items')
+      .doc(widget.itemID)
+      .snapshots();
 
   @override
   void initState() {
@@ -169,16 +175,16 @@ class _IndividualItemState extends State<IndividualItem> {
       return Container();
     }
     return StreamBuilder(
-      stream: getItemStream,
-      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox.shrink();
-        }
-        if (snapshot.hasError) return const CircularProgressIndicator();
-        loadItem(snapshot.data!);
-        return simple_item();
-      }
-    );
+        stream: getItemStream,
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SizedBox.shrink();
+          }
+          if (snapshot.hasError) return const CircularProgressIndicator();
+          loadItem(snapshot.data!);
+          return simple_item();
+        });
   }
 
   //this function loads stream snapshots into item
@@ -255,8 +261,8 @@ class _IndividualItemState extends State<IndividualItem> {
           ],
         ),
         trailing: (context.read<Cowboy>().uuid ==
-                context.read<ShoppingTrip>().host)
-            ? (context.read<ShoppingTrip>().lock == false)
+                context.watch<ShoppingTrip>().host)
+            ? (context.watch<ShoppingTrip>().lock == false)
                 ? IconButton(
                     icon: Icon(
                       Icons.delete,
@@ -276,7 +282,9 @@ class _IndividualItemState extends State<IndividualItem> {
                     onChanged: (bool? value) {
                       setState(() {
                         curItem.check = value!;
-                        context.read<ShoppingTrip>().changeItemCheck(widget.itemID);
+                        context
+                            .read<ShoppingTrip>()
+                            .changeItemCheck(widget.itemID);
                       });
                     },
                   )
@@ -482,10 +490,11 @@ class _EditListsScreenState extends State<EditListScreen> {
       case 2:
         await check_leave(context);
         if (leave_list) {
-          context.read<Cowboy>().removeTrip(context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid);
+          context.read<Cowboy>().removeTrip(
+              context.read<Cowboy>().uuid, context.read<ShoppingTrip>().uuid);
           context
               .read<ShoppingTrip>()
-              .removeBeneficiary(context.read<Cowboy>().uuid);
+              .removeBeneficiaries([context.read<Cowboy>().uuid]);
           Navigator.of(context).pop();
         }
     }
@@ -519,6 +528,16 @@ class _EditListsScreenState extends State<EditListScreen> {
             ],
           ),
         ],
+        leading: IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              setState(() {
+                context.read<ShoppingTrip>().clearField();
+                context.read<ShoppingTrip>().clearCachedBene();
+                context.read<ShoppingTrip>().clearCachedItem();
+                Navigator.pop(context);
+              });
+            }),
       ),
       body: Container(
         child: StreamBuilder<DocumentSnapshot<Object?>>(
@@ -526,12 +545,12 @@ class _EditListsScreenState extends State<EditListScreen> {
             builder:
                 (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
               if (snapshot.hasError) {
-                return Text('Something went wrong StreamBuilder');
+                return CircularProgressIndicator();
               }
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return SizedBox.shrink();
               }
-              //readInData(snapshot.data!);
+              if (!snapshot.data!.exists) return CircularProgressIndicator();
               _queryCurrentTrip(snapshot.data!);
               if (!context
                   .watch<ShoppingTrip>()
@@ -700,41 +719,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                                 ))),
                       ),
                     ),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.start,
-                    //   children: [
-                    //     SizedBox(
-                    //       width: 10.0,
-                    //     ),
-                    //     Text(
-                    //       'Beneficiaries - ',
-                    //       style: TextStyle(
-                    //         color: Colors.black,
-                    //         fontSize: 20,
-                    //       ),
-                    //     ),
-                    //     Badge(
-                    //       showBadge: false,
-                    //       child: TextButton(
-                    //         child: Icon(Icons.person_add_alt),
-                    //         style: ButtonStyle(
-                    //           backgroundColor:
-                    //               MaterialStateProperty.all<Color>(orange),
-                    //           foregroundColor: MaterialStateProperty.all<Color>(
-                    //               Colors.black),
-                    //         ),
-                    //         onPressed: () {
-
-                    //         },
-                    //       ),
-                    //     ),
-                    //   ],
-                    // ),
-                    // SizedBox(
-                    //   height: 10,
-                    // ),
-
-                    //Segregated the Widget into two parts so that the state of the changing widget in maintained inside and changing the widget wont change the state of the whole screen
                     ItemsAddition(
                       tripUUID: tripUUID,
                     )
@@ -745,6 +729,55 @@ class _EditListsScreenState extends State<EditListScreen> {
               );
             }),
       ),
+      bottomSheet: StreamBuilder<DocumentSnapshot<Object?>>(
+          stream: listStream,
+          builder:
+              (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
+            if (snapshot.hasError) {
+              return CircularProgressIndicator();
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return SizedBox.shrink();
+            }
+            if (!snapshot.data!.exists) return CircularProgressIndicator();
+            return (snapshot.data!['host'] == context.watch<Cowboy>().uuid)
+                ? Padding(
+                    padding: EdgeInsets.only(bottom: 10.h),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        //comment
+
+                        Container(
+                          height: 70,
+                          width: 150,
+                          child: RoundedButton(
+                            onPressed: () {
+                              context.read<ShoppingTrip>().changeTripLock();
+                              context.read<ShoppingTrip>().setAllCheckFalse();
+                            },
+                            title: (context.watch<ShoppingTrip>().lock == false)
+                                ? "Shopping Mode"
+                                : "Unlock Trip",
+                            color: appOrange,
+                          ),
+                        ),
+
+                        Container(
+                          height: 70,
+                          width: 150,
+                          child: RoundedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, CheckoutScreen.id);
+                              },
+                              title: "Checkout",
+                              color: Colors.green),
+                        ),
+                      ],
+                    ),
+                  )
+                : SizedBox.shrink();
+          }),
     );
   }
 }
@@ -864,44 +897,6 @@ class _ItemsAdditionState extends State<ItemsAddition> {
         SizedBox(
           height: 4.0,
         ),
-        if (context.read<ShoppingTrip>().host ==
-            context.read<Cowboy>().uuid) ...[
-          Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                //comment
-
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
-                    onPressed: () {
-                      context.read<ShoppingTrip>().changeTripLock();
-                      context.read<ShoppingTrip>().setAllCheckFalse();
-                    },
-                    title: (context.watch<ShoppingTrip>().lock == false)
-                        ? "Shopping Mode"
-                        : "Unlock Trip",
-                    color: appOrange,
-                  ),
-                ),
-
-                Container(
-                  height: 70,
-                  width: 150,
-                  child: RoundedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, CheckoutScreen.id);
-                      },
-                      title: "Checkout",
-                      color: Colors.green),
-                ),
-              ],
-            ),
-          ),
-        ]
       ],
     );
   }

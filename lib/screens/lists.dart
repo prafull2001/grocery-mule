@@ -1,26 +1,62 @@
 import 'dart:async';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:grocery_mule/dev/collection_references.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
+import 'package:grocery_mule/dev/migration.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
 import 'package:grocery_mule/screens/intro_screen.dart';
-import 'package:grocery_mule/screens/paypal_link.dart';
-import 'package:grocery_mule/screens/welcome_screen.dart';
-import 'package:grocery_mule/dev/migration.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:grocery_mule/providers/cowboy_provider.dart';
-import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/user_info.dart';
+import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
-import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
-import 'editlist.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'editlist.dart';
+
+class UserName extends StatefulWidget {
+  late final String userUUID;
+  UserName(String userUUID) {
+    this.userUUID = userUUID;
+  }
+
+  @override
+  _UserNameState createState() => _UserNameState();
+}
+
+class _UserNameState extends State<UserName> {
+  late String userUUID;
+  @override
+  void initState() {
+    userUUID = widget.userUUID;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+        stream: userCollection.doc(userUUID).snapshots(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+          return Text(
+            'Howdy ${snapshot.data!['first_name']}!',
+            style: TextStyle(fontSize: 25, color: Colors.black)
+          );
+        });
+  }
+}
 
 class ListsScreen extends StatefulWidget {
   final _auth = FirebaseAuth.instance;
@@ -84,27 +120,31 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery> {
                     borderRadius: BorderRadius.circular(12.r)),
                 child: ListTile(
                   title: Container(
-                    child: Text('${title_short}',
-                        style: appFontStyle.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                            fontSize: 20.sp)),
+                    child: Text(
+                      '${title_short}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 25,
+                      ),
+                    ),
                   ),
-                  subtitle: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('${desc_short}\n\n',
-                            style: appFontStyle.copyWith(
-                                color: Colors.black, fontSize: 16.sp)),
-                        Text(
-                          '${(snapshot.data!['date'] as Timestamp).toDate().month}' +
-                              '/' +
-                              '${(snapshot.data!['date'] as Timestamp).toDate().day}' +
-                              '/' +
-                              '${(snapshot.data!['date'] as Timestamp).toDate().year}',
-                          style: appFontStyle.copyWith(color: Colors.blueGrey),
-                        )
-                      ]),
+                  subtitle: Row(children: [
+                    Text(
+                      '${desc_short}\n\n'
+                              '${(snapshot.data!['date'] as Timestamp).toDate().month}' +
+                          '/' +
+                          '${(snapshot.data!['date'] as Timestamp).toDate().day}' +
+                          '/' +
+                          '${(snapshot.data!['date'] as Timestamp).toDate().year}',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                  ]),
                   onTap: () async {
                     await Navigator.push(
                         context,
@@ -121,69 +161,11 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery> {
   }
 }
 
-class ShoppingCollectionQuery extends StatefulWidget {
-  List<String> trips = [];
-
-  ShoppingCollectionQuery(List<String> trips) {
-    this.trips = trips;
-  }
-
-  @override
-  _ShoppingCollectionQueryState createState() => _ShoppingCollectionQueryState();
-}
-
-class _ShoppingCollectionQueryState extends State<ShoppingCollectionQuery> {
-  late Stream<QuerySnapshot> personalTrips;
-  @override
-  void initState() {
-    personalTrips = tripCollection.orderBy('date', descending: true).snapshots();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return StreamBuilder<QuerySnapshot>(
-        stream: personalTrips,
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text('Something went wrong');
-          }
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
-          }
-          // (context.watch<Cowboy>().shoppingTrips);
-          List<String> sortedList = [];
-          if (snapshot.hasData) {
-            snapshot.data!.docs.forEach((doc) {
-              if (widget.trips.contains(doc['uuid'])) {
-                sortedList.add(doc['uuid']);
-                // print(doc['uuid']);
-              }
-            });
-          }
-          // print(sortedList);
-          return SafeArea(
-            child: ListView.builder(
-              //scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: sortedList.length,
-              itemBuilder: (context, int index) {
-                return new ShoppingTripQuery(sortedList[index],
-                    key: Key(sortedList[index]));
-              },
-            ),
-            // ),
-          );
-        });
-  }
-}
-
 class _ListsScreenState extends State<ListsScreen> {
   final _auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
-  late Stream<DocumentSnapshot> personalTrip = userCollection.doc(curUser!.uid).snapshots();
-  late Stream<QuerySnapshot<Map<String, dynamic>>> tripstream;
+  late Stream<DocumentSnapshot> personalTrip =
+      userCollection.doc(curUser!.uid).snapshots();
   Future<void>? Cowsnapshot;
   List<String> dev = [
     "NYxh0dZXDya9VAdSYnOeWkY2wv83",
@@ -193,12 +175,12 @@ class _ListsScreenState extends State<ListsScreen> {
   @override
   void initState() {
     Cowsnapshot = _loadCurrentCowboy();
-    tripstream = userCollection.doc(curUser!.uid).collection('shopping_trips').snapshots();
     super.initState();
   }
 
   Future<void> _loadCurrentCowboy() async {
-    final DocumentSnapshot<Object?>? snapshot = await (_queryCowboy() as Future<DocumentSnapshot<Object?>?>);
+    final DocumentSnapshot<Object?>? snapshot =
+        await (_queryCowboy() as Future<DocumentSnapshot<Object?>?>);
     readInData(snapshot!);
     // final Stream<QuerySnapshot<Map<String, dynamic>>> tripstream = userCollection.doc(context.read<Cowboy>().uuid).collection('shopping_trips').snapshots();
   }
@@ -248,7 +230,9 @@ class _ListsScreenState extends State<ListsScreen> {
 
   List<String> readInShoppingTripsData(QuerySnapshot tripshot) {
     List<String> shopping_trips = [];
-    if (tripshot.docs==null || tripshot.docs.isEmpty) {return [];}
+    if (tripshot.docs == null || tripshot.docs.isEmpty) {
+      return [];
+    }
     tripshot.docs.forEach((element) {
       if (element.id != 'dummy') {
         shopping_trips.add(element.id.trim());
@@ -266,10 +250,7 @@ class _ListsScreenState extends State<ListsScreen> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text(
-            'Howdy ${curUser!.displayName!.split(" ")[0]}!',
-            style: TextStyle(fontSize: 24, color: Colors.black),
-          ),
+          title: UserName(curUser!.uid),
           backgroundColor: light_orange,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarBrightness: Brightness.light,
@@ -285,7 +266,7 @@ class _ListsScreenState extends State<ListsScreen> {
             children: [
               const DrawerHeader(
                 decoration: BoxDecoration(
-                  color: dark_beige,
+                  color: light_orange,
                 ),
                 child: Text(
                   'Menu Options',
@@ -305,13 +286,6 @@ class _ListsScreenState extends State<ListsScreen> {
                 onTap: () {
                   //Navigator.pop(context);
                   Navigator.pushNamed(context, UserInfoScreen.id);
-                },
-              ),
-              ListTile(
-                title: const Text('intro screen'),
-                onTap: () {
-                  //Navigator.pop(context);
-                  Navigator.pushNamed(context, IntroScreen.id);
                 },
               ),
               ListTile(
@@ -354,7 +328,11 @@ class _ListsScreenState extends State<ListsScreen> {
           ),
         ),
         body: StreamBuilder<QuerySnapshot<Object?>>(
-            stream: tripstream,
+            stream: userCollection
+                .doc(curUser!.uid)
+                .collection('shopping_trips')
+                .orderBy('date', descending: true)
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Text('Something went wrong StreamBuilder');
@@ -362,11 +340,20 @@ class _ListsScreenState extends State<ListsScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
               }
-              // readIn(snapshot.data!);
-              List<String> temptrips = readInShoppingTripsData(snapshot.data!);
-              // print(context.watch<Cowboy>().shoppingTrips);
-
-              return ShoppingCollectionQuery(temptrips);
+              return SafeArea(
+                child: ListView.builder(
+                  //scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, int index) {
+                    return new ShoppingTripQuery(
+                        snapshot.data!.docs.toList()[index].id,
+                        key: Key(snapshot.data!.docs.toList()[index].id));
+                  },
+                ),
+                // ),
+              );
+              ;
             }),
         floatingActionButton: Container(
           height: 80,

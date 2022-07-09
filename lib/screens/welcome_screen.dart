@@ -1,18 +1,22 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:grocery_mule/screens/login_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/screens/lists.dart';
+import 'package:grocery_mule/screens/login_screen.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
-import 'package:grocery_mule/components/rounded_ button.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
-import 'package:grocery_mule/screens/lists.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../components/text_buttons.dart';
 
@@ -37,6 +41,65 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   late String lastName;
   FirebaseAuth auth = FirebaseAuth.instance;
   //final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  /// Generates a cryptographically secure random nonce, to be included in a
+  /// credential request.
+  String generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  /// Returns the sha256 hash of [input] in hex notation.
+  String sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  Future<void> signInWithApple() async {
+    // To prevent replay attacks with the credential returned from Apple, we
+    // include a nonce in the credential request. When signing in with
+    // Firebase, the nonce in the id token returned by Apple, is expected to
+    // match the sha256 hash of `rawNonce`.
+    final rawNonce = generateNonce();
+    final nonce = sha256ofString(rawNonce);
+
+    // Request credential for the currently signed in Apple account.
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: nonce,
+    );
+
+    // Create an `OAuthCredential` from the credential returned by Apple.
+    final oauthCredential = OAuthProvider("apple.com").credential(
+      idToken: appleCredential.identityToken,
+      rawNonce: rawNonce,
+    );
+    // Sign in to Firebase with the Google [UserCredential].
+    final UserCredential credential =
+        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+    if (credential.additionalUserInfo!.isNewUser) {
+      context.read<Cowboy>().initializeCowboy(
+          credential.user!.uid,
+          appleCredential.givenName!,
+          appleCredential.familyName!,
+          appleCredential.email!);
+      Navigator.pop(context);
+      Navigator.pushNamed(context, PayPalPage.id);
+    } else {
+      Navigator.pop(context);
+      Navigator.pushNamed(context, ListsScreen.id);
+    }
+    // Sign in the user with Firebase. If the nonce we generated earlier does
+    // not match the nonce in `appleCredential.identityToken`, sign in will fail.
+    return;
+  }
 
   Future<void> signInWithGoogle() async {
     // Trigger the Google Authentication flow.
@@ -97,12 +160,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
             Center(
                 child: Text(
-              "Let's Connect",
+              "Start Saving",
               style: titleBlack,
             )),
             Center(
                 child: Text(
-              "Together",
+              "Time",
               style: titleBlack,
             )),
             SizedBox(
@@ -144,7 +207,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 try {
                   await signInWithGoogle();
                 } catch (e) {
-                  print('error: '+e.toString());
+                  print('error: ' + e.toString());
                 }
               },
               child: Padding(
@@ -154,12 +217,40 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     try {
                       await signInWithGoogle();
                     } catch (e) {
-                      print('error: '+e.toString());
+                      print('error: ' + e.toString());
                     }
                   },
                   text: "Continue With Google",
                   icon: Icon(
                     FontAwesomeIcons.google,
+                    color: Colors.blueAccent,
+                  ),
+                  buttonColor: Colors.white,
+                  textColor: Colors.blue,
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () async {
+                try {
+                  await signInWithGoogle();
+                } catch (e) {
+                  print('error: ' + e.toString());
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.h),
+                child: RectangularTextIconButton(
+                  onPressed: () async {
+                    try {
+                      await signInWithApple();
+                    } catch (e) {
+                      print('error: ' + e.toString());
+                    }
+                  },
+                  text: "Continue With   Apple",
+                  icon: Icon(
+                    FontAwesomeIcons.apple,
                     // color: Colors.redAccent,
                   ),
                   buttonColor: Colors.white,
