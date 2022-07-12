@@ -77,6 +77,10 @@ class ReceiptItem extends StatefulWidget {
 class _ReceiptItemState extends State<ReceiptItem> {
   @override
   Widget build(BuildContext context) {
+    String title_short = widget.name;
+    if (title_short.length > 15) {
+      title_short = title_short.substring(0, 11) + "...";
+    }
     return DragTarget<String>(
       onAccept: (String newprice) {
         setState(() {
@@ -91,11 +95,11 @@ class _ReceiptItemState extends State<ReceiptItem> {
         return Card(
           child: Container(
             padding: const EdgeInsets.all(4.0),
-            height: 40.h,
-            child: Row(
+            height: 55.h,
+            child: Column(
               children: [
                 Text(
-                  '${widget.name}: ',
+                  '${title_short}: ',
                   style: appFontStyle.copyWith(
                       color: Colors.white, fontSize: 15.sp),
                 ),
