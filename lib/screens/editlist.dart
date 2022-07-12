@@ -119,7 +119,8 @@ class _ItemsListState extends State<ItemsList> {
     itemColQuery.docs.forEach((document) {
       String itemID = document['uuid'];
       // TODO maybe don't need this check at all
-      if (itemID != 'dummy') {
+      if ((itemID != 'dummy') && (itemID != 'add. fees') && (itemID != "tax")) {
+        //if (itemID != 'add. fees' && itemID == "tax")
         rawItemList.add(itemID);
       }
     });
@@ -157,6 +158,7 @@ class IndividualItem extends StatefulWidget {
 
 class _IndividualItemState extends State<IndividualItem> {
   late Item curItem;
+  late int index;
   late Stream<DocumentSnapshot> getItemStream = tripCollection
       .doc(widget.tripID)
       .collection('items')
@@ -167,6 +169,7 @@ class _IndividualItemState extends State<IndividualItem> {
   void initState() {
     curItem = Item.nothing();
     super.initState();
+    index = widget.index;
   }
 
   @override
@@ -183,6 +186,7 @@ class _IndividualItemState extends State<IndividualItem> {
           }
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
+          print("index: $index , item: ${curItem.name}");
           return simple_item();
         });
   }
@@ -208,7 +212,7 @@ class _IndividualItemState extends State<IndividualItem> {
               context.watch<Cowboy>().uuid !=
                   context.watch<ShoppingTrip>().host)
           ? beige
-          : (widget.index % 2 == 0)
+          : (index % 2 == 0)
               ? Colors.blueGrey
               : beige,
       key: Key(widget.itemID),
@@ -689,14 +693,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                                             )
                                           ],
                                         ),
-                                        // decoration: BoxDecoration(
-                                        //   color: dark_beige,
-                                        //   border: Border.all(
-                                        //     color: darker_beige,
-                                        //     width: 5.0,
-                                        //   ),
-                                        //   borderRadius: BorderRadius.circular(10),
-                                        // ),
                                       ),
                                     );
                                   });
