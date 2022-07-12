@@ -1,13 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
-import 'package:grocery_mule/constants.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:provider/provider.dart';
-import 'package:grocery_mule/screens/confirm_email.dart';
-import 'package:grocery_mule/screens/lists.dart';
 
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
@@ -25,6 +24,35 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   late String firstName;
   late String lastName;
   FirebaseAuth auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    email = "";
+    password = "";
+    firstName = "";
+    lastName = "";
+  }
+
+  bool checkField(
+      String firstname, String lastname, String email, String pass) {
+    bool flag = true;
+    if (firstname == '') {
+      Fluttertoast.showToast(msg: 'First Name cannot be empty');
+      flag = false;
+    } else if (lastname == '') {
+      Fluttertoast.showToast(msg: 'Last Name cannot be empty');
+      flag = false;
+    } else if (pass == '') {
+      Fluttertoast.showToast(msg: 'Password cannot be empty');
+      flag = false;
+    } else if (email == '') {
+      Fluttertoast.showToast(msg: 'Email cannot be empty');
+      flag = false;
+    }
+
+    return flag;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,48 +199,34 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   title: 'Register',
                   color: appOrange,
                   onPressed: () async {
-                    try {
-                      UserCredential userCredential = await FirebaseAuth
-                          .instance
-                          .createUserWithEmailAndPassword(
-                        email: email,
-                        password: password,
-                      );
-                      userCredential.user!.updateDisplayName(firstName);
-                      if (userCredential != null) {
-                        // print(email + ' ' + firstName + ' ' + lastName);
-                        context.read<Cowboy>().initializeCowboy(
-                            userCredential.user?.uid,
-                            firstName,
-                            lastName,
-                            email);
-                        await Navigator.pushNamed(
-                            context, ConfirmEmailScreen.id);
-                        // await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
+                    if (checkField(firstName, lastName, email, password))
+                      try {
+                        UserCredential userCredential = await FirebaseAuth
+                            .instance
+                            .createUserWithEmailAndPassword(
+                          email: email,
+                          password: password,
+                        );
+                        userCredential.user!.updateDisplayName(firstName);
+                        if (userCredential != null) {
+                          // print(email + ' ' + firstName + ' ' + lastName);
+                          context.read<Cowboy>().initializeCowboy(
+                              userCredential.user?.uid,
+                              firstName,
+                              lastName,
+                              email);
+                          await Navigator.pushNamed(
+                              context, ConfirmEmailScreen.id);
+                          // await DatabaseService(uuid: new_cowboy.uuid).initializeUserData(new_cowboy);
 
-                        Navigator.pop(context);
-                        //Navigator.pushNamed(context, ListsScreen.id);
-                        Navigator.pushNamed(context, PayPalPage.id);
+                          Navigator.pop(context);
+                          //Navigator.pushNamed(context, ListsScreen.id);
+                          Navigator.pushNamed(context, PayPalPage.id);
+                        }
+                      } on FirebaseAuthException catch (e) {
+                        print('error: ' + e.toString());
+                        Fluttertoast.showToast(msg: e.message!);
                       }
-                    } on FirebaseAuthException catch (e) {
-                      print('error: '+e.toString());
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text(e.message!),
-                            actions: [
-                              TextButton(
-                                child: Text("OK"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
                   }),
             ),
             SizedBox(

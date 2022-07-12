@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/dev/migration.dart';
@@ -12,7 +13,6 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
-import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
@@ -50,10 +50,8 @@ class _UserNameState extends State<UserName> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
-          return Text(
-            'Howdy ${snapshot.data!['first_name']}!',
-            style: TextStyle(fontSize: 25, color: Colors.black)
-          );
+          return Text('Howdy ${snapshot.data!['first_name']}!',
+              style: TextStyle(fontSize: 25, color: Colors.black));
         });
   }
 }
@@ -291,6 +289,8 @@ class _ListsScreenState extends State<ListsScreen> {
               ListTile(
                 title: const Text('Report a 🐞'),
                 onTap: () async {
+                  Fluttertoast.showToast(
+                      msg: 'Google Sign in required to upload bug report');
                   String paypalStr = "https://forms.gle/xHy3ixadwacFuFMi9";
                   Uri paypal_link = Uri.parse(paypalStr);
                   if (await canLaunchUrl(paypal_link)) {

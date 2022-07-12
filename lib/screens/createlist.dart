@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:grocery_mule/components/header.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
@@ -586,6 +587,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 }
                               } else {
                                 // print("triggered");
+                                /*
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -602,6 +604,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                     );
                                   },
                                 );
+                                 */
+                                Fluttertoast.showToast(
+                                    msg: 'List name cannot be empty');
                               }
                             },
                             text: (newList) ? 'Create List' : 'Save Changes',

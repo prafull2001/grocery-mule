@@ -369,6 +369,7 @@ class _EditListsScreenState extends State<EditListScreen> {
   }
 
   void _queryCurrentTrip(DocumentSnapshot curTrip) {
+    if (curTrip == null) return;
     List<String> bene_uid = [];
     DateTime date = DateTime.now();
     date = (curTrip['date'] as Timestamp).toDate();
@@ -848,6 +849,8 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                         context.read<ShoppingTrip>().addItem(food);
                         isAdd = false;
                       });
+                    else
+                      Fluttertoast.showToast(msg: 'Item cannot be empty');
                   })),
         ],
       )),

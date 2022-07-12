@@ -1,16 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:grocery_mule/components/header.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
+import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:io';
-import 'package:grocery_mule/dev/collection_references.dart';
 
 class UserInfoScreen extends StatefulWidget {
   static String id = 'userinfo_screen';
@@ -52,6 +52,23 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
       );
     }
     return false;
+  }
+
+  bool checkField(String firstname, String email) {
+    bool flag = true;
+    if (firstname == '') {
+      Fluttertoast.showToast(msg: 'Name cannot be empty');
+      flag = false;
+    } else if (email == '') {
+      Fluttertoast.showToast(msg: 'Email cannot be empty');
+      flag = false;
+    } else if (!RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email)) {
+      Fluttertoast.showToast(msg: 'Email is not valid');
+      flag = false;
+    }
+    return flag;
   }
 
   @override
@@ -145,22 +162,6 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                     SizedBox(
                       height: 8.0,
                     ),
-                    // TextFormField(
-                    //      decoration: InputDecoration(
-                    //       icon: Icon(
-                    //     Icons.email,
-                    //     color: appOrange,
-                    //   )),
-                    //   textAlign: TextAlign.center,
-                    //   initialValue: prevLast,
-                    //   onChanged: (value) {
-                    //     lastName = value;
-                    //   },
-                    //   style: TextStyle(color: Colors.black),
-                    // ),
-                    // SizedBox(
-                    //   height: 24.0,
-                    // ),
                     TextFormField(
                       decoration: InputDecoration(
                         icon: Icon(
@@ -189,7 +190,8 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         title: 'Update User Info',
                         color: appOrange,
                         onPressed: () async {
-                          if (checkPaypalValidity(payPal)) {
+                          if (checkPaypalValidity(payPal) &&
+                              (checkField(firstName, email))) {
                             try {
                               context.read<Cowboy>().fillUpdatedInfo(
                                   firstName, lastName, email, payPal);

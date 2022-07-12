@@ -1,17 +1,18 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:grocery_mule/painters/text_detector_painter.dart';
 import 'package:provider/provider.dart';
+
 import '../components/rounded_ button.dart';
 import '../constants.dart';
 
@@ -140,7 +141,9 @@ class _ReceiptItemsState extends State<ReceiptItems> {
       // print('0');
       String item_name = document['name'];
       if (item_name == 'tax') {
-        if (add_fees) widget.rilist.insert(widget.rilist.length-1, ReceiptItem(item_name, document['uuid']));
+        if (add_fees)
+          widget.rilist.insert(widget.rilist.length - 1,
+              ReceiptItem(item_name, document['uuid']));
       } else if (item_name == 'add. fees') {
         widget.rilist.add(ReceiptItem(item_name, document['uuid']));
         add_fees = true;
@@ -201,6 +204,10 @@ class ReceiptPrice extends StatefulWidget {
 class _ReceiptPriceState extends State<ReceiptPrice> {
   String val = '0.00';
 
+  bool isPricValid(String test) {
+    return RegExp(r"(^[0-9]+$)|(^[0-9]+\.[0-9]{0,2}$)").hasMatch(test);
+  }
+
   @override
   Widget build(BuildContext context) {
     return LongPressDraggable<String>(
@@ -240,21 +247,30 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
                                 style: TextStyle(fontSize: 25),
                               ),
                               TextField(
-                                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                keyboardType: TextInputType.numberWithOptions(
+                                    decimal: true),
                                 onChanged: (value) {
                                   val = value;
                                 },
-                                decoration: InputDecoration(hintText: widget.price),
+                                decoration:
+                                    InputDecoration(hintText: widget.price),
                               ),
                               Row(
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      setState(() {
-                                        widget.price = val;
-                                        //price = val;
-                                      });
-                                      Navigator.pop(context);
+                                      print(isPricValid(val));
+                                      if (isPricValid(val)) {
+                                        setState(() {
+                                          //TODO LOOK HERE!!!!!!!!!!!!!
+                                          widget.price = val;
+                                          //price = val;
+                                        });
+                                        Navigator.pop(context);
+                                      } else {
+                                        Fluttertoast.showToast(
+                                            msg: 'Invalid price');
+                                      }
                                     },
                                     icon: Icon(Icons.done),
                                   ),
@@ -477,33 +493,38 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
         title: Text('Receipt Scanning'),
         backgroundColor: light_orange,
       ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              SizedBox(width: 8.0,),
-              Expanded(
-                child: RoundedButton(
-                  onPressed: () => pickImage(true),
-                  title: "Pick from Gallery",
-                  color: Colors.orange,
-                ),
+      body: Column(children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 8.0,
+            ),
+            Expanded(
+              child: RoundedButton(
+                onPressed: () => pickImage(true),
+                title: "Pick from Gallery",
+                color: Colors.orange,
               ),
-              SizedBox(width: 8.0,),
-              Expanded(
-                child: RoundedButton(
-                  onPressed: () => pickImage(false),
-                  title: "Take Picture",
-                  color: Colors.orange,
-                ),
+            ),
+            SizedBox(
+              width: 8.0,
+            ),
+            Expanded(
+              child: RoundedButton(
+                onPressed: () => pickImage(false),
+                title: "Take Picture",
+                color: Colors.orange,
               ),
-              SizedBox(width: 8.0,),
-            ],
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Container(
+            ),
+            SizedBox(
+              width: 8.0,
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
             padding: const EdgeInsets.all(4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -533,7 +554,8 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                           ),
                           label: Text(
                             'Prices',
-                             style: appFontStyle.copyWith(fontSize: 30, color: Colors.black),
+                            style: appFontStyle.copyWith(
+                                fontSize: 30, color: Colors.black),
                           ),
                         ),
                       ],
