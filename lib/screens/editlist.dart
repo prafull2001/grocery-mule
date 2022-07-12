@@ -185,6 +185,7 @@ class _IndividualItemState extends State<IndividualItem> {
           }
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
+          print("index: $index , item: ${curItem.name}");
           return simple_item();
         });
   }
