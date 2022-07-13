@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,9 +11,9 @@ import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-
 import '../components/rounded_ button.dart';
 import '../constants.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class DBItemPrice extends StatefulWidget {
   late final String itemUUID;
@@ -163,7 +162,6 @@ class _ReceiptItemsState extends State<ReceiptItems> {
       child: StreamBuilder<QuerySnapshot>(
         stream: widget.itemstream,
         builder: (context, snapshot) {
-          // print('build ReceiptItemsState: ${items.length}');
           if (snapshot.hasError) {
             return const Text(
                 'Something went wrong with item snapshot in receipt_scanning');
@@ -364,20 +362,17 @@ class ReceiptPrices extends StatefulWidget {
 class _ReceiptPricesState extends State<ReceiptPrices> {
   @override
   Widget build(BuildContext context) {
-    // print('reached build ReceiptPricesState: ${this.prices.length}');
     return Expanded(
       child: Container(
         height: 500,
-        child: ListView.separated(
+        child:
+        ListView.separated(
           padding: const EdgeInsets.all(4.0),
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
           itemCount: widget.rplist.length,
           itemBuilder: (context, index) {
             return widget.rplist[index];
-            // ReceiptPrice rp = ReceiptPrice(prices[index]);
-            // widget.prices[index] = rp.price;
-            // return rp;
           },
           separatorBuilder: (context, index) {
             return SizedBox(height: 10.0);
@@ -388,6 +383,7 @@ class _ReceiptPricesState extends State<ReceiptPrices> {
   }
 }
 
+// overall screen
 class ReceiptScanning extends StatefulWidget {
   static String id = 'receipts_scanning';
 
@@ -584,7 +580,6 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
             ),
           ),
         ),
-        //receipt_image != null ? Image.file(receipt_image!): Text("no image selected")
       ]),
     );
   }

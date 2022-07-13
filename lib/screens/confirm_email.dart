@@ -86,7 +86,9 @@ class _ConfirmEmailScreenState extends State<ConfirmEmailScreen> {
                   ),
                 ],
               ),
-              Image.network("https://i.gifer.com/QHTn.gif")
+              Image.asset(
+                "images/confirm_email.gif",
+              ),
             ],
           ),
         ),
