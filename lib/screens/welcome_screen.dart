@@ -160,14 +160,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             ),
             Center(
                 child: Text(
-              "Start Saving",
+              "Welcome!",
               style: titleBlack,
             )),
-            Center(
-                child: Text(
-              "Time",
-              style: titleBlack,
-            )),
+
             SizedBox(
               height: 20.h,
             ),

@@ -300,12 +300,6 @@ class _ListsScreenState extends State<ListsScreen> {
                 },
               ),
               ListTile(
-                title: const Text('intro screen'),
-                onTap: () async {
-                  Navigator.pushNamed(context, IntroScreen.id);
-                },
-              ),
-              ListTile(
                 title: const Text('Log Out'), //
                 onTap: () async {
                   var currentUser = FirebaseAuth.instance.currentUser;
