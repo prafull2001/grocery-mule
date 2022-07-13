@@ -118,6 +118,13 @@ class _IntroScreenState extends State<IntroScreen> {
           decoration: pageDecoration,
         ),
         PageViewModel(
+          title: "Map Receipt Items",
+          body:
+          "Once you\'re done shopping, scan in your receipt and map it to the correct items",
+          image: _buildImage('item_mapping.gif', 4.1),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
           title: "Checkout 💰",
           body:
           "When you\'re done shopping for a list, click \'Checkout\' to send automatically calculated payment requests with the touch of a button!",
