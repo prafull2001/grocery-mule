@@ -609,6 +609,26 @@ class _EditListsScreenState extends State<EditListScreen> {
                             borderRadius: BorderRadius.circular(12.r)),
                         color: Colors.white,
                         child: ListTile(
+                            leading: Icon(
+                              FontAwesomeIcons.userLarge,
+                              color: appOrange,
+                            ),
+                            title: Text(
+                              "Trip Title",
+                              style: titleBlack.copyWith(fontSize: 18.sp),
+                            ),
+                            trailing: Text('${context.read<ShoppingTrip>().title}')
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        color: Colors.white,
+                        child: ListTile(
                           leading: Icon(
                             FontAwesomeIcons.userLarge,
                             color: appOrange,
