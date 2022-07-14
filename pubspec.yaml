@@ -36,10 +36,16 @@ dependencies:
   sign_in_with_apple: ^4.0.0
   crypto: ^3.0.2
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: 
+
+  flutter_native_splash: ^2.2.4
+
+flutter_native_splash:
+  color: "#ffe9d0"
+  image: images/logo.png
 
 
 flutter:
