@@ -401,11 +401,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         child: Container(
                           child: StreamBuilder<QuerySnapshot>(
                               stream: userCollection
-                                  // .where('uuid',
-                                  //     whereIn:
-                                  //         context.read<Cowboy>().friends.isEmpty
-                                  //             ? ['']
-                                  //             : context.read<Cowboy>().friends)
+                                  .where('friends',
+                                      arrayContains:
+                                          context.read<Cowboy>().uuid)
                                   .snapshots(),
                               builder: (context,
                                   AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -421,14 +419,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 //print("first friend: ${snapshot.data!.docs[1].get('uuid')}");
 
                                 snapshot.data!.docs.forEach((document) {
-                                  if (context
-                                      .read<Cowboy>()
-                                      .friends
-                                      .contains(document['uuid'])) {
-                                    friends.add(MultiSelectItem<String>(
-                                        document['uuid'],
-                                        document['first_name']));
-                                  }
+                                  friends.add(MultiSelectItem<String>(
+                                      document['uuid'],
+                                      document['first_name']));
                                 });
 
                                 return MultiSelectDialogField(
@@ -574,7 +567,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               if (context.read<ShoppingTrip>().title != '') {
                                 print("editing list");
                                 await updateGridView(newList);
-                                //setState(() {});
                                 Navigator.pop(context);
                                 if (newList) {
                                   Navigator.push(
@@ -586,25 +578,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                                   .uuid)));
                                 }
                               } else {
-                                // print("triggered");
-                                /*
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: Text('List name cannot be empty'),
-                                      actions: [
-                                        TextButton(
-                                          child: Text("OK"),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                                 */
                                 Fluttertoast.showToast(
                                     msg: 'List name cannot be empty');
                               }
