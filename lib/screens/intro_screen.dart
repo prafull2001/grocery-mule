@@ -78,43 +78,59 @@ class _IntroScreenState extends State<IntroScreen> {
         PageViewModel(
           title: "Hey There! 👋",
           body:
-          "Nice to meet you. Sign in with Google or your email to get started!",
+          "Welcome to GroceryMule! \n\n Let's take you on a brief tour. Sign up with Google, Apple, or your email to get started!",
           image: _buildImage('logo.png', 3),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Feedback and 🐞s",
           body:
-          "Your feedback directly helps us improve the quality of GroceryMule! Please provide feedback through our Google Form found here!",
+          "Your feedback directly helps us improve the quality of GroceryMule! \n\nPlease provide feedback through our Google Form found here!",
           image: _buildFeedbackImage('bug_reporting.png', 1),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Connect with PayPal 💵",
           body:
-          "Add your PayPal.me link to your account to set up future payments",
+          "We\'ll ask you to add your PayPal.me link when you first create an account. \n\n This will allow you to request payments from other users at the end of trips.",
           image: _buildImage('paypal.png', 7),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Find Your Crowd 🔍",
           body:
-          "Head over to the \'Cowamigos\' tab to search for friends and add them to shopping trips!",
-          image: _buildImage('friends.png', .9),
+          "Head over to the \'Cowamigos\' tab to search for friends to add them to future shopping trips!",
+          image: _buildImage('cowamigos.png', .9),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Create a List 📝",
           body:
-          "Create a list to host a shopping trip by pressing the + sign at the bottom right of your home screen.",
-          image: _buildImage('list.png', 0.9),
+          "Create a list to host a shopping trip by pressing the + sign at the bottom right of your home screen.\n\n Add a title, some friends, and you\'re good to go!",
+          image: _buildImage('create_list.png', 4),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Add Items 🍎",
           body:
-          "Add items to your list and click \'Personal List\' to view the items you\'ve added to that list.",
-          image: _buildImage('items.png', 0.9),
+          "Everyone can add items to the shopping trip, but only Hosts can remove them.",
+          image: _buildImage('additem.png', 2.5),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Shopping Mode ✅",
+          body:
+          "When you're ready to shop, press the 'Shopping Mode' button to lock in your list and create a checklist!"
+              "\n\n You\'ll see the total amount of each item to buy, and users cannot edit the list while it is locked.",
+          image: _buildImage('shoppingmode.png', 2.5),
+          decoration: pageDecoration,
+        ),
+        PageViewModel(
+          title: "Checkout 💰",
+          body:
+          "When you\'re done shopping for a list, click \'Checkout\' to view everyone\'s owed amount"
+              "\n\n ",
+          image: _buildImage('checkout.png', 5),
           decoration: pageDecoration,
         ),
         PageViewModel(
@@ -122,13 +138,6 @@ class _IntroScreenState extends State<IntroScreen> {
           body:
           "Once you\'re done shopping, scan in your receipt and map it to the correct items",
           image: _buildImage('item_mapping.gif', 4.1),
-          decoration: pageDecoration,
-        ),
-        PageViewModel(
-          title: "Checkout 💰",
-          body:
-          "When you\'re done shopping for a list, click \'Checkout\' to send automatically calculated payment requests with the touch of a button!",
-          image: _buildImage('checkout.png', 0.9),
           decoration: pageDecoration,
         ),
       ],
