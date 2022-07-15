@@ -759,7 +759,7 @@ class _EditListsScreenState extends State<EditListScreen> {
             if (!snapshot.data!.exists) return CircularProgressIndicator();
             return (snapshot.data!['host'] == context.watch<Cowboy>().uuid)
                 ? Padding(
-                    padding: EdgeInsets.only(bottom: 10.h),
+                    padding: EdgeInsets.only(bottom: 40.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [

@@ -394,33 +394,36 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                         key: Key(aggre_raw_list.keys.toList()[index]));
                   },
                 ),
-                GestureDetector(
-                  onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 35.w),
-                    child: RectangularTextIconButton(
-                      text: "Receipt Scanning",
-                      buttonColor: Colors.lightGreen,
-                      icon: Icon(Icons.search_rounded),
-                      textColor: Colors.white,
-                      onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
-                    ),
-                  ),
-                ),
-                // Container(
-                //   height: 70,
-                //   width: 150,
-                //   child: RoundedButton(
-                //     onPressed: () {
-                //       Navigator.pushNamed(context, ReceiptScanning.id);
-                //     },
-                //     title: "Receipt Scanning",
-                //     color: Colors.blueAccent,
-                //   ),
-                // ),
               ],
             );
           }),
+      bottomSheet: Padding(
+        padding: EdgeInsets.only(bottom: 30.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 70,
+              width: 300,
+              child:
+              GestureDetector(
+                onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 35.w),
+                  child: RectangularTextIconButton(
+                    text: "Receipt Scanning",
+                    buttonColor: Colors.lightGreen,
+                    icon: Icon(Icons.search_rounded),
+                    textColor: Colors.white,
+                    onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+        ),
+      ),
     );
   }
 //,
