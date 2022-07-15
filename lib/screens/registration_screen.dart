@@ -63,28 +63,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Text(
-                  'Register',
-                  style: TextStyle(
-                    fontSize: 40.0,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
+            Text(
+              'Nice to meet you!',
+              style: appFontStyle.copyWith(
+                  color: Colors.black,
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.bold),
             ),
-            Row(
-              children: <Widget>[
-                Text(
-                  'Nice to meet you!',
-                  style: TextStyle(
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.w100,
-                  ),
-                ),
-              ],
-            ),
+
             SizedBox(
               height: 30.0,
             ),

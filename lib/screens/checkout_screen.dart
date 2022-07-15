@@ -89,18 +89,49 @@ class _PayPalButtonState extends State<PayPalButton> {
           }
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 10.h),
-            child: RectangularTextIconButton(
-                text: "PayPal",
-                buttonColor: Colors.blueGrey,
-                icon: Icon(FontAwesomeIcons.paypal),
-                textColor: Colors.white,
-                onPressed: () async {
-                  String paypalStr = snapshot.data!['paypal'];
-                  Uri paypal_link = Uri.parse(paypalStr);
-                  if (await canLaunchUrl(paypal_link)) {
-                    launchUrl(paypal_link);
-                  }
-                }),
+            child:
+            GestureDetector(
+              onTap: () async {
+                String paypalStr = snapshot.data!['paypal'];
+                Uri paypal_link = Uri.parse(paypalStr);
+                if (await canLaunchUrl(paypal_link)) {
+                  launchUrl(paypal_link);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 35.w),
+                child: RectangularTextIconButton(
+                    text: "PayPal",
+                    buttonColor: Colors.blueGrey,
+                    icon: Icon(FontAwesomeIcons.paypal),
+                    textColor: Colors.white,
+                    onPressed: () async {
+                      String paypalStr = snapshot.data!['paypal'];
+                      Uri paypal_link = Uri.parse(paypalStr);
+                      if (await canLaunchUrl(paypal_link)) {
+                        launchUrl(paypal_link);
+                      }
+                    }),
+              ),
+            ),
+
+
+
+            /*
+             GestureDetector(
+                  onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 35.w),
+                    child: RectangularTextIconButton(
+                      text: "Receipt Scanning",
+                      buttonColor: Colors.lightGreen,
+                      icon: Icon(Icons.search_rounded),
+                      textColor: Colors.white,
+                      onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                    ),
+                  ),
+                ),
+             */
           );
         });
   }

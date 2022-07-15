@@ -244,7 +244,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       print('error: ' + e.toString());
                     }
                   },
-                  text: "Continue With   Apple",
+                  text: "Continue With Apple",
                   icon: Icon(
                     FontAwesomeIcons.apple,
                     // color: Colors.redAccent,
