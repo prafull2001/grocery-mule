@@ -121,22 +121,22 @@ class _IntroScreenState extends State<IntroScreen> {
           title: "Shopping Mode ✅",
           body:
           "When you're ready to shop, press the 'Shopping Mode' button to lock in your list and create a checklist!"
-              "\n\n You\'ll see the total amount of each item to buy, and users cannot edit the list while it is locked.",
+              "\n\n You\'ll see the total amount of each item to buy, and users cannot edit the list while locked.",
           image: _buildImage('shoppingmode.png', 2.5),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Checkout 💰",
           body:
-          "When you\'re done shopping for a list, click \'Checkout\' to view everyone\'s owed amount"
-              "\n\n ",
+          "As a host, click \'Checkout\' to view everyone\'s owed amount."
+              "\n\n After you scan in a receipt, copy costs to your clipboard by tapping the 'Total Cost' button & request each user on PayPal!",
           image: _buildImage('checkout.png', 5),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Map Receipt Items",
           body:
-          "Once you\'re done shopping, scan in your receipt and map it to the correct items",
+          "To assign prices to items as a host, tap the 'Receipt Scanning' in the Checkout Screen.\n\n Here, you can scan in your receipt and map prices to the correct items.",
           image: _buildImage('item_mapping.gif', 4.1),
           decoration: pageDecoration,
         ),
