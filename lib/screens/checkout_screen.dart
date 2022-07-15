@@ -89,18 +89,49 @@ class _PayPalButtonState extends State<PayPalButton> {
           }
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 10.h),
-            child: RectangularTextIconButton(
-                text: "PayPal",
-                buttonColor: Colors.blueGrey,
-                icon: Icon(FontAwesomeIcons.paypal),
-                textColor: Colors.white,
-                onPressed: () async {
-                  String paypalStr = snapshot.data!['paypal'];
-                  Uri paypal_link = Uri.parse(paypalStr);
-                  if (await canLaunchUrl(paypal_link)) {
-                    launchUrl(paypal_link);
-                  }
-                }),
+            child:
+            GestureDetector(
+              onTap: () async {
+                String paypalStr = snapshot.data!['paypal'];
+                Uri paypal_link = Uri.parse(paypalStr);
+                if (await canLaunchUrl(paypal_link)) {
+                  launchUrl(paypal_link);
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 35.w),
+                child: RectangularTextIconButton(
+                    text: "PayPal",
+                    buttonColor: Colors.blueGrey,
+                    icon: Icon(FontAwesomeIcons.paypal),
+                    textColor: Colors.white,
+                    onPressed: () async {
+                      String paypalStr = snapshot.data!['paypal'];
+                      Uri paypal_link = Uri.parse(paypalStr);
+                      if (await canLaunchUrl(paypal_link)) {
+                        launchUrl(paypal_link);
+                      }
+                    }),
+              ),
+            ),
+
+
+
+            /*
+             GestureDetector(
+                  onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 35.w),
+                    child: RectangularTextIconButton(
+                      text: "Receipt Scanning",
+                      buttonColor: Colors.lightGreen,
+                      icon: Icon(Icons.search_rounded),
+                      textColor: Colors.white,
+                      onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                    ),
+                  ),
+                ),
+             */
           );
         });
   }
@@ -363,33 +394,36 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                         key: Key(aggre_raw_list.keys.toList()[index]));
                   },
                 ),
-                GestureDetector(
-                  onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 35.w),
-                    child: RectangularTextIconButton(
-                      text: "Receipt Scanning",
-                      buttonColor: Colors.lightGreen,
-                      icon: Icon(Icons.search_rounded),
-                      textColor: Colors.white,
-                      onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
-                    ),
-                  ),
-                ),
-                // Container(
-                //   height: 70,
-                //   width: 150,
-                //   child: RoundedButton(
-                //     onPressed: () {
-                //       Navigator.pushNamed(context, ReceiptScanning.id);
-                //     },
-                //     title: "Receipt Scanning",
-                //     color: Colors.blueAccent,
-                //   ),
-                // ),
               ],
             );
           }),
+      bottomSheet: Padding(
+        padding: EdgeInsets.only(bottom: 30.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 70,
+              width: 300,
+              child:
+              GestureDetector(
+                onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 35.w),
+                  child: RectangularTextIconButton(
+                    text: "Receipt Scanning",
+                    buttonColor: Colors.lightGreen,
+                    icon: Icon(Icons.search_rounded),
+                    textColor: Colors.white,
+                    onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                  ),
+                ),
+              ),
+            ),
+          ],
+
+        ),
+      ),
     );
   }
 //,
