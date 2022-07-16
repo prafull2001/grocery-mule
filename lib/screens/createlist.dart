@@ -269,6 +269,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             total_per_user[key] = total_per_user[key]! + quantity * unit_price;
           }
         });
+      } else {
+        double unit_price = double.parse(doc['price'].toString()) /
+            context.read<ShoppingTrip>().beneficiaries.length;
+        context.read<ShoppingTrip>().beneficiaries.forEach((key) {
+          total_per_user[key] = total_per_user[key]! + unit_price;
+        });
       }
     });
     context.read<ShoppingTrip>().beneficiaries.forEach((uid) async {
