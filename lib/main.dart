@@ -84,6 +84,7 @@ void main() async {
           builder: (context, child) {
             // print(MediaQuery.of(context).size);
             return MaterialApp(
+              debugShowCheckedModeBanner: false,
               theme: ThemeData(
                   primaryColor: dark_beige,
                   scaffoldBackgroundColor: cream,
