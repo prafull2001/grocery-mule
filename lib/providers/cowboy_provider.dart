@@ -88,6 +88,8 @@ class Cowboy with ChangeNotifier {
       'friends': _friends,
       'requests': _requests,
       'paypal': _paypal,
+      'tier': "standard",
+      'total expenditure': 0
     });
     userCollection
         .doc(_uuid)

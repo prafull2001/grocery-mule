@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,9 +12,9 @@ import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
 import '../components/rounded_ button.dart';
 import '../constants.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class DBItemPrice extends StatefulWidget {
   late final String itemUUID;
@@ -365,8 +366,7 @@ class _ReceiptPricesState extends State<ReceiptPrices> {
     return Expanded(
       child: Container(
         height: 500,
-        child:
-        ListView.separated(
+        child: ListView.separated(
           padding: const EdgeInsets.all(4.0),
           scrollDirection: Axis.vertical,
           shrinkWrap: true,

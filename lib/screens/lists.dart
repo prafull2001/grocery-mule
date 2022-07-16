@@ -13,7 +13,6 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
-import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
@@ -300,6 +299,17 @@ class _ListsScreenState extends State<ListsScreen> {
                 },
               ),
               ListTile(
+                title: const Text('Feature Request'),
+                onTap: () async {
+                  String paypalStr =
+                      "https://docs.google.com/forms/d/e/1FAIpQLSf7gVxRoyMq0C8tuLMdnw4T2hxr8LUgIbZFFWQv2sJFSafndg/viewform";
+                  Uri paypal_link = Uri.parse(paypalStr);
+                  if (await canLaunchUrl(paypal_link)) {
+                    launchUrl(paypal_link);
+                  }
+                },
+              ),
+              ListTile(
                 title: const Text('Log Out'), //
                 onTap: () async {
                   var currentUser = FirebaseAuth.instance.currentUser;
@@ -354,7 +364,6 @@ class _ListsScreenState extends State<ListsScreen> {
                 ),
                 // ),
               );
-              ;
             }),
         floatingActionButton: Container(
           height: 80,

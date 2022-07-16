@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:grocery_mule/constants.dart';
-import 'package:introduction_screen/introduction_screen.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
+import 'package:introduction_screen/introduction_screen.dart';
 
 class IntroScreen extends StatefulWidget {
   static String id = 'intro_screen';
@@ -13,7 +12,6 @@ class IntroScreen extends StatefulWidget {
 }
 
 class _IntroScreenState extends State<IntroScreen> {
-
   final introKey = GlobalKey<IntroductionScreenState>();
 
   void _onIntroEnd(context) {
@@ -22,21 +20,27 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   Widget _buildImage(String assetName, double thisScale, [double width = 350]) {
-    return Image.asset('images/$assetName', width: width, scale: thisScale,);
-  }
-
-  Widget _buildFeedbackImage(String assetName, double thisScale, [double width = 200]) {
-    return Container(
-      height: 300,
-      margin: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2 ),
-      ),
-      child: Image.asset('images/$assetName', width: width, scale: thisScale,)
+    return Image.asset(
+      'images/$assetName',
+      width: width,
+      scale: thisScale,
     );
   }
 
-
+  Widget _buildFeedbackImage(String assetName, double thisScale,
+      [double width = 200]) {
+    return Container(
+        height: 300,
+        margin: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black, width: 2),
+        ),
+        child: Image.asset(
+          'images/$assetName',
+          width: width,
+          scale: thisScale,
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,57 +82,56 @@ class _IntroScreenState extends State<IntroScreen> {
         PageViewModel(
           title: "Hey There! 👋",
           body:
-          "Welcome to GroceryMule! \n\n Let's take you on a brief tour. Sign up with Google, Apple, or your email to get started!",
+              "Welcome to GroceryMule! \n\n Let's take you on a brief tour. Sign up with Google, Apple, or your email to get started!",
           image: _buildImage('logo.png', 3),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Feedback and 🐞s",
           body:
-          "Your feedback directly helps us improve the quality of GroceryMule! \n\nPlease provide feedback through our Google Form found here!",
+              "Your feedback directly helps us improve the quality of GroceryMule! \n\nPlease provide feedback through our Google Form found here!",
           image: _buildFeedbackImage('bug_reporting.png', 1),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Connect with PayPal 💵",
           body:
-          "We\'ll ask you to add your PayPal.me link when you first create an account. \n\n This will allow you to request payments from other users at the end of trips.",
+              "We\'ll ask you to add your PayPal.me link when you first create an account. \n\n This will allow you to request payments from other users at the end of trips.",
           image: _buildImage('paypal.png', 7),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Find Your Crowd 🔍",
           body:
-          "Head over to the \'Cowamigos\' tab to search for friends to add them to future shopping trips!",
+              "Head over to the \'Cowamigos\' tab to search for friends to add them to future shopping trips!",
           image: _buildImage('cowamigos.png', .9),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Create a List 📝",
           body:
-          "Create a list to host a shopping trip by pressing the + sign at the bottom right of your home screen.\n\n Add a title, some friends, and you\'re good to go!",
+              "Create a list to host a shopping trip by pressing the + sign at the bottom right of your home screen.\n\n Add a title, some friends, and you\'re good to go!",
           image: _buildImage('create_list.png', 4),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Add Items 🍎",
           body:
-          "Everyone can add items to the shopping trip, but only Hosts can remove them.",
+              "Everyone can add items to the shopping trip, but only Hosts can remove them.",
           image: _buildImage('additem.png', 2.5),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Shopping Mode ✅",
           body:
-          "When you're ready to shop, press the 'Shopping Mode' button to lock in your list and create a checklist!"
+              "When you're ready to shop, press the 'Shopping Mode' button to lock in your list and create a checklist!"
               "\n\n You\'ll see the total amount of each item to buy, and users cannot edit the list while locked.",
           image: _buildImage('shoppingmode.png', 2.5),
           decoration: pageDecoration,
         ),
         PageViewModel(
           title: "Checkout 💰",
-          body:
-          "As a host, click \'Checkout\' to view everyone\'s owed amount."
+          body: "As a host, click \'Checkout\' to view everyone\'s owed amount."
               "\n\n After you scan in a receipt, copy costs to your clipboard by tapping the 'Total Cost' button & request each user on PayPal!",
           image: _buildImage('checkout.png', 5),
           decoration: pageDecoration,
@@ -136,7 +139,7 @@ class _IntroScreenState extends State<IntroScreen> {
         PageViewModel(
           title: "Map Receipt Items",
           body:
-          "To assign prices to items as a host, tap the 'Receipt Scanning' in the Checkout Screen.\n\n Here, you can scan in your receipt and map prices to the correct items.",
+              "To assign prices to items as a host, tap the 'Receipt Scanning' button in the Checkout Screen.\n\n Here, you can scan in your receipt and map prices to the correct items.",
           image: _buildImage('item_mapping.gif', 4.1),
           decoration: pageDecoration,
         ),
@@ -150,7 +153,8 @@ class _IntroScreenState extends State<IntroScreen> {
       back: const Icon(Icons.arrow_back, color: Colors.orange),
       skip: const Text('Skip', style: TextStyle(fontWeight: FontWeight.w600)),
       next: const Icon(Icons.arrow_forward, color: Colors.orange),
-      done: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange)),
+      done: const Text('Done',
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.orange)),
       curve: Curves.fastLinearToSlowEaseIn,
       controlsMargin: const EdgeInsets.all(16),
       controlsPadding: kIsWeb
@@ -172,5 +176,4 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
     );
   }
-
 }
