@@ -596,7 +596,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                       //   height: 20,
                       // ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(1.0),
                         child: HomeHeader(
                           title: "Trip Details",
                           textColor: Colors.white,
@@ -761,12 +761,11 @@ class _EditListsScreenState extends State<EditListScreen> {
               if (!snapshot.data!.exists) return CircularProgressIndicator();
               return (snapshot.data!['host'] == context.watch<Cowboy>().uuid)
                   ? Padding(
-                      padding: EdgeInsets.only(bottom: 40.h),
+                      padding: EdgeInsets.only(bottom: 5.h),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           //comment
-
                           Container(
                             height: 70,
                             width: 150,
@@ -884,7 +883,7 @@ class _ItemsAdditionState extends State<ItemsAddition> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.h),
+          padding: EdgeInsets.symmetric(vertical: 5.h),
           child: Divider(
             endIndent: 50,
             indent: 50,

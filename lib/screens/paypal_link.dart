@@ -40,6 +40,8 @@ class _PayPalPageSate extends State<PayPalPage> {
                 child: Text("OK"),
                 onPressed: () {
                   Navigator.of(context).pop();
+                  context.read<Cowboy>().updateCowboyPaypal(paypal_link);
+                  Navigator.pushNamed(context, ListsScreen.id);
                 },
               ),
             ],
@@ -180,21 +182,21 @@ class _PayPalPageSate extends State<PayPalPage> {
                       );
                     }
                   }),
-              if (link_valid) ...[
-                RoundedButton(
-                    title: 'Finish Login',
-                    color: Colors.blueAccent,
-                    onPressed: () async {
-                      Uri link = Uri.parse(paypal_link);
-                      print(link);
-                      // if(await canLaunchUrl(link)){
-                      //   print('About to launch $link');
-                      //   await launchUrl(link);
-                      // }
-                      context.read<Cowboy>().updateCowboyPaypal(paypal_link);
-                      Navigator.pushNamed(context, ListsScreen.id);
-                    })
-              ]
+              // if (link_valid) ...[
+              //   RoundedButton(
+              //       title: 'Finish Login',
+              //       color: Colors.blueAccent,
+              //       onPressed: () async {
+              //         Uri link = Uri.parse(paypal_link);
+              //         print(link);
+              //         // if(await canLaunchUrl(link)){
+              //         //   print('About to launch $link');
+              //         //   await launchUrl(link);
+              //         // }
+              //         context.read<Cowboy>().updateCowboyPaypal(paypal_link);
+              //         Navigator.pushNamed(context, ListsScreen.id);
+              //       })
+              // ]
             ],
           ),
         ),
