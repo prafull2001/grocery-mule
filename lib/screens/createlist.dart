@@ -263,12 +263,17 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         Map<String, dynamic> curSubitems = doc
             .get(FieldPath(['subitems'])); // get map of subitems for cur item
         double unit_price = doc['price'] / doc['quantity'];
-        ;
         curSubitems.forEach((key, quantity) {
           // add item name & quantity if user UUIDs match & quantity > 0
           if (curSubitems[key] > 0) {
             total_per_user[key] = total_per_user[key]! + quantity * unit_price;
           }
+        });
+      } else {
+        double unit_price = double.parse(doc['price'].toString()) /
+            context.read<ShoppingTrip>().beneficiaries.length;
+        context.read<ShoppingTrip>().beneficiaries.forEach((key) {
+          total_per_user[key] = total_per_user[key]! + unit_price;
         });
       }
     });
@@ -276,8 +281,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       DocumentSnapshot user = await userCollection.doc(uid).get();
       double cur_total = double.parse(user['total expenditure'].toString());
       cur_total += total_per_user[uid]!;
-      await userCollection.doc(context.read<Cowboy>().uuid).update({
-        'total expenditure': cur_total,
+      await userCollection.doc(uid).update({
+        'total expenditure': cur_total.toStringAsFixed(2),
       });
     });
     return;
