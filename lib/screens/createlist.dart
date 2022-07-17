@@ -93,10 +93,10 @@ class _DatePickerState extends State<DatePicker> {
     this.tripid = widget.tripuuid;
   }
 
-  _selectDate(BuildContext context, DateTime initdate) async {
+  _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: initdate,
+        initialDate: context.read<ShoppingTrip>().date,
         firstDate: DateTime(2022),
         lastDate: DateTime(2050),
         builder: (context, child) => Theme(
@@ -108,9 +108,9 @@ class _DatePickerState extends State<DatePicker> {
               child: child!,
             ));
     if (picked != null && picked != context.read<ShoppingTrip>().date) {
-      context.read<ShoppingTrip>().editTripDate(picked);
       setState(() {
-        // print('setted state uwu');
+        // print('setted state uwu: '+picked.toString());
+        context.read<ShoppingTrip>().editTripDate(picked);
         date = picked;
       });
     }
@@ -123,8 +123,8 @@ class _DatePickerState extends State<DatePicker> {
       return Row(
         children: [
           Text(
-            '$date'.split(' ')[0].replaceAll('-', '/'),
-            style: appFontStyle.copyWith(color: Colors.black),
+            'Date:  '+'$date'.split(' ')[0].replaceAll('-', '/'),
+            style: appFontStyle.copyWith(color: Colors.black, fontSize: 20),
           ),
           //SizedBox(width: 5.0,),
           IconButton(
@@ -132,7 +132,7 @@ class _DatePickerState extends State<DatePicker> {
               Icons.calendar_today,
               color: orange,
             ),
-            onPressed: () => _selectDate(context, DateTime.now()),
+            onPressed: () => _selectDate(context),
           ),
         ],
       );
@@ -155,7 +155,7 @@ class _DatePickerState extends State<DatePicker> {
           return Row(
             children: [
               Text(
-                '$tdate'.split(' ')[0].replaceAll('-', '/'),
+                'Date:  ' + '$tdate'.split(' ')[0].replaceAll('-', '/'),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -167,8 +167,7 @@ class _DatePickerState extends State<DatePicker> {
                   Icons.calendar_today,
                   color: orange,
                 ),
-                onPressed: () =>
-                    _selectDate(context, context.read<ShoppingTrip>().date),
+                onPressed: () => _selectDate(context),
               ),
             ],
           );
@@ -586,13 +585,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           ),
                         ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: HomeHeader(
-                            title: "Date",
-                            color: appOrange,
-                            textColor: Colors.white),
+
+                      SizedBox(
+                        height: 10.h,
                       ),
+
                       Center(
                           child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -600,7 +597,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           DatePicker(newList, trip_uuid),
                         ],
                       )),
-
                       // create/delete buttons
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

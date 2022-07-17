@@ -215,6 +215,7 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
   Widget build(BuildContext context) {
     return LongPressDraggable<String>(
       data: widget.price,
+      delay: Duration(milliseconds: 150),
       child: Container(
         padding: const EdgeInsets.all(4.0),
         height: 40.h,
