@@ -185,7 +185,6 @@ class _IndividualItemState extends State<IndividualItem> {
           }
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
-          print("index: $index , item: ${curItem.name}");
           return simple_item();
         });
   }
@@ -553,7 +552,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                   (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
                 if (snapshot.hasError) {
                   return CircularProgressIndicator();
-
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return SizedBox.shrink();
