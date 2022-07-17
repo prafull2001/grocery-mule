@@ -553,11 +553,36 @@ class _EditListsScreenState extends State<EditListScreen> {
                   (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
                 if (snapshot.hasError) {
                   return CircularProgressIndicator();
+
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return SizedBox.shrink();
                 }
-                if (!snapshot.data!.exists) return CircularProgressIndicator();
+                if (!snapshot.data!.exists) {
+                  // return CircularProgressIndicator();
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                'This trip has been deleted!',
+                                style: TextStyle(
+                                  fontSize: 40.0,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 _queryCurrentTrip(snapshot.data!);
                 if (!context
                     .watch<ShoppingTrip>()
@@ -612,7 +637,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                           color: Colors.white,
                           child: ListTile(
                               leading: Icon(
-                                FontAwesomeIcons.userLarge,
+                                FontAwesomeIcons.list,
                                 color: appOrange,
                               ),
                               title: Text(
