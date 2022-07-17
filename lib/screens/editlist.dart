@@ -559,6 +559,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                 }
                 if (!snapshot.data!.exists) {
                   // return CircularProgressIndicator();
+
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24.0),
                     child: Column(
@@ -610,6 +611,7 @@ class _EditListsScreenState extends State<EditListScreen> {
                     ),
                   );
                 }
+
                 return SingleChildScrollView(
                   child: Container(
                       child: Column(
