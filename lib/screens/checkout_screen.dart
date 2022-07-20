@@ -68,8 +68,6 @@ class PayPalButton extends StatefulWidget {
 
 class _PayPalButtonState extends State<PayPalButton> {
   late String userUUID;
-  CollectionReference userCollection =
-      FirebaseFirestore.instance.collection('paypal_users');
   @override
   void initState() {
     userUUID = widget.userUUID;
@@ -87,51 +85,36 @@ class _PayPalButtonState extends State<PayPalButton> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           }
+          String paypalUser = snapshot.data!['paypal'];
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 60.w, vertical: 10.h),
-            child:
-            GestureDetector(
-              onTap: () async {
-                String paypalStr = snapshot.data!['paypal'];
-                Uri paypal_link = Uri.parse(paypalStr);
-                if (await canLaunchUrl(paypal_link)) {
-                  launchUrl(paypal_link);
-                }
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 35.w),
-                child: RectangularTextIconButton(
-                    text: "PayPal",
-                    buttonColor: Colors.blueGrey,
-                    icon: Icon(FontAwesomeIcons.paypal),
-                    textColor: Colors.white,
-                    onPressed: () async {
-                      String paypalStr = snapshot.data!['paypal'];
+            child: (paypalUser != "")
+                ? GestureDetector(
+                    onTap: () async {
+                      String paypal_prefix = "https://www.paypal.com/paypalme/";
+                      String paypalStr = paypal_prefix + paypalUser;
                       Uri paypal_link = Uri.parse(paypalStr);
                       if (await canLaunchUrl(paypal_link)) {
                         launchUrl(paypal_link);
                       }
-                    }),
-              ),
-            ),
-
-
-
-            /*
-             GestureDetector(
-                  onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 35.w),
-                    child: RectangularTextIconButton(
-                      text: "Receipt Scanning",
-                      buttonColor: Colors.lightGreen,
-                      icon: Icon(Icons.search_rounded),
-                      textColor: Colors.white,
-                      onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 35.w),
+                      child: RectangularTextIconButton(
+                          text: "PayPal",
+                          buttonColor: Colors.blueGrey,
+                          icon: Icon(FontAwesomeIcons.paypal),
+                          textColor: Colors.white,
+                          onPressed: () async {
+                            String paypalStr = snapshot.data!['paypal'];
+                            Uri paypal_link = Uri.parse(paypalStr);
+                            if (await canLaunchUrl(paypal_link)) {
+                              launchUrl(paypal_link);
+                            }
+                          }),
                     ),
-                  ),
-                ),
-             */
+                  )
+                : Text("Paypal not available"),
           );
         });
   }
@@ -144,7 +127,9 @@ class ItemsPerPerson extends StatefulWidget {
   late Map<String, int> itemUUIDMapping;
   int num_bene = 1;
 
-  ItemsPerPerson(this.itemPrices, this.userUUID, this.itemMapping, this.itemUUIDMapping, this.num_bene, {required Key key})
+  ItemsPerPerson(this.itemPrices, this.userUUID, this.itemMapping,
+      this.itemUUIDMapping, this.num_bene,
+      {required Key key})
       : super(key: key);
   @override
   _ItemsPerPersonState createState() => _ItemsPerPersonState();
@@ -162,8 +147,7 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
   }
 
   double calculate_total() {
-
-    double dp(double val, int places){
+    double dp(double val, int places) {
       num mod = pow(10.0, places);
       return ((val * mod).round().toDouble() / mod);
     }
@@ -180,8 +164,10 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
     } else {
       print('item map empty');
     }
-    total += double.parse(widget.itemPrices['tax']!.toString()) / widget.num_bene;
-    total += double.parse(widget.itemPrices['add. fees']!.toString()) / widget.num_bene;
+    total +=
+        double.parse(widget.itemPrices['tax']!.toString()) / widget.num_bene;
+    total += double.parse(widget.itemPrices['add. fees']!.toString()) /
+        widget.num_bene;
     total = dp(total, 2);
 
     return total;
@@ -247,28 +233,17 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RectangularTextButton(
-                      text: 'Total Cost:  \$${calculate_total().toStringAsFixed(2)}',
+                      text:
+                          'Total Cost:  \$${calculate_total().toStringAsFixed(2)}',
                       onPressed: () {
                         beneficiary_subtotal = calculate_total();
-                        Clipboard.setData(ClipboardData(text: beneficiary_subtotal.toString()));
-                        Fluttertoast.showToast(msg: 'Price copied to clipboard!');
+                        Clipboard.setData(ClipboardData(
+                            text: beneficiary_subtotal.toString()));
+                        Fluttertoast.showToast(
+                            msg: 'Price copied to clipboard!');
                       },
                     ),
                   ),
-                  // TextButton(
-                  //   style: ButtonStyle(
-                  //       foregroundColor:
-                  //           MaterialStateProperty.all<Color>(Colors.black),
-                  //       backgroundColor:
-                  //           MaterialStateProperty.all<Color>(orange)),
-                  //   onPressed: () {
-                  //     beneficiary_subtotal = calculate_total();
-                  //     Clipboard.setData(
-                  //         ClipboardData(text: beneficiary_subtotal.toString()));
-                  //     Fluttertoast.showToast(msg: 'Price copied to clipboard!');
-                  //   },
-                  //   child: Text('\$' + '${calculate_total()}'),
-                  // ),
                   if (widget.userUUID != context.read<ShoppingTrip>().host) ...[
                     PayPalButton(widget.userUUID)
                   ]
@@ -344,7 +319,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
               return const CircularProgressIndicator();
             }
 
-            List<String> bene_uuid_list = context.read<ShoppingTrip>().beneficiaries;
+            List<String> bene_uuid_list =
+                context.read<ShoppingTrip>().beneficiaries;
 
             bene_uuid_list.forEach((bene_uuid) {
               // initialize empty bene mapping to aggre_cleaned_list
@@ -353,7 +329,8 @@ class _CheckoutScreen extends State<CheckoutScreen> {
             });
             itemColQuery.data!.docs.forEach((doc) {
               if (doc['uuid'] != 'tax' && doc['uuid'] != 'add. fees') {
-                Map<String, dynamic> curSubitems = doc.get(FieldPath(['subitems'])); // get map of subitems for cur item
+                Map<String, dynamic> curSubitems = doc.get(FieldPath(
+                    ['subitems'])); // get map of subitems for cur item
                 //print('curSubitems: ' + curSubitems.toString());
                 curSubitems.forEach((key, value) {
                   // add item name & quantity if user UUIDs match & quantity > 0
@@ -405,9 +382,10 @@ class _CheckoutScreen extends State<CheckoutScreen> {
             Container(
               height: 70,
               width: 300,
-              child:
-              GestureDetector(
-                onTap: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, ReceiptScanning.id);
+                },
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 35.w),
                   child: RectangularTextIconButton(
@@ -415,13 +393,14 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                     buttonColor: Colors.lightGreen,
                     icon: Icon(Icons.search_rounded),
                     textColor: Colors.white,
-                    onPressed: () {Navigator.pushNamed(context, ReceiptScanning.id);},
+                    onPressed: () {
+                      Navigator.pushNamed(context, ReceiptScanning.id);
+                    },
                   ),
                 ),
               ),
             ),
           ],
-
         ),
       ),
     );

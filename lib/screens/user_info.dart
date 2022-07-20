@@ -11,6 +11,7 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserInfoScreen extends StatefulWidget {
   static String id = 'userinfo_screen';
@@ -28,10 +29,12 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
   FirebaseAuth auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
 
-  bool checkPaypalValidity(String input) {
+  Future<bool> checkPaypalValidity(String input) async {
     String paypal_prefix = "https://www.paypal.com/paypalme/";
-
-    if (input.startsWith(paypal_prefix) && input.length > 32) {
+    String test_link = paypal_prefix + input;
+    Uri paypal_link = Uri.parse(test_link);
+    if (await canLaunchUrl(paypal_link) &&
+        RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input)) {
       return true;
     } else {
       showDialog(
@@ -190,7 +193,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         title: 'Update User Info',
                         color: appOrange,
                         onPressed: () async {
-                          if (checkPaypalValidity(payPal) &&
+                          if (await checkPaypalValidity(payPal) &&
                               (checkField(firstName, email))) {
                             try {
                               context.read<Cowboy>().fillUpdatedInfo(
