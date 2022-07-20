@@ -207,7 +207,7 @@ class ReceiptPrice extends StatefulWidget {
 class _ReceiptPriceState extends State<ReceiptPrice> {
   String val = '0.00';
 
-  bool isPricValid(String test) {
+  bool isPriceValid(String test) {
     return RegExp(r"(^[0-9]+$)|(^[0-9]+\.[0-9]{0,2}$)").hasMatch(test);
   }
 
@@ -263,8 +263,8 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
                                 children: [
                                   IconButton(
                                     onPressed: () {
-                                      print(isPricValid(val));
-                                      if (isPricValid(val)) {
+                                      print(isPriceValid(val));
+                                      if (isPriceValid(val)) {
                                         setState(() {
                                           //TODO LOOK HERE!!!!!!!!!!!!!
                                           widget.price = val;
