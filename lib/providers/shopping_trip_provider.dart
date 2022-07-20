@@ -221,12 +221,16 @@ class ShoppingTrip with ChangeNotifier {
   }
 
   // user adds an item for first time
-  addItem(String name, [int quantity = 0]) {
+  addItem(String name, String defaultUser) {
     var uuider = Uuid();
     String item_uid = uuider.v4();
     Map<String, int> bene_subitem = {};
     _beneficiaries.forEach((bene) {
-      bene_subitem[bene] = 0;
+      if (bene == defaultUser) {
+        bene_subitem[bene] = 1;
+      } else {
+        bene_subitem[bene] = 0;
+      }
     });
     tripCollection.doc(_uuid).collection('items').doc(item_uid).set({
       'name': name,
