@@ -98,25 +98,18 @@ class _ItemsListState extends State<ItemsList> {
           }
 
           loadItemToProvider(itemColQuery.data!);
-          return Column(
-            children: [
-              Container(
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: context.watch<ShoppingTrip>().itemUUID.length,
-                  itemBuilder: (context, int index) {
-                    return IndividualItem(tripUUID,
-                        context.watch<ShoppingTrip>().itemUUID[index], index,
-                        key:
-                            Key(context.watch<ShoppingTrip>().itemUUID[index]));
-                  },
-                ),
-              ),
-              SizedBox(
-                height: 40.0,
-              ),
-            ],
+          return Container(
+            height: 370,
+            child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: context.watch<ShoppingTrip>().itemUUID.length,
+              itemBuilder: (context, int index) {
+                return IndividualItem(tripUUID,
+                    context.watch<ShoppingTrip>().itemUUID[index], index,
+                    key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
+              },
+            ),
           );
         });
   }
@@ -192,6 +185,7 @@ class _IndividualItemState extends State<IndividualItem> {
           }
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
+          print("index: $index , item: ${curItem.name}");
           return simple_item();
         });
   }
@@ -203,6 +197,8 @@ class _IndividualItemState extends State<IndividualItem> {
     curItem.subitems = {};
     curItem.check = snapshot['check'] as bool;
     (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
+      int count = curItem.subitems.keys.length;
+      // print('loadItem (individual) called with uid: {$uid}, value: {$value}, length: {$count}');
       curItem.subitems[uid] = int.parse(value.toString());
     });
   }
@@ -622,9 +618,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     //padding: const EdgeInsets.all(25),
                     children: [
-                      // SizedBox(
-                      //   height: 20,
-                      // ),
                       ExpansionTile(
                         title: Padding(
                           padding: const EdgeInsets.all(1.0),
@@ -634,145 +627,141 @@ class _EditListsScreenState extends State<EditListScreen> {
                             color: appOrange,
                           ),
                         ),
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                              color: Colors.white,
-                              child: ListTile(
-                                  leading: Icon(
-                                    FontAwesomeIcons.list,
-                                    color: appOrange,
-                                  ),
-                                  title: Text(
-                                    "Trip Title",
-                                    style: titleBlack.copyWith(fontSize: 18.sp),
-                                  ),
-                                  trailing: Text(
-                                      '${context.read<ShoppingTrip>().title}')),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                              color: Colors.white,
-                              child: ListTile(
-                                leading: Icon(
-                                  FontAwesomeIcons.userLarge,
-                                  color: appOrange,
-                                ),
-                                title: Text(
-                                  "Host",
-                                  style: titleBlack.copyWith(fontSize: 18.sp),
-                                ),
-                                trailing: UserName(
-                                    context.read<ShoppingTrip>().host,
-                                    false,
-                                    true),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r)),
+                          color: Colors.white,
+                          child: ListTile(
+                              leading: Icon(
+                                FontAwesomeIcons.list,
+                                color: appOrange,
                               ),
+                              title: Text(
+                                "Trip Title",
+                                style: titleBlack.copyWith(fontSize: 18.sp),
+                              ),
+                              trailing: Text(
+                                  '${context.read<ShoppingTrip>().title}')),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r)),
+                          color: Colors.white,
+                          child: ListTile(
+                            leading: Icon(
+                              FontAwesomeIcons.userLarge,
+                              color: appOrange,
                             ),
+                            title: Text(
+                              "Host",
+                              style: titleBlack.copyWith(fontSize: 18.sp),
+                            ),
+                            trailing: UserName(
+                                context.read<ShoppingTrip>().host, false, true),
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                              color: Colors.white,
-                              child: ListTile(
-                                  onTap: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            content: Container(
-                                              width: double.maxFinite,
-                                              height: 60.0 +
-                                                  (context
-                                                          .watch<ShoppingTrip>()
-                                                          .beneficiaries
-                                                          .length *
-                                                      50.0),
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(
-                                                    height: 25.0,
-                                                    child: Text(
-                                                      'Beneficiaries',
-                                                      style: TextStyle(
-                                                          fontSize: 20.0),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 10.0,
-                                                  ),
-                                                  Column(
-                                                    children: [
-                                                      for (String uid in context
-                                                          .watch<ShoppingTrip>()
-                                                          .beneficiaries)
-                                                        Column(children: [
-                                                          Row(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .end,
-                                                            children: [
-                                                              SizedBox(
-                                                                width: 20.0,
-                                                              ),
-                                                              (uid ==
-                                                                      context
-                                                                          .watch<
-                                                                              ShoppingTrip>()
-                                                                          .host)
-                                                                  ? Icon(Icons
-                                                                      .face_sharp)
-                                                                  : Icon(Icons
-                                                                      .person_pin_outlined),
-                                                              SizedBox(
-                                                                width: 25.0,
-                                                              ),
-                                                              UserName(uid),
-                                                            ],
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10.0,
-                                                          ),
-                                                        ]),
-                                                    ],
-                                                  )
-                                                ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r)),
+                          color: Colors.white,
+                          child: ListTile(
+                              onTap: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: Container(
+                                          width: double.maxFinite,
+                                          height: 60.0 +
+                                              (context
+                                                      .watch<ShoppingTrip>()
+                                                      .beneficiaries
+                                                      .length *
+                                                  50.0),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 25.0,
+                                                child: Text(
+                                                  'Beneficiaries',
+                                                  style:
+                                                      TextStyle(fontSize: 20.0),
+                                                ),
                                               ),
-                                            ),
-                                          );
-                                        });
-                                  },
-                                  leading: Icon(
-                                    Icons.supervised_user_circle,
-                                    color: appOrange,
-                                  ),
-                                  title: Text(
-                                    "Beneficiaries",
-                                    style: titleBlack.copyWith(fontSize: 18.sp),
-                                  ),
-                                  trailing: IconButton(
-                                      onPressed: null,
-                                      icon: CircleAvatar(
-                                        backgroundColor: appColor,
-                                        child: Icon(
-                                          Icons.list_outlined,
-                                          color: appOrange,
+                                              SizedBox(
+                                                height: 10.0,
+                                              ),
+                                              Column(
+                                                children: [
+                                                  for (String uid in context
+                                                      .watch<ShoppingTrip>()
+                                                      .beneficiaries)
+                                                    Column(children: [
+                                                      Row(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          SizedBox(
+                                                            width: 20.0,
+                                                          ),
+                                                          (uid ==
+                                                                  context
+                                                                      .watch<
+                                                                          ShoppingTrip>()
+                                                                      .host)
+                                                              ? Icon(Icons
+                                                                  .face_sharp)
+                                                              : Icon(Icons
+                                                                  .person_pin_outlined),
+                                                          SizedBox(
+                                                            width: 25.0,
+                                                          ),
+                                                          UserName(uid),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10.0,
+                                                      ),
+                                                    ]),
+                                                ],
+                                              )
+                                            ],
+                                          ),
                                         ),
-                                      ))),
-                            ),
-                          ),
-                        ],
+                                      );
+                                    });
+                              },
+                              leading: Icon(
+                                Icons.supervised_user_circle,
+                                color: appOrange,
+                              ),
+                              title: Text(
+                                "Beneficiaries",
+                                style: titleBlack.copyWith(fontSize: 18.sp),
+                              ),
+                              trailing: IconButton(
+                                  onPressed: null,
+                                  icon: CircleAvatar(
+                                    backgroundColor: appColor,
+                                    child: Icon(
+                                      Icons.list_outlined,
+                                      color: appOrange,
+                                    ),
+                                  ))),
+                        ),
                       ),
 
                       ItemsAddition(
