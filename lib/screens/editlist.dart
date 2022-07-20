@@ -210,9 +210,11 @@ class _IndividualItemState extends State<IndividualItem> {
               context.watch<Cowboy>().uuid !=
                   context.watch<ShoppingTrip>().host)
           ? beige
-          : (index % 2 == 0)
-              ? Colors.blueGrey
-              : beige,
+          : (quantity != 0)
+              ? (index % 2 == 0)
+                  ? Colors.blueGrey
+                  : beige
+              : Colors.red,
       key: Key(widget.itemID),
       child: ListTile(
         title: Container(
@@ -391,66 +393,6 @@ class _EditListsScreenState extends State<EditListScreen> {
         curTrip['host'],
         bene_uid,
         curTrip['lock'] as bool);
-  }
-
-  Widget create_item() {
-    String food = '';
-    //auto_collapse(null);
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: beige,
-      ),
-      child: (Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Container(
-            child: Text(
-              'Enter Item',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-              ),
-            ),
-            padding: EdgeInsets.all(20),
-          ),
-          Container(
-            height: 45,
-            child: TextField(
-              style: TextStyle(color: darker_beige),
-              cursorColor: darker_beige,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: darker_beige,
-                  ),
-                ),
-                hintText: 'EX: Apple',
-              ),
-              onChanged: (text) {
-                food = text;
-              },
-            ),
-          ),
-          Container(
-              child: IconButton(
-                  icon: const Icon(Icons.add_circle),
-                  onPressed: () {
-                    if (food != '')
-                      setState(() {
-                        context.read<ShoppingTrip>().addItem(food);
-                        isAdd = false;
-                      });
-                  })),
-          Container(
-              child: IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () => (setState(() {
-                        isAdd = false;
-                      })))),
-        ],
-      )),
-    );
   }
 
   check_leave(BuildContext context) {
@@ -895,7 +837,9 @@ class _ItemsAdditionState extends State<ItemsAddition> {
                   onPressed: () {
                     if (food != '')
                       setState(() {
-                        context.read<ShoppingTrip>().addItem(food);
+                        context
+                            .read<ShoppingTrip>()
+                            .addItem(food, context.read<Cowboy>().uuid);
                         isAdd = false;
                       });
                     else

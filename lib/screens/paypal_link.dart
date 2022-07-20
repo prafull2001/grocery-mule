@@ -165,7 +165,7 @@ class _PayPalPageSate extends State<PayPalPage> {
                           ..onTap = () {
                             Navigator.of(context).pop();
                             context.read<Cowboy>().updateCowboyPaypal("");
-                            Navigator.of(context).pop();
+                            Navigator.pushNamed(context, ListsScreen.id);
                           }),
                   ),
                   SizedBox(
