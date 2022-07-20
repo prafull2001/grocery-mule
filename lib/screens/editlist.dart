@@ -98,18 +98,25 @@ class _ItemsListState extends State<ItemsList> {
           }
 
           loadItemToProvider(itemColQuery.data!);
-          return Container(
-            height: 370,
-            child: ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: context.watch<ShoppingTrip>().itemUUID.length,
-              itemBuilder: (context, int index) {
-                return IndividualItem(tripUUID,
-                    context.watch<ShoppingTrip>().itemUUID[index], index,
-                    key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
-              },
-            ),
+          return Column(
+            children: [
+              Container(
+                child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: context.watch<ShoppingTrip>().itemUUID.length,
+                  itemBuilder: (context, int index) {
+                    return IndividualItem(tripUUID,
+                        context.watch<ShoppingTrip>().itemUUID[index], index,
+                        key:
+                            Key(context.watch<ShoppingTrip>().itemUUID[index]));
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 40.0,
+              ),
+            ],
           );
         });
   }
@@ -185,7 +192,6 @@ class _IndividualItemState extends State<IndividualItem> {
           }
           if (snapshot.hasError) return const CircularProgressIndicator();
           loadItem(snapshot.data!);
-          print("index: $index , item: ${curItem.name}");
           return simple_item();
         });
   }
@@ -197,8 +203,6 @@ class _IndividualItemState extends State<IndividualItem> {
     curItem.subitems = {};
     curItem.check = snapshot['check'] as bool;
     (snapshot['subitems'] as Map<String, dynamic>).forEach((uid, value) {
-      int count = curItem.subitems.keys.length;
-      // print('loadItem (individual) called with uid: {$uid}, value: {$value}, length: {$count}');
       curItem.subitems[uid] = int.parse(value.toString());
     });
   }
@@ -622,14 +626,14 @@ class _EditListsScreenState extends State<EditListScreen> {
                       //   height: 20,
                       // ),
                       ExpansionTile(
-                          title: Padding(
-                            padding: const EdgeInsets.all(1.0),
-                            child: HomeHeader(
-                              title: "Trip Details",
-                              textColor: Colors.white,
-                              color: appOrange,
-                            ),
+                        title: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: HomeHeader(
+                            title: "Trip Details",
+                            textColor: Colors.white,
+                            color: appOrange,
                           ),
+                        ),
                         children: [
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -668,7 +672,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                                   style: titleBlack.copyWith(fontSize: 18.sp),
                                 ),
                                 trailing: UserName(
-                                    context.read<ShoppingTrip>().host, false, true),
+                                    context.read<ShoppingTrip>().host,
+                                    false,
+                                    true),
                               ),
                             ),
                           ),
@@ -689,9 +695,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                                               width: double.maxFinite,
                                               height: 60.0 +
                                                   (context
-                                                      .watch<ShoppingTrip>()
-                                                      .beneficiaries
-                                                      .length *
+                                                          .watch<ShoppingTrip>()
+                                                          .beneficiaries
+                                                          .length *
                                                       50.0),
                                               child: Column(
                                                 children: [
@@ -699,8 +705,8 @@ class _EditListsScreenState extends State<EditListScreen> {
                                                     height: 25.0,
                                                     child: Text(
                                                       'Beneficiaries',
-                                                      style:
-                                                      TextStyle(fontSize: 20.0),
+                                                      style: TextStyle(
+                                                          fontSize: 20.0),
                                                     ),
                                                   ),
                                                   SizedBox(
@@ -714,21 +720,21 @@ class _EditListsScreenState extends State<EditListScreen> {
                                                         Column(children: [
                                                           Row(
                                                             crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .end,
+                                                                CrossAxisAlignment
+                                                                    .end,
                                                             children: [
                                                               SizedBox(
                                                                 width: 20.0,
                                                               ),
                                                               (uid ==
-                                                                  context
-                                                                      .watch<
-                                                                      ShoppingTrip>()
-                                                                      .host)
+                                                                      context
+                                                                          .watch<
+                                                                              ShoppingTrip>()
+                                                                          .host)
                                                                   ? Icon(Icons
-                                                                  .face_sharp)
+                                                                      .face_sharp)
                                                                   : Icon(Icons
-                                                                  .person_pin_outlined),
+                                                                      .person_pin_outlined),
                                                               SizedBox(
                                                                 width: 25.0,
                                                               ),
@@ -768,7 +774,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                           ),
                         ],
                       ),
-
 
                       ItemsAddition(
                         tripUUID: tripUUID,
