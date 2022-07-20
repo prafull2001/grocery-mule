@@ -262,6 +262,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         Map<String, dynamic> curSubitems = doc
             .get(FieldPath(['subitems'])); // get map of subitems for cur item
         double unit_price = doc['price'] / doc['quantity'];
+
         curSubitems.forEach((key, quantity) {
           // add item name & quantity if user UUIDs match & quantity > 0
           if (curSubitems[key] > 0) {

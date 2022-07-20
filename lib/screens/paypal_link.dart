@@ -1,14 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:grocery_mule/components/rounded_ button.dart';
 import 'package:grocery_mule/constants.dart';
+import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:grocery_mule/providers/cowboy_provider.dart';
-import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'lists.dart';
@@ -24,10 +22,12 @@ class _PayPalPageSate extends State<PayPalPage> {
   String paypal_link = '';
   bool link_valid = false;
 
-  void checkStringValidity(String input) {
+  void checkStringValidity(String input) async {
     String paypal_prefix = "https://www.paypal.com/paypalme/";
-
-    if (input.startsWith(paypal_prefix) && input.length > 32) {
+    String test_link = paypal_prefix + input;
+    Uri paypal_link = Uri.parse(test_link);
+    if (await canLaunchUrl(paypal_link) &&
+        RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input)) {
       link_valid = true;
       setState(() {});
       showDialog(
@@ -40,7 +40,7 @@ class _PayPalPageSate extends State<PayPalPage> {
                 child: Text("OK"),
                 onPressed: () {
                   Navigator.of(context).pop();
-                  context.read<Cowboy>().updateCowboyPaypal(paypal_link);
+                  context.read<Cowboy>().updateCowboyPaypal(input);
                   Navigator.pushNamed(context, ListsScreen.id);
                 },
               ),
@@ -55,7 +55,7 @@ class _PayPalPageSate extends State<PayPalPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Please enter a valid PayPal.me link.'),
+            title: Text('Please enter a valid PayPal.me Username.'),
             actions: [
               TextButton(
                 child: Text("OK"),
@@ -94,7 +94,7 @@ class _PayPalPageSate extends State<PayPalPage> {
                 height: 30.0,
               ),
               Text(
-                'Add your full \'https\' PayPal.me link to your profile!',
+                'Add your Paypal username to your profile!',
                 style: appFontStyle,
               ),
               SizedBox(
@@ -134,7 +134,7 @@ class _PayPalPageSate extends State<PayPalPage> {
                       Image.asset(
                         "images/infoPaypal.gif",
                       ),
-                      ListTile(title: Text("Paste your link below")),
+                      ListTile(title: Text("Paste your username below")),
                     ],
                   ),
                 ),
@@ -156,47 +156,49 @@ class _PayPalPageSate extends State<PayPalPage> {
               SizedBox(
                 height: 24.0,
               ),
-              RoundedButton(
-                  title: 'Add Paypal Link',
-                  color: Colors.blueAccent,
-                  onPressed: () {
-                    if (paypal_link != '') {
-                      checkStringValidity(paypal_link);
-                    } else {
-                      setState(() {});
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('This field cannot be empty!'),
-                            actions: [
-                              TextButton(
-                                child: Text("OK"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
+              Row(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                        text: 'Skip for now',
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.of(context).pop();
+                            context.read<Cowboy>().updateCowboyPaypal("");
+                            Navigator.of(context).pop();
+                          }),
+                  ),
+                  SizedBox(
+                    width: 24.0,
+                  ),
+                  RoundedButton(
+                      title: 'Add Paypal username',
+                      color: Colors.blueAccent,
+                      onPressed: () {
+                        if (paypal_link != '') {
+                          checkStringValidity(paypal_link);
+                        } else {
+                          setState(() {});
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('This field cannot be empty!'),
+                                actions: [
+                                  TextButton(
+                                    child: Text("OK"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
                           );
-                        },
-                      );
-                    }
-                  }),
-              // if (link_valid) ...[
-              //   RoundedButton(
-              //       title: 'Finish Login',
-              //       color: Colors.blueAccent,
-              //       onPressed: () async {
-              //         Uri link = Uri.parse(paypal_link);
-              //         print(link);
-              //         // if(await canLaunchUrl(link)){
-              //         //   print('About to launch $link');
-              //         //   await launchUrl(link);
-              //         // }
-              //         context.read<Cowboy>().updateCowboyPaypal(paypal_link);
-              //         Navigator.pushNamed(context, ListsScreen.id);
-              //       })
-              // ]
+                        }
+                      }),
+                ],
+              ),
             ],
           ),
         ),
