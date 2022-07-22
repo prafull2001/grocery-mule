@@ -152,7 +152,8 @@ class _ReceiptItemsState extends State<ReceiptItems> {
         widget.rilist.add(ReceiptItem(item_name, document['uuid']));
         add_fees = true;
       } else {
-        widget.rilist.insert(0, ReceiptItem(item_name, document['uuid']));
+        if (document['quantity'] > 0)
+          widget.rilist.insert(0, ReceiptItem(item_name, document['uuid']));
       }
     });
   }
@@ -168,7 +169,6 @@ class _ReceiptItemsState extends State<ReceiptItems> {
                 'Something went wrong with item snapshot in receipt_scanning');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            print('waiting for snapshot ReceiptItemsState');
             return const CircularProgressIndicator();
           }
           loadItems(snapshot.data!);

@@ -161,6 +161,9 @@ class _PayPalPageSate extends State<PayPalPage> {
                   RichText(
                     text: TextSpan(
                         text: 'Skip for now',
+                        style: TextStyle(
+                          color: Colors.black
+                        ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
                             Navigator.of(context).pop();
