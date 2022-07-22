@@ -206,15 +206,7 @@ class _IndividualItemState extends State<IndividualItem> {
     String name = curItem.name;
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
     return Card(
-      color: (context.watch<ShoppingTrip>().lock == true &&
-              context.watch<Cowboy>().uuid !=
-                  context.watch<ShoppingTrip>().host)
-          ? beige
-          : (quantity != 0)
-              ? (index % 2 == 0)
-                  ? Colors.blueGrey
-                  : beige
-              : Colors.red,
+      color: (context.watch<ShoppingTrip>().lock == true && context.watch<Cowboy>().uuid != context.watch<ShoppingTrip>().host) ? beige : (quantity != 0) ? Colors.blueGrey : Colors.red,
       key: Key(widget.itemID),
       child: ListTile(
         title: Container(
