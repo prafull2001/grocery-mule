@@ -157,9 +157,12 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
     // print(itemUUIDMapping.toString());
     if (widget.itemUUIDMapping.isNotEmpty) {
       widget.itemUUIDMapping.forEach((itemUUID, quantity) {
-        double unitPrice = widget.itemPrices[itemUUID]!;
-        double subTotal = unitPrice * quantity;
-        total += subTotal;
+        if (quantity != 0) {
+          double unitPrice = widget.itemPrices[itemUUID]!;
+          double subTotal = unitPrice * quantity;
+          //print(subTotal);
+          total += subTotal;
+        }
       });
     } else {
       print('item map empty');
@@ -168,6 +171,7 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
         double.parse(widget.itemPrices['tax']!.toString()) / widget.num_bene;
     total += double.parse(widget.itemPrices['add. fees']!.toString()) /
         widget.num_bene;
+
     total = dp(total, 2);
 
     return total;
@@ -229,7 +233,7 @@ class _ItemsPerPersonState extends State<ItemsPerPerson> {
               children: <Widget>[
                 if (widget.itemMapping.isNotEmpty) ...[
                   for (var entry in widget.itemMapping.entries)
-                    simple_item(entry.key, entry.value),
+                    if (entry.value != 0) simple_item(entry.key, entry.value),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RectangularTextButton(
@@ -342,7 +346,11 @@ class _CheckoutScreen extends State<CheckoutScreen> {
                         curSubitems[key] = curSubitems[key];
                   }
                 });
-                itemPrices[doc['uuid']] = doc['price'] / doc['quantity'];
+                if (doc['quantity'] != 0) {
+                  itemPrices[doc['uuid']] = doc['price'] / doc['quantity'];
+                } else {
+                  itemPrices[doc['uuid']] = 0;
+                }
               } else {
                 // print('price: ${double.parse(doc['price'].toString())} length: ${bene_uuid_list.length}');
                 itemPrices[doc['uuid']] = double.parse(doc['price'].toString());
