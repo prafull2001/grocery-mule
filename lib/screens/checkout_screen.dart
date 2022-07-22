@@ -106,7 +106,8 @@ class _PayPalButtonState extends State<PayPalButton> {
                           icon: Icon(FontAwesomeIcons.paypal),
                           textColor: Colors.white,
                           onPressed: () async {
-                            String paypalStr = snapshot.data!['paypal'];
+                            String paypal_prefix = "https://www.paypal.com/paypalme/";
+                            String paypalStr = paypal_prefix + paypalUser;
                             Uri paypal_link = Uri.parse(paypalStr);
                             if (await canLaunchUrl(paypal_link)) {
                               launchUrl(paypal_link);
