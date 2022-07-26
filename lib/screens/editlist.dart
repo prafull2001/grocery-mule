@@ -551,159 +551,131 @@ class _EditListsScreenState extends State<EditListScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     //padding: const EdgeInsets.all(25),
                     children: [
-                      ExpansionTile(
-                        title: Padding(
-                          padding: const EdgeInsets.all(1.0),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
                           child: HomeHeader(
                             title: "Trip Details",
                             textColor: Colors.white,
                             color: appOrange,
                           ),
                         ),
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                              color: Colors.white,
-                              child: ListTile(
-                                  leading: Icon(
-                                    FontAwesomeIcons.list,
-                                    color: appOrange,
-                                  ),
-                                  title: Text(
-                                    "Trip Title",
-                                    style: titleBlack.copyWith(fontSize: 18.sp),
-                                  ),
-                                  trailing: Text(
-                                      '${context.read<ShoppingTrip>().title}')),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                              color: Colors.white,
-                              child: ListTile(
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r)),
+                            color: Colors.white,
+                            child: ListTile(
                                 leading: Icon(
-                                  FontAwesomeIcons.userLarge,
+                                  FontAwesomeIcons.list,
                                   color: appOrange,
                                 ),
                                 title: Text(
-                                  "Host",
+                                  "Trip Title",
                                   style: titleBlack.copyWith(fontSize: 18.sp),
                                 ),
-                                trailing: UserName(
-                                    context.read<ShoppingTrip>().host,
-                                    false,
-                                    true),
-                              ),
-                            ),
+                                trailing: Text(
+                                    '${context.read<ShoppingTrip>().title}')),
                           ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: Card(
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r)),
-                              color: Colors.white,
-                              child: ListTile(
-                                  onTap: () {
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            content: Container(
-                                              width: double.maxFinite,
-                                              height: 60.0 +
-                                                  (context
-                                                          .watch<ShoppingTrip>()
-                                                          .beneficiaries
-                                                          .length *
-                                                      50.0),
-                                              child: Column(
-                                                children: [
-                                                  SizedBox(
-                                                    height: 25.0,
-                                                    child: Text(
-                                                      'Beneficiaries',
-                                                      style: TextStyle(
-                                                          fontSize: 20.0),
-                                                    ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                          child: Card(
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r)),
+                            color: Colors.white,
+                            child: ListTile(
+                                onTap: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          content: Container(
+                                            width: double.maxFinite,
+                                            height: 60.0 +
+                                                (context
+                                                        .watch<ShoppingTrip>()
+                                                        .beneficiaries
+                                                        .length *
+                                                    50.0),
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: 25.0,
+                                                  child: Text(
+                                                    'List Members',
+                                                    style: TextStyle(
+                                                        fontSize: 20.0),
                                                   ),
-                                                  SizedBox(
-                                                    height: 10.0,
-                                                  ),
-                                                  Column(
-                                                    children: [
-                                                      for (String uid in context
-                                                          .watch<ShoppingTrip>()
-                                                          .beneficiaries)
-                                                        Column(children: [
-                                                          Row(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .end,
-                                                            children: [
-                                                              SizedBox(
-                                                                width: 20.0,
-                                                              ),
-                                                              (uid ==
-                                                                      context
-                                                                          .watch<
-                                                                              ShoppingTrip>()
-                                                                          .host)
-                                                                  ? Icon(Icons
-                                                                      .face_sharp)
-                                                                  : Icon(Icons
-                                                                      .person_pin_outlined),
-                                                              SizedBox(
-                                                                width: 25.0,
-                                                              ),
-                                                              UserName(uid),
-                                                            ],
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10.0,
-                                                          ),
-                                                        ]),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    for (String uid in context
+                                                        .watch<ShoppingTrip>()
+                                                        .beneficiaries)
+                                                      Column(children: [
+                                                        Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .end,
+                                                          children: [
+                                                            SizedBox(
+                                                              width: 20.0,
+                                                            ),
+                                                            (uid ==
+                                                                    context
+                                                                        .watch<
+                                                                            ShoppingTrip>()
+                                                                        .host)
+                                                                ? Icon(Icons
+                                                                    .face_sharp)
+                                                                : Icon(Icons
+                                                                    .person_pin_outlined),
+                                                            SizedBox(
+                                                              width: 25.0,
+                                                            ),
+                                                            UserName(uid),
+                                                          ],
+                                                        ),
+                                                        SizedBox(
+                                                          height: 10.0,
+                                                        ),
+                                                      ]),
+                                                  ],
+                                                )
+                                              ],
                                             ),
-                                          );
-                                        });
-                                  },
-                                  leading: Icon(
-                                    Icons.supervised_user_circle,
-                                    color: appOrange,
-                                  ),
-                                  title: Text(
-                                    "Beneficiaries",
-                                    style: titleBlack.copyWith(fontSize: 18.sp),
-                                  ),
-                                  trailing: IconButton(
-                                      onPressed: null,
-                                      icon: CircleAvatar(
-                                        backgroundColor: appColor,
-                                        child: Icon(
-                                          Icons.list_outlined,
-                                          color: appOrange,
-                                        ),
-                                      ))),
-                            ),
+                                          ),
+                                        );
+                                      });
+                                },
+                                leading: Icon(
+                                  Icons.supervised_user_circle,
+                                  color: appOrange,
+                                ),
+                                title: Text(
+                                  "List Members",
+                                  style: titleBlack.copyWith(fontSize: 18.sp),
+                                ),
+                                trailing: IconButton(
+                                    onPressed: null,
+                                    icon: CircleAvatar(
+                                      backgroundColor: appColor,
+                                      child: Icon(
+                                        Icons.list_outlined,
+                                        color: appOrange,
+                                      ),
+                                    ))),
                           ),
-                        ],
-                      ),
-
-                      ItemsAddition(
-                        tripUUID: tripUUID,
-                      )
+                        ),
+                        ItemsAddition(
+                          tripUUID: tripUUID,
+                        )
 
                       //SizedBox(height: 10),
                     ],
@@ -744,7 +716,6 @@ class _EditListsScreenState extends State<EditListScreen> {
                               color: appOrange,
                             ),
                           ),
-
                           Container(
                             height: 70,
                             width: 150,
