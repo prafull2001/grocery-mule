@@ -33,8 +33,8 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
     String paypal_prefix = "https://www.paypal.com/paypalme/";
     String test_link = paypal_prefix + input;
     Uri paypal_link = Uri.parse(test_link);
-    if (await canLaunchUrl(paypal_link) &&
-        RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input)) {
+    if ((await canLaunchUrl(paypal_link) &&
+        RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input)) || input.isEmpty) {
       return true;
     } else {
       showDialog(
