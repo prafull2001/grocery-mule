@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "656233033461-0psv12jk151bv0es1m8og6e35tpr8to0.apps.googleusercontent.com",
+          "client_id": "656233033461-71fttmbltrsbm89n6cpdr3em6ivl7i90.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "net.grocerymule.grocerymule",
-            "certificate_hash": "84c4c3bb0966d45a480ad1132ed3bb0ef329a21d"
+            "certificate_hash": "25cb4316013a72dc86e1d3899f298956a2729b1c"
           }
         }
       ],
@@ -35,10 +35,10 @@
               "client_type": 3
             },
             {
-              "client_id": "656233033461-csgdsik1g456af2cfsfosbn4h9hsope4.apps.googleusercontent.com",
+              "client_id": "656233033461-1ntv6lci409g273rmru87qquirqq1uro.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "net.grocerymule.grocerymule"
+                "bundle_id": "net.mule.grocerymule"
               }
             }
           ]
