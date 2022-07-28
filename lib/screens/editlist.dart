@@ -16,7 +16,6 @@ import 'package:grocery_mule/theme/colors.dart';
 import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:provider/provider.dart';
 
-import '../components/header.dart';
 import '../components/rounded_ button.dart';
 import 'checkout_screen.dart';
 import 'createlist.dart';
@@ -98,19 +97,22 @@ class _ItemsListState extends State<ItemsList> {
           }
 
           loadItemToProvider(itemColQuery.data!);
-          return Container(
-            height: 370,
-            child: ListView.builder(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: context.watch<ShoppingTrip>().itemUUID.length,
-              itemBuilder: (context, int index) {
-                return IndividualItem(tripUUID,
-                    context.watch<ShoppingTrip>().itemUUID[index], index,
-                    key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
-              },
-            ),
-          );
+          return
+            //height: 370,
+            Container(
+              height: MediaQuery.of(context).size.height - 400,
+              child: ListView.builder(
+                physics: AlwaysScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: context.watch<ShoppingTrip>().itemUUID.length,
+                itemBuilder: (context, int index) {
+                  return IndividualItem(tripUUID,
+                      context.watch<ShoppingTrip>().itemUUID[index], index,
+                      key: Key(context.watch<ShoppingTrip>().itemUUID[index]));
+                },
+              ),
+            );
         });
   }
 
@@ -206,7 +208,13 @@ class _IndividualItemState extends State<IndividualItem> {
     String name = curItem.name;
     int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
     return Card(
-      color: (context.watch<ShoppingTrip>().lock == true && context.watch<Cowboy>().uuid != context.watch<ShoppingTrip>().host) ? beige : (quantity != 0) ? Colors.blueGrey : Colors.red,
+      color: (context.watch<ShoppingTrip>().lock == true &&
+          context.watch<Cowboy>().uuid !=
+              context.watch<ShoppingTrip>().host)
+          ? beige
+          : (quantity != 0)
+          ? Colors.blueGrey
+          : Colors.red,
       key: Key(widget.itemID),
       child: ListTile(
         title: Container(
@@ -215,7 +223,7 @@ class _IndividualItemState extends State<IndividualItem> {
                   ? '${name}'
                   : '${name} (total)',
               style:
-                  appFontStyle.copyWith(color: Colors.white, fontSize: 16.sp)),
+              appFontStyle.copyWith(color: Colors.white, fontSize: 16.sp)),
         ),
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -229,9 +237,9 @@ class _IndividualItemState extends State<IndividualItem> {
                         color: Colors.white,
                       ),
                       onPressed: () => (setState(() {
-                            updateUsrQuantity(context.read<Cowboy>().uuid,
-                                max(0, quantity - 1));
-                          })))),
+                        updateUsrQuantity(context.read<Cowboy>().uuid,
+                            max(0, quantity - 1));
+                      })))),
             ],
             Container(
               child: Text(
@@ -257,33 +265,33 @@ class _IndividualItemState extends State<IndividualItem> {
           ],
         ),
         trailing: (context.read<Cowboy>().uuid ==
-                context.watch<ShoppingTrip>().host)
+            context.watch<ShoppingTrip>().host)
             ? (context.watch<ShoppingTrip>().lock == false)
-                ? IconButton(
-                    icon: Icon(
-                      Icons.delete,
-                      color: appColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        Fluttertoast.showToast(msg: 'removed item');
-                        context.read<ShoppingTrip>().removeItem(widget.itemID);
-                      });
-                    },
-                  )
-                : Checkbox(
-                    checkColor: Colors.white,
-                    fillColor: MaterialStateProperty.resolveWith(getColor),
-                    value: curItem.check,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        curItem.check = value!;
-                        context
-                            .read<ShoppingTrip>()
-                            .changeItemCheck(widget.itemID);
-                      });
-                    },
-                  )
+            ? IconButton(
+          icon: Icon(
+            Icons.delete,
+            color: appColor,
+          ),
+          onPressed: () {
+            setState(() {
+              Fluttertoast.showToast(msg: 'removed item');
+              context.read<ShoppingTrip>().removeItem(widget.itemID);
+            });
+          },
+        )
+            : Checkbox(
+          checkColor: Colors.white,
+          fillColor: MaterialStateProperty.resolveWith(getColor),
+          value: curItem.check,
+          onChanged: (bool? value) {
+            setState(() {
+              curItem.check = value!;
+              context
+                  .read<ShoppingTrip>()
+                  .changeItemCheck(widget.itemID);
+            });
+          },
+        )
             : SizedBox.shrink(),
         isThreeLine: true,
       ),
@@ -404,9 +412,9 @@ class _EditListsScreenState extends State<EditListScreen> {
             ),
             TextButton(
                 onPressed: () => {
-                      leave_list = true,
-                      Navigator.of(context).pop(),
-                    },
+                  leave_list = true,
+                  Navigator.of(context).pop(),
+                },
                 child: const Text("LEAVE")),
           ],
         );
@@ -418,10 +426,10 @@ class _EditListsScreenState extends State<EditListScreen> {
     switch (item) {
       case 1:
         Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => CreateListScreen(
-                        false, context.read<ShoppingTrip>().uuid)))
+            context,
+            MaterialPageRoute(
+                builder: (context) => CreateListScreen(
+                    false, context.read<ShoppingTrip>().uuid)))
             .then((_) => setState(() {}));
         break;
       case 2:
@@ -462,7 +470,7 @@ class _EditListsScreenState extends State<EditListScreen> {
               },
               itemBuilder: (context) => [
                 (context.read<Cowboy>().uuid ==
-                        context.read<ShoppingTrip>().host)
+                    context.read<ShoppingTrip>().host)
                     ? PopupMenuItem<int>(value: 1, child: Text('Trip Settings'))
                     : PopupMenuItem<int>(value: 2, child: Text('Leave Trip')),
               ],
@@ -546,19 +554,49 @@ class _EditListsScreenState extends State<EditListScreen> {
                 }
 
                 return SingleChildScrollView(
-                  child: Container(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    //padding: const EdgeInsets.all(25),
-                    children: [
-                        Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: HomeHeader(
-                            title: "Trip Details",
-                            textColor: Colors.white,
-                            color: appOrange,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      //padding: const EdgeInsets.all(25),
+                      children: [
+                        if (context.watch<ShoppingTrip>().host ==
+                            context.watch<Cowboy>().uuid)
+                          Padding(
+                            padding: EdgeInsets.only(bottom: 5.h),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                //comment
+                                Container(
+                                  height: 70,
+                                  width: 150,
+                                  child: RoundedButton(
+                                    onPressed: () {
+                                      context.read<ShoppingTrip>().changeTripLock();
+                                      context
+                                          .read<ShoppingTrip>()
+                                          .setAllCheckFalse();
+                                    },
+                                    title: (context.watch<ShoppingTrip>().lock ==
+                                        false)
+                                        ? "Shopping Mode"
+                                        : "Unlock Trip",
+                                    color: appOrange,
+                                  ),
+                                ),
+                                Container(
+                                  height: 70,
+                                  width: 150,
+                                  child: RoundedButton(
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                            context, CheckoutScreen.id);
+                                      },
+                                      title: "Checkout",
+                                      color: Colors.green),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10.w),
                           child: Card(
@@ -575,8 +613,8 @@ class _EditListsScreenState extends State<EditListScreen> {
                                   "Trip Title",
                                   style: titleBlack.copyWith(fontSize: 18.sp),
                                 ),
-                                trailing: Text(
-                                    '${context.read<ShoppingTrip>().title}')),
+                                trailing:
+                                Text('${context.watch<ShoppingTrip>().title}')),
                           ),
                         ),
                         Padding(
@@ -596,9 +634,9 @@ class _EditListsScreenState extends State<EditListScreen> {
                                             width: double.maxFinite,
                                             height: 60.0 +
                                                 (context
-                                                        .watch<ShoppingTrip>()
-                                                        .beneficiaries
-                                                        .length *
+                                                    .watch<ShoppingTrip>()
+                                                    .beneficiaries
+                                                    .length *
                                                     50.0),
                                             child: Column(
                                               children: [
@@ -606,8 +644,8 @@ class _EditListsScreenState extends State<EditListScreen> {
                                                   height: 25.0,
                                                   child: Text(
                                                     'List Members',
-                                                    style: TextStyle(
-                                                        fontSize: 20.0),
+                                                    style:
+                                                    TextStyle(fontSize: 20.0),
                                                   ),
                                                 ),
                                                 SizedBox(
@@ -621,21 +659,21 @@ class _EditListsScreenState extends State<EditListScreen> {
                                                       Column(children: [
                                                         Row(
                                                           crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .end,
+                                                          CrossAxisAlignment
+                                                              .end,
                                                           children: [
                                                             SizedBox(
                                                               width: 20.0,
                                                             ),
                                                             (uid ==
-                                                                    context
-                                                                        .watch<
-                                                                            ShoppingTrip>()
-                                                                        .host)
+                                                                context
+                                                                    .watch<
+                                                                    ShoppingTrip>()
+                                                                    .host)
                                                                 ? Icon(Icons
-                                                                    .face_sharp)
+                                                                .face_sharp)
                                                                 : Icon(Icons
-                                                                    .person_pin_outlined),
+                                                                .person_pin_outlined),
                                                             SizedBox(
                                                               width: 25.0,
                                                             ),
@@ -675,63 +713,13 @@ class _EditListsScreenState extends State<EditListScreen> {
                         ),
                         ItemsAddition(
                           tripUUID: tripUUID,
-                        )
-
-                      //SizedBox(height: 10),
-                    ],
-                  )),
-                );
+                        ),
+                        ItemsList(tripUUID),
+                        //SizedBox(height: 10),
+                      ],
+                    ));
               }),
         ),
-        bottomSheet: StreamBuilder<DocumentSnapshot<Object?>>(
-            stream: listStream,
-            builder:
-                (context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
-              if (snapshot.hasError) {
-                return CircularProgressIndicator();
-              }
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return SizedBox.shrink();
-              }
-              if (!snapshot.data!.exists) return CircularProgressIndicator();
-              return (snapshot.data!['host'] == context.watch<Cowboy>().uuid)
-                  ? Padding(
-                      padding: EdgeInsets.only(bottom: 5.h),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          //comment
-                          Container(
-                            height: 70,
-                            width: 150,
-                            child: RoundedButton(
-                              onPressed: () {
-                                context.read<ShoppingTrip>().changeTripLock();
-                                context.read<ShoppingTrip>().setAllCheckFalse();
-                              },
-                              title:
-                                  (context.watch<ShoppingTrip>().lock == false)
-                                      ? "Shopping Mode"
-                                      : "Unlock Trip",
-                              color: appOrange,
-                            ),
-                          ),
-                          Container(
-                            height: 70,
-                            width: 150,
-                            child: RoundedButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, CheckoutScreen.id);
-                                },
-                                title: "Checkout",
-                                color: Colors.green),
-                          ),
-                        ],
-                      ),
-                    )
-                  : SizedBox.shrink();
-            }),
       ),
     );
   }
@@ -838,21 +826,20 @@ class _ItemsAdditionState extends State<ItemsAddition> {
             Container(
               child: (context.read<ShoppingTrip>().lock == false)
                   ? IconButton(
-                      icon: (isAdd == false)
-                          ? const Icon(Icons.add_circle)
-                          : const Icon(Icons.remove),
-                      onPressed: () {
-                        setState(() {
-                          isAdd = !isAdd;
-                        });
-                      },
-                    )
+                icon: (isAdd == false)
+                    ? const Icon(Icons.add_circle)
+                    : const Icon(Icons.remove),
+                onPressed: () {
+                  setState(() {
+                    isAdd = !isAdd;
+                  });
+                },
+              )
                   : const Icon(Icons.lock_outlined),
             )
           ],
         ),
         if (isAdd) create_item(),
-        ItemsList(widget.tripUUID),
         SizedBox(
           height: 4.0,
         ),

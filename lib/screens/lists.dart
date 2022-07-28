@@ -13,6 +13,7 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
+import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
