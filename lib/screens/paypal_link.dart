@@ -116,7 +116,7 @@ class _PayPalPageSate extends State<PayPalPage> {
                     backgroundColor: appColorLight,
                     collapsedTextColor: Colors.black,
                     title: Text(
-                      "Finding your PayPal.me link",
+                      "Finding your PayPal Username",
                       style: appFontStyle,
                     ),
                     children: [
