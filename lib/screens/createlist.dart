@@ -102,7 +102,7 @@ class _DatePickerState extends State<DatePicker> {
         builder: (context, child) => Theme(
               data: ThemeData().copyWith(
                   colorScheme: ColorScheme.light(
-                      primary: Colors.amber,
+                      primary: appOrange,
                       onPrimary: Colors.white,
                       onSurface: Colors.black)),
               child: child!,
@@ -130,7 +130,7 @@ class _DatePickerState extends State<DatePicker> {
           IconButton(
             icon: Icon(
               Icons.calendar_today,
-              color: orange,
+              color: appOrange,
             ),
             onPressed: () => _selectDate(context),
           ),
@@ -165,7 +165,7 @@ class _DatePickerState extends State<DatePicker> {
               IconButton(
                 icon: Icon(
                   Icons.calendar_today,
-                  color: orange,
+                  color: appOrange,
                 ),
                 onPressed: () => _selectDate(context),
               ),
@@ -417,7 +417,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
             iconTheme: IconThemeData(
               color: Colors.black,
             ),
-            backgroundColor: light_orange,
+            backgroundColor: appOrange,
           ),
           body: FutureBuilder<DocumentSnapshot>(
               future: tripCollection.doc(trip_uuid).get(),
@@ -492,7 +492,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                     ),
                                     buttonIcon: Icon(
                                       Icons.person,
-                                      color: Colors.blueGrey,
+                                      color: Colors.black,
                                     ),
                                     buttonText: Text(
                                       'Selected Friends',
@@ -604,7 +604,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         children: [
                           Container(
                             width: 180,
-                            height: 50,
+                            height: MediaQuery.of(context).size.height/10,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
                             ),
@@ -636,7 +636,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           Spacer(),
                           Container(
                             width: 180,
-                            height: 50,
+                            height: MediaQuery.of(context).size.height/10,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
                             ),

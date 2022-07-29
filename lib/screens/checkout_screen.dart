@@ -390,7 +390,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
           children: [
             Container(
               height: 70,
-              width: 300,
+              width: MediaQuery.of(context).size.width,
               child: GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, ReceiptScanning.id);

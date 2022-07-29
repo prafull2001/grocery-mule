@@ -140,7 +140,7 @@ class _CowamigoState extends State<cowamigo>
                                         style: ButtonStyle(
                                           backgroundColor:
                                               MaterialStateProperty.all<Color>(
-                                                  orange),
+                                                  appOrange),
                                           foregroundColor:
                                               MaterialStateProperty.all<Color>(
                                                   Colors.black),
@@ -377,7 +377,7 @@ class _RequestAmigoState extends State<RequestAmigo>
                       Navigator.pop(context);
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(orange),
+                      backgroundColor: MaterialStateProperty.all<Color>(appOrange),
                       foregroundColor:
                           MaterialStateProperty.all<Color>(Colors.black),
                     ),
@@ -533,7 +533,7 @@ class _FriendScreenState extends State<FriendScreen>
                     ),
                     style: ButtonStyle(
                       backgroundColor:
-                      MaterialStateProperty.all<Color>(orange),
+                      MaterialStateProperty.all<Color>(appOrange),
                       foregroundColor:
                       MaterialStateProperty.all<Color>(Colors.black),
                     ),

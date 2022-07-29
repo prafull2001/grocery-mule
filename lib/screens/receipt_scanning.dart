@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -64,10 +65,27 @@ class ReceiptItem extends StatefulWidget {
   String name = '';
   String price = '0.00';
   String receiptItemUUID = '';
+  late bool isPhone;
 
   ReceiptItem(String name, String receiptItemUUID) {
     this.name = name;
     this.receiptItemUUID = receiptItemUUID;
+
+    final double devicePixelRatio = ui.window.devicePixelRatio;
+    final ui.Size size = ui.window.physicalSize;
+    final double width = size.width;
+    final double height = size.height;
+
+
+    if(devicePixelRatio < 2 && (width >= 1000 || height >= 1000)) {
+      isPhone = false;
+    }
+    else if(devicePixelRatio == 2 && (width >= 1920 || height >= 1920)) {
+      isPhone = false;
+    }
+    else {
+      isPhone = true;
+    }
   }
 
   @override
@@ -95,13 +113,13 @@ class _ReceiptItemState extends State<ReceiptItem> {
         return Card(
           child: Container(
             padding: const EdgeInsets.all(4.0),
-            height: 55.h,
+            height: (widget.isPhone)? 55.h : MediaQuery.of(context).size.height/10,
             child: Column(
               children: [
                 Text(
                   '${title_short}: ',
                   style: appFontStyle.copyWith(
-                      color: Colors.white, fontSize: 15.sp),
+                      color: Colors.black, fontSize: 15.sp),
                 ),
                 // TODO get price to go as right as possible
                 // SizedBox.expand(),
@@ -110,11 +128,10 @@ class _ReceiptItemState extends State<ReceiptItem> {
                 ]
               ],
             ),
-            // decoration: BoxDecoration(
-            //   color: Colors.grey[500],
-            //   border: Border.all(),
-            //   borderRadius: BorderRadius.all(Radius.circular(4.0)),
-            // ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(4.0)),
+            ),
           ),
         );
       },
@@ -152,8 +169,9 @@ class _ReceiptItemsState extends State<ReceiptItems> {
         widget.rilist.add(ReceiptItem(item_name, document['uuid']));
         add_fees = true;
       } else {
-        if (document['quantity'] > 0)
+        if (document['quantity'] > 0) {
           widget.rilist.insert(0, ReceiptItem(item_name, document['uuid']));
+        }
       }
     });
   }
@@ -218,11 +236,11 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
       delay: Duration(milliseconds: 150),
       child: Container(
         padding: const EdgeInsets.all(4.0),
-        height: 40.h,
+        height: 56.h,
         child: Row(
           children: [
             Text(
-              '${widget.price} ',
+              '   ${widget.price} ',
               style: TextStyle(
                 fontSize: 20.0,
               ),
@@ -300,7 +318,7 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
           ],
         ),
         decoration: BoxDecoration(
-          color: Colors.grey[500],
+          color: Colors.white,
           // border: Border.all(),
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
         ),
@@ -368,7 +386,7 @@ class _ReceiptPricesState extends State<ReceiptPrices> {
       child: Container(
         height: 500,
         child: ListView.separated(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.only(top: 8.0),
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
           itemCount: widget.rplist.length,
@@ -376,7 +394,7 @@ class _ReceiptPricesState extends State<ReceiptPrices> {
             return widget.rplist[index];
           },
           separatorBuilder: (context, index) {
-            return SizedBox(height: 10.0);
+            return SizedBox(height: 11.0);
           },
         ),
       ),
@@ -492,7 +510,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Receipt Scanning'),
-        backgroundColor: light_orange,
+        backgroundColor: appOrange,
       ),
       body: Column(children: [
         Row(
@@ -504,7 +522,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
               child: RoundedButton(
                 onPressed: () => pickImage(true),
                 title: "Pick from Gallery",
-                color: Colors.orange,
+                color: appOrange,
               ),
             ),
             SizedBox(
@@ -514,7 +532,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
               child: RoundedButton(
                 onPressed: () => pickImage(false),
                 title: "Take Picture",
-                color: Colors.orange,
+                color: appOrange,
               ),
             ),
             SizedBox(
@@ -572,7 +590,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                 // items
                 ReceiptItems(rilist, itemstream),
                 VerticalDivider(
-                  color: Colors.blueGrey,
+                  color: Colors.black,
                   thickness: 0.7,
                 ),
                 // prices

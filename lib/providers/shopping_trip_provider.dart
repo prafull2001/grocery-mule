@@ -234,7 +234,7 @@ class ShoppingTrip with ChangeNotifier {
     });
     tripCollection.doc(_uuid).collection('items').doc(item_uid).set({
       'name': name,
-      'quantity': 0,
+      'quantity': 1,
       'subitems': bene_subitem,
       'uuid': item_uid,
       'timeStamp': DateTime.now().microsecondsSinceEpoch,

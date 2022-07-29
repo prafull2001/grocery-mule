@@ -13,6 +13,7 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
+import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
@@ -97,7 +98,43 @@ class _ShoppingTripQueryState extends State<ShoppingTripQuery> {
             return const Text('Something went wrong');
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Text("Loading");
+            return Card(
+              elevation: 10,
+              color: appColor,
+              shadowColor: appOrange,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r)),
+              child: ListTile(
+                title: Container(
+                  child: Text(
+                    'Loading Title...',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 25,
+                    ),
+                  ),
+                ),
+                subtitle: Row(children: [
+                  Text(
+                    'Loading Info...\n\n',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                ]),
+                onTap: () async {
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditListScreen(listUUID)));
+                },
+                isThreeLine: true,
+              ),
+            );
           }
           if (snapshot.data!.data() != null) {
             String desc_short = snapshot.data!['description'];
@@ -250,12 +287,12 @@ class _ListsScreenState extends State<ListsScreen> {
         appBar: AppBar(
           centerTitle: true,
           title: UserName(curUser!.uid),
-          backgroundColor: light_orange,
+          backgroundColor: appOrange,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarBrightness: Brightness.light,
           ),
           iconTheme: IconThemeData(
-            color: darker_beige,
+            color: Colors.black,
           ),
           elevation: 0,
         ),
@@ -263,9 +300,9 @@ class _ListsScreenState extends State<ListsScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              const DrawerHeader(
+              DrawerHeader(
                 decoration: BoxDecoration(
-                  color: light_orange,
+                  color: appOrange,
                 ),
                 child: Text(
                   'Menu Options',
@@ -371,6 +408,7 @@ class _ListsScreenState extends State<ListsScreen> {
           width: 80,
           child: FloatingActionButton(
             child: const Icon(Icons.add),
+            backgroundColor: appOrange,
             onPressed: () async {
               await Navigator.push(
                   context,
