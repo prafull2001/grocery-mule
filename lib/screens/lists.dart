@@ -204,9 +204,9 @@ class _ListsScreenState extends State<ListsScreen> {
       userCollection.doc(curUser!.uid).snapshots();
   Future<void>? Cowsnapshot;
   List<String> dev = [
-    "NYxh0dZXDya9VAdSYnOeWkY2wv83",
-    "plXPxFNLEMbJclCzNsyJeE61RKT2",
-    "nW7NnPdQGcXtj1775nrLdB1igjG2",
+    "ZzIAu0Hqzoa0YDerS408uZN5lrf1", // harra
+    "GqZ1wHAr3aUPTlz2Z3IkqS3vsk52", // praffa
+    "W9J3qDwNQgSBbsDvyT6RZtvbm572", // dhruva
   ];
   @override
   void initState() {
@@ -363,6 +363,16 @@ class _ListsScreenState extends State<ListsScreen> {
                     return route.settings.name == WelcomeScreen.id;
                   });
                   Navigator.pushNamed(context, WelcomeScreen.id);
+                },
+              ),
+              ListTile(
+                title: const Text('Privacy Policy'),
+                onTap: () async {
+                  String ppstr = "https://grocerymule.net/privacy.html";
+                  Uri pp_link = Uri.parse(ppstr);
+                  if (await canLaunchUrl(pp_link)) {
+                    launchUrl(pp_link);
+                  }
                 },
               ),
               if (dev.contains(context.watch<Cowboy>().uuid))

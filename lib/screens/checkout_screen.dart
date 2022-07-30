@@ -308,7 +308,7 @@ class _CheckoutScreen extends State<CheckoutScreen> {
             fontSize: 20,
           ),
         ),
-        backgroundColor: light_orange,
+        backgroundColor: appOrange,
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: tripCollection
