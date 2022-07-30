@@ -113,7 +113,7 @@ class _ReceiptItemState extends State<ReceiptItem> {
         return Card(
           child: Container(
             padding: const EdgeInsets.all(4.0),
-            height: (widget.isPhone)? 55.h : MediaQuery.of(context).size.height/10,
+            height: (widget.isPhone)? 66.h : MediaQuery.of(context).size.height/10,
             child: Column(
               children: [
                 Text(
@@ -190,8 +190,10 @@ class _ReceiptItemsState extends State<ReceiptItems> {
             return const CircularProgressIndicator();
           }
           loadItems(snapshot.data!);
+          //print('am i a dirty slut? ${ui.window.physicalSize.height}');
           return Container(
-            height: 500,
+            height: (ui.window.physicalSize.height < 2210) ? 400 : 500,
+            padding: EdgeInsets.only(bottom: (ui.window.physicalSize.height < 2000) ? 100.0 : 0.0),
             child: ListView.separated(
               padding: const EdgeInsets.all(4.0),
               scrollDirection: Axis.vertical,
@@ -236,7 +238,7 @@ class _ReceiptPriceState extends State<ReceiptPrice> {
       delay: Duration(milliseconds: 150),
       child: Container(
         padding: const EdgeInsets.all(4.0),
-        height: 56.h,
+        height: 66.h,
         child: Row(
           children: [
             Text(
@@ -384,7 +386,7 @@ class _ReceiptPricesState extends State<ReceiptPrices> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        height: 500,
+        height: (ui.window.physicalSize.height < 500) ? 400 : 500,
         child: ListView.separated(
           padding: const EdgeInsets.only(top: 8.0),
           scrollDirection: Axis.vertical,
@@ -541,10 +543,11 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
           ],
         ),
         SizedBox(
-          height: 20,
+          height: (ui.window.physicalSize.height < 2210) ? 0 : 20,
         ),
         Container(
             padding: const EdgeInsets.all(4.0),
+            //height: (ui.window.physicalSize.height < 2000) ? 30 : 50,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -552,7 +555,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                   child: Center(
                     child: Text(
                       'Items',
-                      style: appFontStyle.copyWith(fontSize: 30),
+                      style: appFontStyle.copyWith(fontSize: (ui.window.physicalSize.height < 2000) ? 24 : 30),
                     ),
                   ),
                 ),
@@ -573,8 +576,7 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
                           ),
                           label: Text(
                             'Prices',
-                            style: appFontStyle.copyWith(
-                                fontSize: 30, color: Colors.black),
+                            style: appFontStyle.copyWith(fontSize: (ui.window.physicalSize.height < 2000) ? 24 : 30, color: Colors.black),
                           ),
                         ),
                       ],
@@ -584,14 +586,18 @@ class _ReceiptScanningState extends State<ReceiptScanning> {
               ],
             )),
         Container(
+          height: (ui.window.physicalSize.height < 2000) ? 400 : 500,
           child: IntrinsicHeight(
             child: Row(
               children: [
                 // items
                 ReceiptItems(rilist, itemstream),
-                VerticalDivider(
-                  color: Colors.black,
-                  thickness: 0.7,
+                Container(
+                  height: 400,
+                  child: VerticalDivider(
+                    color: Colors.black,
+                    thickness: 0.7,
+                  ),
                 ),
                 // prices
                 ReceiptPrices(rplist),
