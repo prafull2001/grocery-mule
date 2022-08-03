@@ -152,13 +152,13 @@ class Cowboy with ChangeNotifier {
     }
   }
 
-  Future<Map<String, String>> fetchFriendFriends(String friend_uuid) async {
+  Future<List<String>> fetchFriendFriends(String friend_uuid) async {
     DocumentSnapshot friendShot = await userCollection.doc(friend_uuid).get();
-    Map<String, String> amigos = {};
-    if (!(friendShot['friends'] as Map<String, dynamic>).isEmpty) {
-      (friendShot['friends'] as Map<String, dynamic>).forEach((uid, entry) {
-        String fields = entry.toString().trim();
-        amigos[uid.trim()] = fields;
+    List<String> amigos = [];
+    if (!(friendShot['friends'] as List<dynamic>).isEmpty) {
+      (friendShot['friends'] as List<dynamic>).forEach((uid) {
+        String fields = uid.toString().trim();
+        amigos.add(fields);
       });
     }
     return amigos;
@@ -195,7 +195,8 @@ class Cowboy with ChangeNotifier {
   // removes friend, notifies listeners, and updates database
   removeFriend(String friendUUID) {
     print('friends: $_friends');
-    _friends.remove(friendUUID);
+    friends.removeWhere((element) => (element==friendUUID));
+    //_friends.remove(friendUUID);
     print('friends again: $_friends');
     updateCowboyFriendsRemove(friendUUID);
     userCollection.doc(friendUUID).update({
@@ -204,13 +205,32 @@ class Cowboy with ChangeNotifier {
     notifyListeners();
   }
 
+  removeAllFriends() async {
+    DocumentSnapshot user_shot = await userCollection.doc(_uuid).get();
+    if (user_shot!=null && user_shot['friends']!=null) {
+      _friends = [];
+      (user_shot['friends'] as List<dynamic>).forEach((element) {
+        _friends.add(element.toString().trim());
+      });
+    }
+    print('current friends: $_friends');
+    _friends.forEach((friend_uuid) async {
+      // print('removing friend with uuid: $friend_uuid');
+      await updateCowboyFriendsRemove(friend_uuid);
+      await userCollection.doc(friend_uuid).update({
+        'friends': FieldValue.arrayRemove([_uuid])
+      });
+    });
+    _friends.removeWhere((element) => (_friends.contains(element)));
+  }
+
   updateCowboyRequestsRemove(String friendUUID) {
     userCollection.doc(_uuid).update({'requests': _requests});
   }
 
   updateCowboyFriendsRemove(String friendUUID) async {
     userCollection.doc(_uuid).update({'friends': _friends});
-    Map<String, String> amigos = {};
+    List<String> amigos = [];
     amigos = await fetchFriendFriends(friendUUID);
     print('amigos: $amigos');
     amigos.remove(_uuid);

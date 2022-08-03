@@ -186,9 +186,13 @@ class _IndividualItemState extends State<IndividualItem> {
             return const SizedBox.shrink();
           }
           if (snapshot.hasError) return const CircularProgressIndicator();
+          if (snapshot.data == null) {
+            return const SizedBox.shrink();
+          }
           loadItem(snapshot.data!);
           return simple_item();
-        });
+        },
+    );
   }
 
   //this function loads stream snapshots into item
@@ -206,7 +210,10 @@ class _IndividualItemState extends State<IndividualItem> {
 
   Widget simple_item() {
     String name = curItem.name;
-    int quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
+    int quantity = 0;
+    if (curItem.subitems[context.read<Cowboy>().uuid] != null) {
+      quantity = curItem.subitems[context.read<Cowboy>().uuid]!;
+    }
     return Card(
       color: (context.watch<ShoppingTrip>().lock == true &&
           context.watch<Cowboy>().uuid !=

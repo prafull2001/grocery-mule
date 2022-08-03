@@ -175,47 +175,40 @@ class ShoppingTrip with ChangeNotifier {
     });
   }
 
-  removeBeneficiaries(List<String> bene_uuids) {
+  removeBeneficiaries(List<String> bene_uuids) async {
     _beneficiaries.removeWhere((element) => bene_uuids.contains(element));
-    print("modified");
-    print(bene_uuids);
-    bene_uuids.forEach((String bene_uuid) {
-      removeBeneficiaryFromItems(bene_uuid);
-      tripCollection.doc(_uuid).update({
-        'beneficiaries': FieldValue.arrayRemove([bene_uuid])
-      });
-      userCollection
-          .doc(bene_uuid)
-          .collection('shopping_trips')
-          .doc(_uuid)
-          .delete();
+    await removeBeneficiariesFromItems(bene_uuids);
+    await tripCollection.doc(_uuid).update({'beneficiaries': FieldValue.arrayRemove(bene_uuids)});
+    bene_uuids.forEach((String bene_uuid) async {
+      await userCollection.doc(bene_uuid).collection('shopping_trips').doc(_uuid).delete();
     });
     notifyListeners();
   }
 
-  removeBeneficiaryFromItems(String bene_uuid) {
-    itemUUID.forEach((item) {
-      tripCollection.doc(_uuid).collection('items').get().then((collection) => {
-            collection.docs.forEach((document) async {
-              late int newItemTotal;
-              int beneItemTotal = 0;
-              Map<String, int> bene_items = {};
-              (document.data()['subitems'] as Map<String, dynamic>)
-                  .forEach((uuid, quantity) {
-                bene_items[uuid] = int.parse(quantity.toString());
-                if (uuid == bene_uuid) {
-                  beneItemTotal = quantity;
-                }
-                newItemTotal = document.data()['quantity'];
-              });
-              bene_items.remove(bene_uuid);
-              print(bene_items);
-              newItemTotal = newItemTotal - beneItemTotal;
-              await document.reference
-                  .update({"quantity": newItemTotal, "subitems": bene_items});
-            })
-          });
-      // tripCollection.doc(_uuid).collection('items').doc(item).update({'subitems':}));
+  removeBeneficiariesFromItems(List<String> bene_uuids) async {
+    QuerySnapshot items_shot = await tripCollection.doc(_uuid).collection('items').get();
+    if (items_shot.docs != null && items_shot.docs.isNotEmpty) {
+      itemUUID = [];
+      items_shot.docs.forEach((item_uuid) {
+        if (item_uuid.id.trim()!='tax' && item_uuid.id.trim()!='add. fees') {
+          itemUUID.add(item_uuid.id.trim());
+        }
+      });
+    }
+    itemUUID.forEach((item) async {
+      DocumentSnapshot item_shot = await tripCollection.doc(_uuid).collection('items').doc(item).get();
+      int newtotal = 0;
+      Map<String, int> bene_items = <String, int>{};
+      (item_shot['subitems'] as Map<String, dynamic>).forEach((uuid, quantity) {
+        bene_items[uuid] = int.parse(quantity.toString());
+        if (!bene_uuids.contains(uuid)) {
+          newtotal += int.parse(quantity.toString());
+        }
+      });
+      bene_uuids.forEach((bene_uuid) {
+        bene_items.remove(bene_uuid);
+      });
+      await tripCollection.doc(_uuid).collection('items').doc(item).update({'quantity': newtotal, 'subitems': bene_items});
     });
     notifyListeners();
   }
@@ -322,12 +315,16 @@ class ShoppingTrip with ChangeNotifier {
 
   deleteTripDB() async {
     print(_uuid);
-    itemUUID.forEach((uid) {
-      tripCollection.doc(_uuid).collection('items').doc(uid).delete();
+    QuerySnapshot items_snapshot = await tripCollection.doc(_uuid).collection('items').get();
+    items_snapshot.docs.forEach((item_doc) {
+      item_doc.reference.delete();
     });
-    tripCollection.doc(_uuid).collection('items').doc('dummy').delete();
-    tripCollection.doc(_uuid).collection('items').doc('tax').delete();
-    tripCollection.doc(_uuid).collection('items').doc('add. fees').delete();
+    // itemUUID.forEach((uid) {
+    //   tripCollection.doc(_uuid).collection('items').doc(uid).delete();
+    // });
+    // tripCollection.doc(_uuid).collection('items').doc('dummy').delete();
+    // tripCollection.doc(_uuid).collection('items').doc('tax').delete();
+    // tripCollection.doc(_uuid).collection('items').doc('add. fees').delete();
     _beneficiaries.forEach((bene) {
       userCollection.doc(bene).collection('shopping_trips').doc(_uuid).delete();
     });

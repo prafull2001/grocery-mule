@@ -81,15 +81,27 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       idToken: appleCredential.identityToken,
       rawNonce: rawNonce,
     );
-    // Sign in to Firebase with the Google [UserCredential].
+    // Sign in to Firebase with the Apple [UserCredential].
     final UserCredential credential =
         await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
     if (credential.additionalUserInfo!.isNewUser) {
+      print("detected Apple New User!!!!");
+      print("apple UUID: " + credential.user!.uid);
+      print("apple email: " + credential.user!.email!);
+      if(appleCredential.givenName == null) {
+        print("given Name is NULL!!");
+      }
+      // print("apple givenName: " + appleCredential.givenName!);
+      // print("apple familyName: " + appleCredential.familyName!);
+      // print("apple email: " + appleCredential.email!);
+
+
       context.read<Cowboy>().initializeCowboy(
           credential.user!.uid,
-          appleCredential.givenName!,
-          appleCredential.familyName!,
-          appleCredential.email!);
+          "Apple",
+          "User",
+          credential.user!.email!);
       Navigator.pop(context);
       Navigator.pushNamed(context, PayPalPage.id);
     } else {
@@ -229,7 +241,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             GestureDetector(
               onTap: () async {
                 try {
-                  await signInWithGoogle();
+                  await signInWithApple();
                 } catch (e) {
                   print('error: ' + e.toString());
                 }

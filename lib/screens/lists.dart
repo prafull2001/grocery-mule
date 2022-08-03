@@ -1,24 +1,25 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:grocery_mule/constants.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:grocery_mule/dev/collection_references.dart';
-import 'package:grocery_mule/dev/migration.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
 import 'package:grocery_mule/screens/createlist.dart';
+import 'package:grocery_mule/screens/email_reauth.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
-import 'package:grocery_mule/screens/intro_screen.dart';
-import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'editlist.dart';
@@ -51,6 +52,9 @@ class _UserNameState extends State<UserName> {
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
+          }
+          if (snapshot == null || snapshot.data == null) {
+            return Text('Howdy!', style: TextStyle(fontSize: 25, color: Colors.black));
           }
           return Text('Howdy ${snapshot.data!['first_name']}!',
               style: TextStyle(fontSize: 25, color: Colors.black));
@@ -278,6 +282,188 @@ class _ListsScreenState extends State<ListsScreen> {
     return shopping_trips;
   }
 
+  Future<void> loadItemToProvider() async {
+    QuerySnapshot itemColQuery = await tripCollection.doc(context.read<ShoppingTrip>().uuid).collection('items').get();
+    List<String> rawItemList = [];
+    itemColQuery.docs.forEach((document) {
+      String itemID = document['uuid'];
+      // TODO maybe don't need this check at all
+      if ((itemID != 'dummy') && (itemID != 'add. fees') && (itemID != "tax")) {
+        rawItemList.add(itemID);
+      }
+    });
+    //check if every id from firebase is in local itemUUID
+    rawItemList.forEach((itemID) {
+      if (!context.read<ShoppingTrip>().itemUUID.contains(itemID)) {
+        context.read<ShoppingTrip>().itemUUID.add(itemID);
+      }
+    });
+    List<String> tobeDeleted = [];
+    //check if any local uuid needs to be deleted
+    context.read<ShoppingTrip>().itemUUID.forEach((itemID) {
+      if (!rawItemList.contains(itemID)) {
+        tobeDeleted.add(itemID);
+      }
+    });
+    context
+        .read<ShoppingTrip>()
+        .itemUUID
+        .removeWhere((element) => tobeDeleted.contains(element));
+  }
+
+  Future<void> deleteAllUserFields() async {
+    // step 1 - delete trip / remove self from trip
+    bool step1 = true;
+    // step 2 - clear and delete shopping_trips reference
+    bool step2 = false;
+    // step 3 - delete friends
+    bool step3 = false;
+    // step 4 - delete self
+    bool step4 = false;
+
+    while (true) {
+      if (step1) {
+        // DELETE TRIP
+        QuerySnapshot trips = await userCollection.doc(curUser!.uid).collection('shopping_trips').get();
+        int total_trips = trips.docs.length; // actual number of trips plus 1 for dummy
+        int count_trips = 0;
+        trips.docs.forEach((trip) async {
+          if (trip.id == 'dummy') {
+            count_trips++;
+          } else {
+            DocumentSnapshot trip_snapshot =
+                await tripCollection.doc(trip.id).get();
+            List<String> benes = [];
+            (trip_snapshot['beneficiaries'] as List<dynamic>)
+                .forEach((bene_uuid) {
+              benes.add(bene_uuid);
+            });
+            context.read<ShoppingTrip>().initializeTripFromDB(
+                trip.id,
+                trip_snapshot['title'],
+                DateTime(2001),
+                trip_snapshot['description'],
+                trip_snapshot['host'],
+                benes,
+                false);
+            await loadItemToProvider();
+            if (context.read<ShoppingTrip>().host == curUser!.uid) {
+              await context.read<ShoppingTrip>().deleteTripDB();
+              print('deleting trip where host: ${context.read<ShoppingTrip>().host} and uuid: ${context.read<ShoppingTrip>().uuid}');
+              count_trips++;
+            } else {
+              // remove self from subitems
+              await context
+                  .read<ShoppingTrip>()
+                  .removeBeneficiaries([curUser!.uid]);
+              print('removing beneficiary where bene: ${context.read<ShoppingTrip>().uuid}');
+              count_trips++;
+            }
+          }
+        });
+        if (count_trips == total_trips) {
+          print('step 1 finished');
+          step1 = false;
+          step2 = true;
+        }
+      }
+      if (step2) {
+        // CLEAR AND DELETE SHOPPING TRIPS REFERENCE
+        QuerySnapshot trips = await userCollection.doc(curUser!.uid).collection('shopping_trips').get();
+        int total_trips = trips.docs.length;
+        int count_trips = 0;
+        trips.docs.forEach((trip_uuid) async {
+          await trip_uuid.reference.delete();
+          count_trips++;
+        });
+        if (count_trips == total_trips) {
+          print('step 2 finished');
+          step2 = false;
+          step3 = true;
+        }
+      }
+      if (step3) {
+        // DELETE FRIENDS
+        await context.read<Cowboy>().removeAllFriends();
+        print('step 3 finished');
+        step3 = false;
+        step4 = true;
+      }
+      if (step4) {
+        // DELETE SELF
+        await userCollection.doc(curUser!.uid).delete();
+        Navigator.of(context).popUntil((route) {
+          return route.settings.name == WelcomeScreen.id;
+        });
+        Navigator.pushNamed(context, WelcomeScreen.id);
+        context.read<Cowboy>().clearData();
+        step4 = false;
+        print('step 4 finished');
+      }
+      if (!step1 && !step2 && !step3 && !step4) {
+        print('all steps finished u dirty cuck slut !!!!!!');
+        break;
+      }
+    }
+  }
+
+  String sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  Future<void> reauthUser() async {
+    print('reauth: REAUTHING USER');
+    String curProviderID = FirebaseAuth
+        .instance.currentUser!.providerData[0].providerId
+        .toString();
+    if (curProviderID == "google.com") {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      // Obtain the auth details from the request.
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser!.authentication;
+      // Create a new credential.
+      final OAuthCredential googleCredential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      await FirebaseAuth.instance.currentUser!
+          .reauthenticateWithCredential(googleCredential);
+    } else if (curProviderID == "password") {
+      final reauth_info = await Navigator.pushNamed(context, ReauthScreen.id);
+      print('USER CREDS: ' + '${reauth_info}');
+      List<dynamic> user_info = reauth_info as List<dynamic>;
+      try {
+        AuthCredential credential = EmailAuthProvider.credential(email: user_info[0].toString(), password: user_info[1].toString());
+        await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(credential);
+      } on FirebaseAuthException catch (e) {
+        Fluttertoast.showToast(msg: 'Invalid Credentials');
+        throw e;
+      }
+
+    } else if (curProviderID == "apple.com") {
+      final rawNonce = generateNonce();
+      final nonce = sha256ofString(rawNonce);
+      // Request credential for the currently signed in Apple account.
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+      // Create an `OAuthCredential` from the credential returned by Apple.
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+      await FirebaseAuth.instance.currentUser!
+          .reauthenticateWithCredential(oauthCredential);
+    }
+    print('reauth: FINISHED REAUTHING USER');
+  }
+
   @override
   Widget build(BuildContext context) {
     //print(context.watch<Cowboy>().shoppingTrips);
@@ -375,14 +561,48 @@ class _ListsScreenState extends State<ListsScreen> {
                   }
                 },
               ),
-              if (dev.contains(context.watch<Cowboy>().uuid))
-                ListTile(
-                  title: const Text('Dev only'),
-                  onTap: () {
-                    //Navigator.pop(context);
-                    Navigator.pushNamed(context, Migration.id);
-                  },
-                ),
+              ListTile(
+                title: const Text('Delete Account'),
+                onTap: () async {
+                  return showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Confirm"),
+                        content: const Text(
+                            "Are you sure you want to delete your account?"),
+                        actions: <Widget>[
+                          TextButton(
+                              onPressed: () async {
+                                try {
+                                  await reauthUser();
+                                  print('STARTED DELETE OF USER');
+                                  await deleteAllUserFields();
+                                  print('STARTED DELETE OF AUTH');
+                                  await FirebaseAuth.instance.currentUser!.delete();
+                                  // print(context.read<Cowboy>().uuid),
+                                } on FirebaseAuthException catch (e) {
+                                  if (e.code == 'requires-recent-login') {
+                                    // print('The user must reauthenticate before this operation can be executed.');
+                                    print("reauth failed");
+                                  }
+                                }
+                                // deleteAccountTrips(),
+                                // Navigator.of(context).pop(),
+                              },
+                              child: const Text("DELETE")),
+                          TextButton(
+                            onPressed: () => {
+                              Navigator.of(context).pop(),
+                            },
+                            child: const Text("CANCEL"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
             ],
           ),
         ),

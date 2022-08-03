@@ -11,6 +11,7 @@ import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/createlist.dart';
 import 'package:grocery_mule/screens/editlist.dart';
+import 'package:grocery_mule/screens/email_reauth.dart';
 import 'package:grocery_mule/screens/friend_screen.dart';
 import 'package:grocery_mule/screens/intro_screen.dart';
 import 'package:grocery_mule/screens/lists.dart';
@@ -110,6 +111,7 @@ void main() async {
                 Migration.id: (context) => Migration(),
                 PayPalPage.id: (context) => PayPalPage(),
                 ReceiptScanning.id: (context) => ReceiptScanning(),
+                ReauthScreen.id: (context) => ReauthScreen(),
               },
             );
           }),

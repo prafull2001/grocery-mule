@@ -109,7 +109,6 @@ class _DatePickerState extends State<DatePicker> {
             ));
     if (picked != null && picked != context.read<ShoppingTrip>().date) {
       setState(() {
-        // print('setted state uwu: '+picked.toString());
         context.read<ShoppingTrip>().editTripDate(picked);
         date = picked;
       });
@@ -310,12 +309,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       beneficiaries,
       snapshot['lock'] as bool,
     );
-    print(context.read<ShoppingTrip>().beneficiaries);
   }
 
   Future<void> updateGridView(bool new_trip) async {
     if (new_trip) {
-      print("made here");
       friend_bene.add(hostUUID);
       await context.read<ShoppingTrip>().initializeTrip(
           context.read<ShoppingTrip>().title,
@@ -337,33 +334,25 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       context.read<Cowboy>().addTrip(context.read<Cowboy>().uuid,
           context.read<ShoppingTrip>().uuid, context.read<ShoppingTrip>().date);
     } else {
-      print(context.read<ShoppingTrip>().beneficiaries);
-      print("starting to edit list");
       List<String> removeList = [];
-      print(friend_bene);
       context.read<ShoppingTrip>().beneficiaries.forEach((old_bene) {
         if (!friend_bene.contains(old_bene) &&
             old_bene != context.read<Cowboy>().uuid) {
-          print("remove: " + old_bene);
           removeList.add(old_bene);
         }
       });
 
-      //check if any bene needs to be removed
-      print("removeList: " + removeList.toString());
+
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
 
       //check if new bene need to be added
       for (var friend in friend_bene) {
         if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
-          //print(friend);
-          print("adding new bene: " + friend);
           context.read<ShoppingTrip>().addBeneficiary(friend);
           //context.read<Cowboy>().addTripToBene(friend, context.read<ShoppingTrip>().uuid,);
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
       }
-      print(context.read<ShoppingTrip>().beneficiaries);
       context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
@@ -432,7 +421,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                 if (snapshot.data!.exists) {
                   _loadCurrentTrip(snapshot.data!);
                 }
-                print(localTime);
 
                 return Padding(
                   padding: EdgeInsets.all(15.0),
@@ -485,10 +473,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                       color: dark_beige.withOpacity(0.25),
                                       borderRadius:
                                           BorderRadius.all(Radius.circular(12)),
-                                      // border: Border.all(
-                                      //   color: darker_beige,
-                                      //   width: 2,
-                                      // ),
                                     ),
                                     buttonIcon: Icon(
                                       Icons.person,
@@ -504,9 +488,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                       friend_bene = results
                                           .map((e) => e.toString())
                                           .toList();
-                                      print(context
-                                          .read<ShoppingTrip>()
-                                          .beneficiaries);
                                     },
                                   );
                                 }),
@@ -613,7 +594,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               textColor: Colors.white,
                               onPressed: () async {
                                 if (context.read<ShoppingTrip>().title != '') {
-                                  print("editing list");
                                   await updateGridView(newList);
                                   Navigator.pop(context);
                                   if (newList) {
@@ -648,10 +628,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 await check_delete(context);
                                 if (delete_list) {
                                   if (!newList) {
-                                    print('delete');
-                                    DocumentSnapshot user = await userCollection
-                                        .doc(context.read<Cowboy>().uuid)
-                                        .get();
                                     if (!newList) {
                                       await total_expenditure(
                                           context.read<ShoppingTrip>().uuid);
