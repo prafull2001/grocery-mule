@@ -202,6 +202,9 @@ class QueryAmigoDelegate extends SearchDelegate {
   String email = '';
 
   @override
+  String searchFieldLabel = 'first name, case sensitive!';
+
+  @override
   List<Widget>? buildActions(BuildContext context) => [
     IconButton(
       onPressed: () {close(context, null);},
