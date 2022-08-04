@@ -11,6 +11,7 @@ import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/screens/lists.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
+import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
@@ -99,10 +100,11 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
       context.read<Cowboy>().initializeCowboy(
           credential.user!.uid,
-          "Apple",
-          "User",
+          "",
+          "",
           credential.user!.email!);
       Navigator.pop(context);
+      await Navigator.pushNamed(context, UserInfoScreen.id);
       Navigator.pushNamed(context, PayPalPage.id);
     } else {
       Navigator.pop(context);
