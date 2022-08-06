@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-
+import 'dart:io' show Platform;
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -194,9 +194,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       if (appleCredential.givenName == null) {
         print("given Name is NULL!!");
       }
-      // print("apple givenName: " + appleCredential.givenName!);
-      // print("apple familyName: " + appleCredential.familyName!);
-      // print("apple email: " + appleCredential.email!);
 
       context.read<Cowboy>().initializeCowboy(
           credential.user!.uid, "", "", credential.user!.email!);
@@ -348,34 +345,36 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 ),
               ),
             ),
-            GestureDetector(
-              onTap: () async {
-                try {
-                  await signInWithApple();
-                } catch (e) {
-                  print('error: ' + e.toString());
-                }
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.h),
-                child: RectangularTextIconButton(
-                  onPressed: () async {
-                    try {
-                      await signInWithApple();
-                    } catch (e) {
-                      print('error: ' + e.toString());
-                    }
-                  },
-                  text: "Continue With Apple",
-                  icon: Icon(
-                    FontAwesomeIcons.apple,
-                    // color: Colors.redAccent,
+            if(Platform.isIOS)...[
+              GestureDetector(
+                onTap: () async {
+                  try {
+                    await signInWithApple();
+                  } catch (e) {
+                    print('error: ' + e.toString());
+                  }
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.h),
+                  child: RectangularTextIconButton(
+                    onPressed: () async {
+                      try {
+                        await signInWithApple();
+                      } catch (e) {
+                        print('error: ' + e.toString());
+                      }
+                    },
+                    text: "Continue With Apple",
+                    icon: Icon(
+                      FontAwesomeIcons.apple,
+                      // color: Colors.redAccent,
+                    ),
+                    buttonColor: Colors.white,
+                    textColor: Colors.black,
                   ),
-                  buttonColor: Colors.white,
-                  textColor: Colors.black,
                 ),
               ),
-            ),
+            ]
           ],
         ),
       ),
