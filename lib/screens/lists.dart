@@ -57,7 +57,7 @@ class _UserNameState extends State<UserName> {
             return Text('Howdy!', style: TextStyle(fontSize: 25, color: Colors.black));
           }
           return Text('Howdy ${snapshot.data!['first_name']}!',
-              style: TextStyle(fontSize: 25, color: Colors.black));
+              style: TextStyle(fontSize: 25, color: Colors.white));
         });
   }
 }
@@ -486,28 +486,33 @@ class _ListsScreenState extends State<ListsScreen> {
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: appOrange,
+              Container(
+                height: 150.0,
+                //alignment: Alignment.center,
+                child: DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: appOrange,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Menu Options',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
                 ),
-                child: Text(
-                  'Menu Options',
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                ),
-              ),
-              // Text(context.watch<Cowboy>().first_name),
-              ListTile(
-                title: const Text('Cowamigos'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, FriendScreen.id);
-                },
               ),
               ListTile(
                 title: const Text('Edit Profile'),
                 onTap: () {
                   //Navigator.pop(context);
                   Navigator.pushNamed(context, UserInfoScreen.id);
+                },
+              ),
+              ListTile(
+                title: const Text('Cowamigos'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, FriendScreen.id);
                 },
               ),
               ListTile(

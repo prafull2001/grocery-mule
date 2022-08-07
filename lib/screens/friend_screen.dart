@@ -53,13 +53,18 @@ class _CowamigoState extends State<cowamigo>
       child: StreamBuilder<DocumentSnapshot>(
         stream: userCollection.doc(uuid).snapshots(),
         builder: (context, snapshot) {
-          Map<String, dynamic> result =
-              snapshot.data?.data() as Map<String, dynamic>;
-          if (result != null && snapshot.data != null) {
-            name = result['first_name'].toString() +
-                ' ' +
-                result['last_name'].toString();
-            email = result['email'].toString();
+          Map<String, dynamic> result = {};
+          if (snapshot.data != null) {
+            if (snapshot.data!.data() != null) {
+              result = snapshot.data!.data() as Map<String, dynamic>;
+              name = result['first_name'].toString() +
+                  ' ' +
+                  result['last_name'].toString();
+              email = result['email'].toString();
+            } else {
+              // print('remove this sumbitch');
+              return SizedBox();
+            }
           }
 
           return Card(
@@ -145,7 +150,7 @@ class _CowamigoState extends State<cowamigo>
                                         style: ButtonStyle(
                                           backgroundColor:
                                               MaterialStateProperty.all<Color>(
-                                                  appOrange),
+                                                  Colors.lightGreen),
                                           foregroundColor:
                                               MaterialStateProperty.all<Color>(
                                                   Colors.black),
@@ -158,6 +163,7 @@ class _CowamigoState extends State<cowamigo>
                                         },
                                       ),
                                     ),
+                                    SizedBox(width: 5.0,),
                                     SizedBox(
                                       width: 35,
                                       child: TextButton(
@@ -291,7 +297,7 @@ class QueryAmigoDelegate extends SearchDelegate {
           }
           List<QueryDocumentSnapshot> result = snapshot.data?.docs as List<QueryDocumentSnapshot>;
           if (result.isEmpty) {
-            return Text('sorry, nobody with that email', style: appFontStyle.copyWith(fontSize: 18.sp),);
+            return Text('sorry, nobody with that first name', style: appFontStyle.copyWith(fontSize: 18.sp),);
           }
           List<List<String>> queries = [];
           int index = 0;
@@ -385,7 +391,7 @@ class _RequestAmigoState extends State<RequestAmigo>
                       Navigator.pop(context);
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(appOrange),
+                      backgroundColor: MaterialStateProperty.all<Color>(Colors.lightGreen),
                       foregroundColor:
                           MaterialStateProperty.all<Color>(Colors.black),
                     ),
@@ -395,6 +401,7 @@ class _RequestAmigoState extends State<RequestAmigo>
                     ),
                   ),
                 ),
+                SizedBox(width: 10.0,),
                 SizedBox(
                   // REJECT
                   width: 35.0,
@@ -645,12 +652,19 @@ class _FriendScreenState extends State<FriendScreen>
                         ),
                       );
                     }
+                    List<String> nullUUIDs = [];
+                    // context.read<Cowboy>().friends.forEach((cowamigo_uuid) async {
+                    //   if ((await userCollection.doc(cowamigo_uuid).get()).get('uuid') == '') {
+                    //     nullUUIDs.add(value)
+                    //   }
+                    // });
+                    context.read<Cowboy>().friends.removeWhere((element) => nullUUIDs.contains(element));
                     return ListView.separated(
                       padding: const EdgeInsets.all(2.0),
                       // scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       itemCount: context.watch<Cowboy>().friends.length,
-                      controller: ScrollController(),
+                      // controller: ScrollController(),
                       itemBuilder: (BuildContext context, int index) {
                         return GestureDetector(
                           key: Key(context.watch<Cowboy>().friends[index]),
