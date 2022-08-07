@@ -113,7 +113,7 @@ void main() async {
                 PayPalPage.id: (context) => PayPalPage(),
                 ReceiptScanning.id: (context) => ReceiptScanning(),
                 ReauthScreen.id: (context) => ReauthScreen(),
-                AppleInfoScreen.id: (context) => AppleInfoScreen(),
+                AppleInfoScreen.id: (context) => AppleInfoScreen(''),
               },
             );
           }),

@@ -201,6 +201,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       context.read<Cowboy>().initializeCowboy(
           credential.user!.uid, "", "", credential.user!.email!);
       Navigator.pop(context);
+      await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AppleInfoScreen(credential.user!.email!)));
       await Navigator.pushNamed(context, AppleInfoScreen.id);
     } else {
       Navigator.pop(context);

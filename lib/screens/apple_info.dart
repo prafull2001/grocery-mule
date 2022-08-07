@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 
 class AppleInfoScreen extends StatefulWidget {
   static String id = 'apple_info_screen';
+  late String initialEmail;
+  AppleInfoScreen(this.initialEmail);
 
   @override
   _AppleInfoScreenState createState() => _AppleInfoScreenState();
@@ -23,6 +25,11 @@ class _AppleInfoScreenState extends State<AppleInfoScreen> {
   late String firstName;
   late String lastName;
   String payPal = "";
+  //widget
+  @override
+  void initState() {
+    email = widget.initialEmail;
+  }
 
   FirebaseAuth auth = FirebaseAuth.instance;
   final User? curUser = FirebaseAuth.instance.currentUser;
@@ -53,7 +60,7 @@ class _AppleInfoScreenState extends State<AppleInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    email = '';
+    email = widget.initialEmail;
     firstName = '';
     lastName = '';
 
@@ -95,7 +102,7 @@ class _AppleInfoScreenState extends State<AppleInfoScreen> {
               keyboardType: TextInputType.emailAddress,
               textAlign: TextAlign.center,
               style: appFontStyle,
-              initialValue: '',
+              initialValue: widget.initialEmail,
               onChanged: (value) {
                 email = value;
               },
