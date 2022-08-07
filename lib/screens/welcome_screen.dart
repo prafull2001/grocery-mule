@@ -1,17 +1,19 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
+import 'package:grocery_mule/screens/apple_info.dart';
 import 'package:grocery_mule/screens/lists.dart';
 import 'package:grocery_mule/screens/login_screen.dart';
-import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/paypal_link.dart';
 import 'package:grocery_mule/screens/registration_screen.dart';
 import 'package:grocery_mule/theme/colors.dart';
@@ -20,6 +22,7 @@ import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../components/text_buttons.dart';
+import 'email_reauth.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static String id = 'welcome_screen';
@@ -60,6 +63,106 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return digest.toString();
   }
 
+  Future<UserCredential> signIn(OAuthCredential oauthCredential) async {
+    late UserCredential userCredential;
+    try {
+      print("prepare to test");
+      userCredential =
+          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      print(userCredential.user!.providerData[0].displayName);
+    } on FirebaseAuthException catch (e) {
+      print(e.code);
+      if (e.code == 'account-exists-with-different-credential') {
+        Fluttertoast.showToast(
+            msg: 'This account exists with other sign in methods');
+        // The account already exists with a different credential
+        String email = e.email!;
+        AuthCredential pendingCredential = e.credential!;
+
+        // Fetch a list of what sign-in methods exist for the conflicting user
+        List<String> userSignInMethods =
+            await auth.fetchSignInMethodsForEmail(email);
+
+        // If the user has several sign-in methods,
+        // the first method in the list will be the "recommended" method to use.
+        if (userSignInMethods.first == 'password') {
+          sleep(Duration(seconds: 1));
+          Fluttertoast.showToast(msg: 'Please Sign in with password first');
+          // Prompt the user to enter their password
+          final reauth_info =
+              await Navigator.pushNamed(context, ReauthScreen.id);
+          print('USER CREDS: ' + '${reauth_info}');
+          List<dynamic> user_info = reauth_info as List<dynamic>;
+          AuthCredential credential = EmailAuthProvider.credential(
+              email: user_info[0].toString(),
+              password: user_info[1].toString());
+          await FirebaseAuth.instance.currentUser!
+              .reauthenticateWithCredential(credential);
+
+          // Sign the user in to their account with the password
+          userCredential = await auth.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+
+          // Link the pending credential with the existing account
+          await userCredential.user!.linkWithCredential(pendingCredential);
+        }
+
+        // Since other providers are now external, you must now sign the user in with another
+        // auth provider, such as Facebook.
+        if (userSignInMethods.first == 'google.com') {
+          sleep(Duration(seconds: 1));
+          Fluttertoast.showToast(msg: 'Please Sign in with Google first');
+          // Create a new Facebook credential
+          final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+          // Obtain the auth details from the request.
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser!.authentication;
+          // Create a new credential.
+          final OAuthCredential googleCredential =
+              GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+          // Sign the user in with the credential
+          userCredential = await auth.signInWithCredential(googleCredential);
+
+          // Link the pending credential with the existing account
+          await userCredential.user!.linkWithCredential(pendingCredential);
+        }
+        // Handle other OAuth providers...
+        if (userSignInMethods.first == 'apple.com') {
+          sleep(Duration(seconds: 1));
+          Fluttertoast.showToast(msg: 'Please Sign in with Apple first');
+          final rawNonce = generateNonce();
+          final nonce = sha256ofString(rawNonce);
+
+          // Request credential for the currently signed in Apple account.
+          final appleCredential = await SignInWithApple.getAppleIDCredential(
+            scopes: [
+              AppleIDAuthorizationScopes.email,
+              AppleIDAuthorizationScopes.fullName,
+            ],
+            nonce: nonce,
+          );
+
+          // Create an `OAuthCredential` from the credential returned by Apple.
+          final oauthCredential = OAuthProvider("apple.com").credential(
+            idToken: appleCredential.identityToken,
+            rawNonce: rawNonce,
+          );
+          // Sign the user in with the credential
+          userCredential = await auth.signInWithCredential(oauthCredential);
+
+          // Link the pending credential with the existing account
+          await userCredential.user!.linkWithCredential(pendingCredential);
+        }
+      }
+    }
+    return userCredential;
+  }
+
   Future<void> signInWithApple() async {
     // To prevent replay attacks with the credential returned from Apple, we
     // include a nonce in the credential request. When signing in with
@@ -83,33 +186,27 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       rawNonce: rawNonce,
     );
     // Sign in to Firebase with the Apple [UserCredential].
-    final UserCredential credential =
-        await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-
+    UserCredential credential = await signIn(oauthCredential);
     if (credential.additionalUserInfo!.isNewUser) {
       print("detected Apple New User!!!!");
       print("apple UUID: " + credential.user!.uid);
       print("apple email: " + credential.user!.email!);
-      if(appleCredential.givenName == null) {
+      if (appleCredential.givenName == null) {
         print("given Name is NULL!!");
       }
       // print("apple givenName: " + appleCredential.givenName!);
       // print("apple familyName: " + appleCredential.familyName!);
       // print("apple email: " + appleCredential.email!);
 
-
       context.read<Cowboy>().initializeCowboy(
-          credential.user!.uid,
-          "",
-          "",
-          credential.user!.email!);
+          credential.user!.uid, "", "", credential.user!.email!);
       Navigator.pop(context);
-      await Navigator.pushNamed(context, UserInfoScreen.id);
-      Navigator.pushNamed(context, PayPalPage.id);
+      await Navigator.pushNamed(context, AppleInfoScreen.id);
     } else {
       Navigator.pop(context);
       Navigator.pushNamed(context, ListsScreen.id);
     }
+
     // Sign in the user with Firebase. If the nonce we generated earlier does
     // not match the nonce in `appleCredential.identityToken`, sign in will fail.
     return;
@@ -126,15 +223,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    // Sign in to Firebase with the Google [UserCredential].
-    final UserCredential credential =
+    UserCredential credential =
         await FirebaseAuth.instance.signInWithCredential(googleCredential);
     //check if it is a new user
-    String full_name = credential.user!.displayName!;
+    String full_name = credential.user!.providerData[0].displayName!;
     List<String> name_array = full_name.split(" ");
     firstName = name_array[0];
     lastName = name_array[1];
-    email = credential.user!.email!;
+    email = credential.user!.providerData[0].email!;
     // if new user, create doc and push PayPal Screen, else continue to Lists
     if (credential.additionalUserInfo!.isNewUser) {
       context
@@ -177,7 +273,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               "Welcome!",
               style: titleBlack,
             )),
-
             SizedBox(
               height: 20.h,
             ),

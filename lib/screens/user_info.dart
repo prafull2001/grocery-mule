@@ -34,7 +34,8 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
     String test_link = paypal_prefix + input;
     Uri paypal_link = Uri.parse(test_link);
     if (await canLaunchUrl(paypal_link) &&
-        RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input) || input.isEmpty) {
+            RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input) ||
+        input.isEmpty) {
       return true;
     } else {
       showDialog(
@@ -63,7 +64,8 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
       Fluttertoast.showToast(msg: 'Name cannot be empty');
       flag = false;
     } else if (firstname.length < 3) {
-      Fluttertoast.showToast(msg: 'First name must be at least 3 characters long');
+      Fluttertoast.showToast(
+          msg: 'First name must be at least 3 characters long');
       flag = false;
     } else if (email == '') {
       Fluttertoast.showToast(msg: 'Email cannot be empty');
@@ -166,7 +168,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                       textAlign: TextAlign.center,
                       initialValue: prevFirst + ' ' + prevLast,
                       onChanged: (value) {
-                        List<String> names = value.split(' ');
+                        List<String> names = value.trim().split(' ');
                         if (value.isEmpty) {
                           firstName = '';
                         } else if (names.length == 1) {
@@ -182,7 +184,6 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                     SizedBox(
                       height: 8.0,
                     ),
-
                     TextFormField(
                       decoration: InputDecoration(
                         icon: Icon(
@@ -211,7 +212,7 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         title: 'Update User Info',
                         color: appOrange,
                         onPressed: () async {
-                          if (await checkPaypalValidity(payPal) &&
+                          if (await checkPaypalValidity(payPal.trim()) &&
                               (checkField(firstName, lastName, email))) {
                             try {
                               context.read<Cowboy>().fillUpdatedInfo(
