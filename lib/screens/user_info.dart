@@ -34,7 +34,8 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
     String test_link = paypal_prefix + input;
     Uri paypal_link = Uri.parse(test_link);
     if (await canLaunchUrl(paypal_link) &&
-        RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input) || input.isEmpty) {
+            RegExp(r"(^(\d|[a-zA-Z])+$)").hasMatch(input) ||
+        input.isEmpty) {
       return true;
     } else {
       showDialog(
@@ -57,10 +58,14 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
     return false;
   }
 
-  bool checkField(String firstname, String email) {
+  bool checkField(String firstname, String lastname, String email) {
     bool flag = true;
     if (firstname == '') {
       Fluttertoast.showToast(msg: 'Name cannot be empty');
+      flag = false;
+    } else if (firstname.length < 3) {
+      Fluttertoast.showToast(
+          msg: 'First name must be at least 3 characters long');
       flag = false;
     } else if (email == '') {
       Fluttertoast.showToast(msg: 'Email cannot be empty');
@@ -70,6 +75,9 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
         .hasMatch(email)) {
       Fluttertoast.showToast(msg: 'Email is not valid');
       flag = false;
+    }
+    if (lastName == '') {
+      Fluttertoast.showToast(msg: 'Warning: last name is empty');
     }
     return flag;
   }
@@ -144,21 +152,32 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                     ),
                     TextFormField(
                       decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: BorderSide(
-                              color: appOrange,
-                              width: 1.0,
-                            ),
-                          ),
-                          icon: Icon(
-                            FontAwesomeIcons.userLarge,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(
                             color: appOrange,
-                          )),
+                            width: 1.0,
+                          ),
+                        ),
+                        icon: Icon(
+                          FontAwesomeIcons.userLarge,
+                          color: appOrange,
+                        ),
+                        hintText: 'First Last',
+                      ),
                       textAlign: TextAlign.center,
-                      initialValue: prevFirst,
+                      initialValue: prevFirst + ' ' + prevLast,
                       onChanged: (value) {
-                        firstName = value;
+                        List<String> names = value.trim().split(' ');
+                        if (value.isEmpty) {
+                          firstName = '';
+                        } else if (names.length == 1) {
+                          firstName = names[0].trim();
+                          lastName = '';
+                        } else {
+                          firstName = names[0].trim();
+                          lastName = names[1].trim();
+                        }
                       },
                       style: appFontStyle,
                     ),
@@ -193,8 +212,8 @@ class _UserInfoScreenScreenState extends State<UserInfoScreen> {
                         title: 'Update User Info',
                         color: appOrange,
                         onPressed: () async {
-                          if (await checkPaypalValidity(payPal) &&
-                              (checkField(firstName, email))) {
+                          if (await checkPaypalValidity(payPal.trim()) &&
+                              (checkField(firstName, lastName, email))) {
                             try {
                               context.read<Cowboy>().fillUpdatedInfo(
                                   firstName, lastName, email, payPal);

@@ -36,9 +36,14 @@ class _CowamigoState extends State<cowamigo>
     this.uuid = widget.uuid;
   }
 
-  String lengthify(String str) {
+  String lengthifyName(String str) {
     if (str.isEmpty) return '';
-    if (str.length > 29) str = str.substring(0, 26) + '...';
+    if (str.length > 17) str = str.substring(0, 14) + '...';
+    return str;
+  }
+  String lengthifyEmail(String str) {
+    if (str.isEmpty) return '';
+    if (str.length > 26) str = str.substring(0, 23) + '...';
     return str;
   }
 
@@ -80,7 +85,7 @@ class _CowamigoState extends State<cowamigo>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name,
+                        lengthifyName(name),
                         style: appFontStyle.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -90,7 +95,7 @@ class _CowamigoState extends State<cowamigo>
                         height: 1.0,
                       ),
                       Text(
-                        email,
+                        lengthifyEmail(email),
                         style: appFontStyle.copyWith(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -197,6 +202,9 @@ class QueryAmigoDelegate extends SearchDelegate {
   String email = '';
 
   @override
+  String searchFieldLabel = 'first name, case sensitive!';
+
+  @override
   List<Widget>? buildActions(BuildContext context) => [
     IconButton(
       onPressed: () {close(context, null);},
@@ -270,10 +278,10 @@ class QueryAmigoDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    if (query.length<=4) {return Container();}
+    if (query.length<3) {return Container();}
     return Container(
       child: StreamBuilder<QuerySnapshot>(
-        stream: userCollection.where('email', isGreaterThanOrEqualTo: query).where('email', isLessThanOrEqualTo: query+ '\uf88f').snapshots(),
+        stream: userCollection.where('first_name', isGreaterThanOrEqualTo: query).where('first_name', isLessThanOrEqualTo: query+ '\uf88f').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Text('something went wrong !!');

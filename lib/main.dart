@@ -7,6 +7,7 @@ import 'package:grocery_mule/constants.dart';
 import 'package:grocery_mule/dev/migration.dart';
 import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/providers/shopping_trip_provider.dart';
+import 'package:grocery_mule/screens/apple_info.dart';
 import 'package:grocery_mule/screens/checkout_screen.dart';
 import 'package:grocery_mule/screens/confirm_email.dart';
 import 'package:grocery_mule/screens/createlist.dart';
@@ -24,7 +25,7 @@ import 'package:grocery_mule/screens/user_info.dart';
 import 'package:grocery_mule/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 import 'firebase_options.dart';
 
 bool seen_intro; // global that updates with show_home's value upon startup
@@ -112,6 +113,7 @@ void main() async {
                 PayPalPage.id: (context) => PayPalPage(),
                 ReceiptScanning.id: (context) => ReceiptScanning(),
                 ReauthScreen.id: (context) => ReauthScreen(),
+                AppleInfoScreen.id: (context) => AppleInfoScreen(''),
               },
             );
           }),
