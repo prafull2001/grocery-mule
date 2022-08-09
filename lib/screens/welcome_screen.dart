@@ -230,11 +230,20 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     UserCredential credential =
         await FirebaseAuth.instance.signInWithCredential(googleCredential);
     //check if it is a new user
-    String full_name = credential.user!.providerData[0].displayName!;
+    late String full_name;
+    late String email;
+    for (int x = 0; x < credential.user!.providerData.length; x++) {
+      if (credential.user!.providerData[x].providerId.compareTo('google.com') ==
+          0) {
+        full_name = credential.user!.providerData[x].displayName!;
+        email = credential.user!.providerData[x].email!;
+        break;
+      }
+    }
     List<String> name_array = full_name.split(" ");
     firstName = name_array[0];
     lastName = name_array[1];
-    email = credential.user!.providerData[0].email!;
+
     // if new user, create doc and push PayPal Screen, else continue to Lists
     if (credential.additionalUserInfo!.isNewUser) {
       context
