@@ -180,7 +180,9 @@ class CreateListScreen extends StatefulWidget {
   static String id = 'create_list_screen';
   late String trip_uuid;
   late String initTitle;
+  String newTitle = '';
   late String initDescription;
+  String newDesc = '';
   late DateTime initDate;
   late bool newList;
 
@@ -314,6 +316,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   Future<void> updateGridView(bool new_trip) async {
     if (new_trip) {
       friend_bene.add(hostUUID);
+      print('selected friends: $friend_bene');
       await context.read<ShoppingTrip>().initializeTrip(
           context.read<ShoppingTrip>().title,
           context.read<ShoppingTrip>().date,
@@ -353,6 +356,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
       }
+      print('updating DB');
+      print('title: ${context.read<ShoppingTrip>().title}');
+      print('date: ${context.read<ShoppingTrip>().date}');
+      print('desc: ${context.read<ShoppingTrip>().description}');
       context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
@@ -488,6 +495,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                       friend_bene = results
                                           .map((e) => e.toString())
                                           .toList();
+                                      print('updated benes: $friend_bene');
                                     },
                                   );
                                 }),
@@ -523,9 +531,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               input: TextInputType.text,
                               secureText: false,
                               onChanged: (value) {
-                                context
-                                    .read<ShoppingTrip>()
-                                    .editTripTitle(value);
+                                widget.newTitle = value;
+                                print('title is now: ${widget.newTitle}');
                               },
                               suffix: Container(),
                               onTap1: () {},
@@ -557,9 +564,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               input: TextInputType.text,
                               secureText: false,
                               onChanged: (value) {
-                                context
-                                    .read<ShoppingTrip>()
-                                    .editTripDescription(value);
+                                widget.newDesc = value;
                               },
                               suffix: Container(),
                               onTap1: () {},
@@ -593,7 +598,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               buttonColor: Colors.green,
                               textColor: Colors.white,
                               onPressed: () async {
-                                if (context.read<ShoppingTrip>().title != '') {
+                                if (widget.newTitle != '') {
+                                  //print('pre updategridview title: ${context.read<ShoppingTrip>().title}');
+                                  print('pre updategridview title: ${widget.newTitle}');
+                                  context.read<ShoppingTrip>().editTripTitle(widget.newTitle);
+                                  context.read<ShoppingTrip>().editTripDescription(widget.newDesc);
                                   await updateGridView(newList);
                                   Navigator.pop(context);
                                   if (newList) {

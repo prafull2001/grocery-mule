@@ -87,6 +87,7 @@ class ShoppingTrip with ChangeNotifier {
   // metadata editing methods
   editTripTitle(String title) {
     _title = title;
+    notifyListeners();
   }
 
   editTripDate(DateTime date) {
@@ -334,9 +335,11 @@ class ShoppingTrip with ChangeNotifier {
 
   // only updates trip metadata in db
   updateTripMetadataDB() {
+    // print('benes: $_beneficiaries');
     tripCollection.doc(_uuid).update({'title': _title});
     tripCollection.doc(_uuid).update({'date': _date});
     tripCollection.doc(_uuid).update({'description': _description});
+    //tripCollection.doc(_uuid).update({'beneficiaries': _beneficiaries});
   }
 
   // updates after a beneficiary has been added
