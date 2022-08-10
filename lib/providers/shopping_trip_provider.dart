@@ -132,12 +132,10 @@ class ShoppingTrip with ChangeNotifier {
   }
 
   // when metadata update fields are called from first screen, this method should be called
-  updateTripMetadata(String title, DateTime date, String description,
-      List<String> beneficiary) {
+  updateTripMetadata(String title, DateTime date, String description) {
     _title = title;
     _date = date;
     _description = description;
-    _beneficiaries = beneficiary;
     updateTripMetadataDB();
     updateDateForAll();
     notifyListeners();

@@ -348,11 +348,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       });
 
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
+      // print('friend bene in updategridview: $friend_bene');
 
       //check if new bene need to be added
       for (var friend in friend_bene) {
-        if (!context.read<ShoppingTrip>().beneficiaries.contains(friend)) {
-          context.read<ShoppingTrip>().addBeneficiary(friend);
+        if (!context.read<ShoppingTrip>().beneficiaries.toSet().toList().contains(friend)) {
+          print('this shit worked cucky wucky');
+          await context.read<ShoppingTrip>().addBeneficiary(friend);
           //context.read<Cowboy>().addTripToBene(friend, context.read<ShoppingTrip>().uuid,);
         }
         // addTripToBene(String bene_uuid, String trip_uuid)
@@ -361,11 +363,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       print('title: ${context.read<ShoppingTrip>().title}');
       print('date: ${context.read<ShoppingTrip>().date}');
       print('desc: ${context.read<ShoppingTrip>().description}');
+      print('benes: ${context.read<ShoppingTrip>().beneficiaries.toSet().toList()}');
       context.read<ShoppingTrip>().updateTripMetadata(
             context.read<ShoppingTrip>().title,
             context.read<ShoppingTrip>().date,
             context.read<ShoppingTrip>().description,
-            context.read<ShoppingTrip>().beneficiaries,
           );
       // await DatabaseService(uuid: trip.uuid).updateShoppingTrip(trip);
     }
@@ -534,6 +536,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               onChanged: (value) {
                                 widget.newTitle = value;
                                 print('title is now: ${widget.newTitle}');
+                                print('UWU benes: ${context.read<ShoppingTrip>().beneficiaries.toSet().toList()}');
                               },
                               suffix: Container(),
                               onTap1: () {},
@@ -599,8 +602,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               buttonColor: Colors.green,
                               textColor: Colors.white,
                               onPressed: () async {
+                                print('UWU benes: ${context.read<ShoppingTrip>().beneficiaries.toSet().toList()}');
                                 if (!newList && widget.newTitle == '') {
                                   widget.newTitle = context.read<ShoppingTrip>().title;
+                                }
+                                if (!newList && widget.newDesc == '') {
+                                  widget.newDesc = context.read<ShoppingTrip>().description;
                                 }
                                 if (widget.newTitle != '') {
                                   //print('pre updategridview title: ${context.read<ShoppingTrip>().title}');
