@@ -311,8 +311,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       beneficiaries,
       snapshot['lock'] as bool,
     );
-    widget.newTitle = snapshot['title'];
-    widget.newDesc = snapshot['description'];
+    // widget.newTitle = snapshot['title'];
+    // widget.newDesc = snapshot['description'];
   }
 
   Future<void> updateGridView(bool new_trip) async {
@@ -599,6 +599,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               buttonColor: Colors.green,
                               textColor: Colors.white,
                               onPressed: () async {
+                                if (!newList && widget.newTitle == '') {
+                                  widget.newTitle = context.read<ShoppingTrip>().title;
+                                }
                                 if (widget.newTitle != '') {
                                   //print('pre updategridview title: ${context.read<ShoppingTrip>().title}');
                                   print(
