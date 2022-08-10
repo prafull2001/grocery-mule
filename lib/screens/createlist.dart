@@ -122,7 +122,7 @@ class _DatePickerState extends State<DatePicker> {
       return Row(
         children: [
           Text(
-            'Date:  '+'$date'.split(' ')[0].replaceAll('-', '/'),
+            'Date:  ' + '$date'.split(' ')[0].replaceAll('-', '/'),
             style: appFontStyle.copyWith(color: Colors.black, fontSize: 20),
           ),
           //SizedBox(width: 5.0,),
@@ -311,6 +311,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       beneficiaries,
       snapshot['lock'] as bool,
     );
+    widget.newTitle = snapshot['title'];
+    widget.newDesc = snapshot['description'];
   }
 
   Future<void> updateGridView(bool new_trip) async {
@@ -344,7 +346,6 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           removeList.add(old_bene);
         }
       });
-
 
       context.read<ShoppingTrip>().removeBeneficiaries(removeList);
 
@@ -590,7 +591,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                         children: [
                           Container(
                             width: 180,
-                            height: MediaQuery.of(context).size.height/10,
+                            height: MediaQuery.of(context).size.height / 10,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
                             ),
@@ -600,9 +601,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               onPressed: () async {
                                 if (widget.newTitle != '') {
                                   //print('pre updategridview title: ${context.read<ShoppingTrip>().title}');
-                                  print('pre updategridview title: ${widget.newTitle}');
-                                  context.read<ShoppingTrip>().editTripTitle(widget.newTitle);
-                                  context.read<ShoppingTrip>().editTripDescription(widget.newDesc);
+                                  print(
+                                      'pre updategridview title: ${widget.newTitle}');
+                                  context
+                                      .read<ShoppingTrip>()
+                                      .editTripTitle(widget.newTitle);
+                                  context
+                                      .read<ShoppingTrip>()
+                                      .editTripDescription(widget.newDesc);
                                   await updateGridView(newList);
                                   Navigator.pop(context);
                                   if (newList) {
@@ -625,7 +631,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                           Spacer(),
                           Container(
                             width: 180,
-                            height: MediaQuery.of(context).size.height/10,
+                            height: MediaQuery.of(context).size.height / 10,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25.0),
                             ),
