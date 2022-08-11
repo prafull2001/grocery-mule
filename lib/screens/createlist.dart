@@ -84,7 +84,6 @@ class CreateListScreen extends StatefulWidget {
   CreateListScreen(bool newList, String trip_id) {
     this.newList = newList;
     trip_uuid = trip_id;
-    print('trip uuid creatlist constructor: ${trip_uuid}');
   }
 
   @override
@@ -111,10 +110,12 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   Map<String, String> friendsName = {};
   late DateTime localTime;
   bool tripCreated = false;
+  bool dateEdited = false;
+  late Future<DocumentSnapshot> tripFuture;
 
   @override
   void initState() {
-
+    tripFuture = tripCollection.doc(widget.trip_uuid).get();
     newList = widget.newList;
     if (widget.trip_uuid != "dummy") {
       _tripTitleController = TextEditingController(text: '');
@@ -122,8 +123,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       newList = false;
       //selected_friend = context.read<ShoppingTrip>().beneficiaries;
     } else {
-      localTime = DateTime.now();
       newList = true;
+      localTime = DateTime.now();
     }
     super.initState();
   }
@@ -170,7 +171,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   void _loadCurrentTrip(DocumentSnapshot snapshot) {
     DateTime date = DateTime.now();
     date = (snapshot.data() as Map<String, dynamic>)['date'].toDate();
-    localTime = date;
+    if (!dateEdited) {
+      localTime = date;
+    }
     _tripTitleController = TextEditingController(text: snapshot['title']);
     newTitle = snapshot['title'];
     _tripDescriptionController =
@@ -380,6 +383,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       setState(() {
         localTime = picked;
       });
+      print('local time after date pick: $localTime');
     }
   }
 
@@ -416,7 +420,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           backgroundColor: appOrange,
         ),
         body: FutureBuilder<DocumentSnapshot>(
-            future: tripCollection.doc(widget.trip_uuid).get(),
+            future: tripFuture,
             builder: (BuildContext context,
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.hasError) {
@@ -467,28 +471,28 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                       document['first_name']));
                                 });
 
-                                return MultiSelectDialogField(
+                                return MultiSelectChipField(
                                   key: GlobalKey(),
                                   searchable: true,
                                   items: friends,
                                   initialValue: old_benes,
                                   title: Text('Friends'),
-                                  selectedColor: dark_beige,
+                                  selectedChipColor: dark_beige,
                                   decoration: BoxDecoration(
                                     color: dark_beige.withOpacity(0.25),
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(12)),
                                   ),
-                                  buttonIcon: Icon(
-                                    Icons.person,
-                                    color: Colors.black,
-                                  ),
-                                  buttonText: Text(
-                                    'Selected Friends',
-                                    style: appFontStyle.copyWith(
-                                        color: Colors.black),
-                                  ),
-                                  onConfirm: (results) {
+                                  // buttonIcon: Icon(
+                                  //   Icons.person,
+                                  //   color: Colors.black,
+                                  // ),
+                                  // buttonText: Text(
+                                  //   'Selected Friends',
+                                  //   style: appFontStyle.copyWith(
+                                  //       color: Colors.black),
+                                  // ),
+                                  onTap: (results) {
                                     print(results.toList());
                                     friend_bene = results
                                         .map((e) => e.toString())
@@ -600,7 +604,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 Icons.calendar_today,
                                 color: appOrange,
                               ),
-                              onPressed: () => _selectDate(context),
+                              onPressed: () {
+                                dateEdited = true;
+                                _selectDate(context);
+                              },
                             ),
                           ],
                         ),
@@ -621,6 +628,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             textColor: Colors.white,
                             onPressed: () async {
                               if (newTitle != '') {
+                                print('pre updategridview date: $localTime');
                                 await updateGridView(newList);
                                 Navigator.pop(context);
                                 if (newList) {
