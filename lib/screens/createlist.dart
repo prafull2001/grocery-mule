@@ -14,13 +14,13 @@ import 'package:grocery_mule/providers/cowboy_provider.dart';
 import 'package:grocery_mule/screens/editlist.dart';
 import 'package:grocery_mule/screens/lists.dart';
 import 'package:grocery_mule/theme/colors.dart';
-import 'package:grocery_mule/theme/text_styles.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../components/text_buttons.dart';
 import '../components/text_fields.dart';
+import '../theme/text_styles.dart';
 
 class UserName extends StatefulWidget {
   late final String userUUID;
@@ -290,7 +290,9 @@ class _CreateListsScreenState extends State<CreateListScreen> {
 
       var tripId = Uuid().v4();
       widget.trip_uuid = tripId;
-      await context.read<Cowboy>().addTrip(context.read<Cowboy>().uuid, tripId, localTime);
+      await context
+          .read<Cowboy>()
+          .addTrip(context.read<Cowboy>().uuid, tripId, localTime);
       await tripCollection.doc(tripId).set({
         'uuid': tripId,
         'title': newTitle,
@@ -473,15 +475,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
 
                                 return MultiSelectChipField(
                                   key: GlobalKey(),
-                                  searchable: true,
                                   items: friends,
                                   initialValue: old_benes,
-                                  title: Text('Friends'),
+                                  title: Text(
+                                    'Friends',
+                                    style: appFontStyle.copyWith(
+                                        color: Colors.black),
+                                  ),
                                   selectedChipColor: dark_beige,
                                   decoration: BoxDecoration(
-                                    color: dark_beige.withOpacity(0.25),
+                                    color: light_cream,
                                     borderRadius:
-                                        BorderRadius.all(Radius.circular(12)),
+                                        BorderRadius.all(Radius.circular(22)),
                                   ),
                                   // buttonIcon: Icon(
                                   //   Icons.person,
@@ -634,12 +639,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 if (newList) {
                                   if (tripCreated) {
                                     // print('SUPER MAX MAX MAX SUPER MAX SUPER MAX');
-                                    print('trip uuid before nav push: ${widget.trip_uuid}');
+                                    print(
+                                        'trip uuid before nav push: ${widget.trip_uuid}');
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                EditListScreen(widget.trip_uuid)));
+                                                EditListScreen(
+                                                    widget.trip_uuid)));
                                   }
                                 }
                               } else {
