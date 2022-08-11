@@ -330,14 +330,14 @@ class _IndividualItemState extends State<IndividualItem> {
 
 class EditListScreen extends StatefulWidget {
   static String id = 'edit_list_screen';
-  String? tripUUID;
+  late String tripUUID;
   User? curUser = FirebaseAuth.instance.currentUser;
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
 
   // simple constructor, just takes in tripUUID
-  EditListScreen(String? tripUUID) {
+  EditListScreen(String tripUUID) {
     this.tripUUID = tripUUID;
-    if (this.tripUUID == null) {
+    if (this.tripUUID == 'dummy') {
       throw Exception('editlist.dart: Invalid tripUUID was passed');
     }
   }
@@ -362,7 +362,8 @@ class _EditListsScreenState extends State<EditListScreen> {
   @override
   void initState() {
     tripUUID = widget.tripUUID!;
-    listStream = tripCollection.doc(tripUUID).snapshots();
+    print('trip uuid in initstate: ${widget.tripUUID}');
+    listStream = tripCollection.doc(widget.tripUUID).snapshots();
     hostFirstName = context.read<Cowboy>().firstName;
 
     // null value problem here???

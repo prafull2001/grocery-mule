@@ -125,8 +125,8 @@ class Cowboy with ChangeNotifier {
   List<String> get requests => _requests;
 
   // only called upon setup by system during trip creation or list share
-  addTrip(String user_uuid, String trip_uuid, DateTime date) {
-    userCollection
+  addTrip(String user_uuid, String trip_uuid, DateTime date) async {
+    await userCollection
         .doc(user_uuid)
         .collection('shopping_trips')
         .doc(trip_uuid)

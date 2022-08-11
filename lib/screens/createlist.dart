@@ -84,6 +84,7 @@ class CreateListScreen extends StatefulWidget {
   CreateListScreen(bool newList, String trip_id) {
     this.newList = newList;
     trip_uuid = trip_id;
+    print('trip uuid creatlist constructor: ${trip_uuid}');
   }
 
   @override
@@ -93,7 +94,6 @@ class CreateListScreen extends StatefulWidget {
 class _CreateListsScreenState extends State<CreateListScreen> {
   final User? curUser = FirebaseAuth.instance.currentUser;
   late bool newList;
-  late String trip_uuid;
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
   TextEditingController _tripDescriptionController = TextEditingController();
@@ -110,13 +110,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   //List<String> selected_friend = [];
   Map<String, String> friendsName = {};
   late DateTime localTime;
+  bool tripCreated = false;
 
   @override
   void initState() {
-    trip_uuid = widget.trip_uuid;
 
     newList = widget.newList;
-    if (trip_uuid != "dummy") {
+    if (widget.trip_uuid != "dummy") {
       _tripTitleController = TextEditingController(text: '');
       _tripDescriptionController = TextEditingController(text: '');
       newList = false;
@@ -186,20 +186,20 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     old_benes.removeWhere((element) => bene_uuids.contains(element));
     await removeBeneficiariesFromItems(bene_uuids);
     await tripCollection
-        .doc(trip_uuid)
+        .doc(widget.trip_uuid)
         .update({'beneficiaries': FieldValue.arrayRemove(bene_uuids)});
     bene_uuids.forEach((String bene_uuid) async {
       await userCollection
           .doc(bene_uuid)
           .collection('shopping_trips')
-          .doc(trip_uuid)
+          .doc(widget.trip_uuid)
           .delete();
     });
   }
 
   removeBeneficiariesFromItems(List<String> bene_uuids) async {
     QuerySnapshot items_shot =
-        await tripCollection.doc(trip_uuid).collection('items').get();
+        await tripCollection.doc(widget.trip_uuid).collection('items').get();
     List<String> itemUUID = [];
     if (items_shot.docs != null && items_shot.docs.isNotEmpty) {
       items_shot.docs.forEach((item_uuid) {
@@ -211,7 +211,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     }
     itemUUID.forEach((item) async {
       DocumentSnapshot item_shot = await tripCollection
-          .doc(trip_uuid)
+          .doc(widget.trip_uuid)
           .collection('items')
           .doc(item)
           .get();
@@ -227,7 +227,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         bene_items.remove(bene_uuid);
       });
       await tripCollection
-          .doc(trip_uuid)
+          .doc(widget.trip_uuid)
           .collection('items')
           .doc(item)
           .update({'quantity': newtotal, 'subitems': bene_items});
@@ -239,15 +239,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       await userCollection
           .doc(bene_uuid)
           .collection('shopping_trips')
-          .doc(trip_uuid)
+          .doc(widget.trip_uuid)
           .set({'date': localTime});
     });
     await tripCollection
-        .doc(trip_uuid)
+        .doc(widget.trip_uuid)
         .update({'beneficiaries': FieldValue.arrayUnion(addList)});
     //add bene to every item document
     QuerySnapshot items_shot =
-        await tripCollection.doc(trip_uuid).collection('items').get();
+        await tripCollection.doc(widget.trip_uuid).collection('items').get();
     List<String> itemUUID = [];
     if (items_shot.docs != null && items_shot.docs.isNotEmpty) {
       items_shot.docs.forEach((item_uuid) {
@@ -257,19 +257,18 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         }
       });
     }
-    //TODO: Nuke item to 0
     itemUUID.forEach((item) async {
       Map<String, int> bene_items = <String, int>{};
       //add back previous user
-      addList.forEach((bene_uuid) {
-        bene_items[bene_uuid] = 0;
+      addList.forEach((bene_uuid) async {
+        // bene_items[bene_uuid] = 0;
+        await tripCollection
+            .doc(widget.trip_uuid)
+            .collection('items')
+            .doc(item)
+            .update({'subitems.$bene_uuid': 0});
       });
-      print(trip_uuid);
-      await tripCollection
-          .doc(trip_uuid)
-          .collection('items')
-          .doc(item)
-          .update({'subitems': bene_items});
+      print(widget.trip_uuid);
     });
   }
 
@@ -287,6 +286,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
        */
 
       var tripId = Uuid().v4();
+      widget.trip_uuid = tripId;
+      await context.read<Cowboy>().addTrip(context.read<Cowboy>().uuid, tripId, localTime);
       await tripCollection.doc(tripId).set({
         'uuid': tripId,
         'title': newTitle,
@@ -312,9 +313,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         context.read<Cowboy>().addTrip(friend, tripId, localTime);
         //addTripToBene(String bene_uuid, String trip_uuid)
       }
-      context
-          .read<Cowboy>()
-          .addTrip(context.read<Cowboy>().uuid, tripId, localTime);
+      tripCreated = true;
     } else {
       List<String> removeList = [];
       old_benes.forEach((old_bene) {
@@ -335,13 +334,13 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       }
       print(addList);
       addBeneficiary(addList);
-      tripCollection.doc(trip_uuid).update(
+      tripCollection.doc(widget.trip_uuid).update(
           {'title': newTitle, 'date': localTime, 'description': newDesc});
       friend_bene.forEach((user) {
         userCollection
             .doc(user)
             .collection('shopping_trips')
-            .doc(trip_uuid)
+            .doc(widget.trip_uuid)
             .update({'date': localTime});
       });
     }
@@ -349,7 +348,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
 
   deleteTripDB() async {
     QuerySnapshot items_snapshot =
-        await tripCollection.doc(trip_uuid).collection('items').get();
+        await tripCollection.doc(widget.trip_uuid).collection('items').get();
     items_snapshot.docs.forEach((item_doc) {
       item_doc.reference.delete();
     });
@@ -357,10 +356,10 @@ class _CreateListsScreenState extends State<CreateListScreen> {
       userCollection
           .doc(bene)
           .collection('shopping_trips')
-          .doc(trip_uuid)
+          .doc(widget.trip_uuid)
           .delete();
     });
-    tripCollection.doc(trip_uuid).delete();
+    tripCollection.doc(widget.trip_uuid).delete();
   }
 
   _selectDate(BuildContext context) async {
@@ -417,7 +416,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           backgroundColor: appOrange,
         ),
         body: FutureBuilder<DocumentSnapshot>(
-            future: tripCollection.doc(trip_uuid).get(),
+            future: tripCollection.doc(widget.trip_uuid).get(),
             builder: (BuildContext context,
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.hasError) {
@@ -533,7 +532,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             secureText: false,
                             onChanged: (value) {
                               newTitle = value;
-                              print('title is now: ${newTitle}');
+                              // print('title is now: ${newTitle}');
                             },
                             suffix: Container(),
                             onTap1: () {},
@@ -625,11 +624,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 await updateGridView(newList);
                                 Navigator.pop(context);
                                 if (newList) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditListScreen(trip_uuid)));
+                                  if (tripCreated) {
+                                    // print('SUPER MAX MAX MAX SUPER MAX SUPER MAX');
+                                    print('trip uuid before nav push: ${widget.trip_uuid}');
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditListScreen(widget.trip_uuid)));
+                                  }
                                 }
                               } else {
                                 Fluttertoast.showToast(
@@ -654,7 +657,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                               await check_delete(context);
                               if (delete_list) {
                                 if (!newList) {
-                                  await total_expenditure(trip_uuid);
+                                  await total_expenditure(widget.trip_uuid);
                                   deleteTripDB();
                                 }
                                 Navigator.of(context).popUntil((route) {
