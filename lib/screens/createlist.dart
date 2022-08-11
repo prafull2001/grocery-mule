@@ -96,7 +96,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   late String trip_uuid;
   //////////////////////
   TextEditingController _tripTitleController = TextEditingController();
-  var _tripDescriptionController;
+  TextEditingController _tripDescriptionController = TextEditingController();
   final String hostUUID = FirebaseAuth.instance.currentUser!.uid;
   final String? hostFirstName = FirebaseAuth.instance.currentUser!.displayName;
   //Map<String,Item_front_end> frontend_list = {}; // name to frontend item
@@ -118,7 +118,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     newList = widget.newList;
     if (trip_uuid != "dummy") {
       _tripTitleController = TextEditingController(text: '');
-      _tripDescriptionController = TextEditingController()..text = '';
+      _tripDescriptionController = TextEditingController(text: '');
       newList = false;
       //selected_friend = context.read<ShoppingTrip>().beneficiaries;
     } else {
@@ -173,8 +173,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     localTime = date;
     _tripTitleController = TextEditingController(text: snapshot['title']);
     newTitle = snapshot['title'];
-    _tripDescriptionController = TextEditingController()
-      ..text = snapshot['description'];
+    _tripDescriptionController =
+        TextEditingController(text: snapshot['description']);
     newDesc = snapshot['description'];
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
       friend_bene.add(uid);
@@ -234,8 +234,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     });
   }
 
-  addBeneficiary(List<String> bene_uuids) async {
-    bene_uuids.forEach((String bene_uuid) async {
+  addBeneficiary(List<String> addList) async {
+    addList.forEach((String bene_uuid) async {
       await userCollection
           .doc(bene_uuid)
           .collection('shopping_trips')
@@ -244,7 +244,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     });
     await tripCollection
         .doc(trip_uuid)
-        .update({'beneficiaries': FieldValue.arrayUnion(bene_uuids)});
+        .update({'beneficiaries': FieldValue.arrayUnion(addList)});
     //add bene to every item document
     QuerySnapshot items_shot =
         await tripCollection.doc(trip_uuid).collection('items').get();
@@ -257,11 +257,14 @@ class _CreateListsScreenState extends State<CreateListScreen> {
         }
       });
     }
+    //TODO: Nuke item to 0
     itemUUID.forEach((item) async {
       Map<String, int> bene_items = <String, int>{};
-      bene_uuids.forEach((bene_uuid) {
+      //add back previous user
+      addList.forEach((bene_uuid) {
         bene_items[bene_uuid] = 0;
       });
+      print(trip_uuid);
       await tripCollection
           .doc(trip_uuid)
           .collection('items')
@@ -330,6 +333,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
           addList.add(friend);
         }
       }
+      print(addList);
       addBeneficiary(addList);
       tripCollection.doc(trip_uuid).update(
           {'title': newTitle, 'date': localTime, 'description': newDesc});
@@ -465,6 +469,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                 });
 
                                 return MultiSelectDialogField(
+                                  key: GlobalKey(),
                                   searchable: true,
                                   items: friends,
                                   initialValue: old_benes,
@@ -485,9 +490,11 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                                         color: Colors.black),
                                   ),
                                   onConfirm: (results) {
-                                    //print(results.toList());
+                                    print(results.toList());
                                     friend_bene = results
                                         .map((e) => e.toString())
+                                        .toList()
+                                        .toSet()
                                         .toList();
                                     print('updated benes: $friend_bene');
                                   },
@@ -516,8 +523,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             context: context,
                             enabled: true,
                             focusColor: Colors.black,
-                            helpText: "List Name",
-                            hintText: "",
+                            helpText: "Trip Name",
+                            hintText: "Title",
                             show: IconButton(
                                 onPressed: () {},
                                 icon: Icon(Icons.verified_user_outlined)),
