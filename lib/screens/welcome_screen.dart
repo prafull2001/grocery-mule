@@ -317,35 +317,36 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 endIndent: 20,
               ),
             ),
-            GestureDetector(
-              onTap: () async {
-                try {
-                  await signInWithGoogle();
-                } catch (e) {
-                  print('error: ' + e.toString());
-                }
-              },
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.h),
-                child: RectangularTextIconButton(
-                  onPressed: () async {
-                    try {
-                      await signInWithGoogle();
-                    } catch (e) {
-                      print('error: ' + e.toString());
-                    }
-                  },
-                  text: "Continue With Google",
-                  icon: Icon(
-                    FontAwesomeIcons.google,
-                    color: Colors.blueAccent,
+
+            if(Platform.isIOS)...[
+              GestureDetector(
+                onTap: () async {
+                  try {
+                    await signInWithGoogle();
+                  } catch (e) {
+                    print('error: ' + e.toString());
+                  }
+                },
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.h),
+                  child: RectangularTextIconButton(
+                    onPressed: () async {
+                      try {
+                        await signInWithGoogle();
+                      } catch (e) {
+                        print('error: ' + e.toString());
+                      }
+                    },
+                    text: "Continue With Google",
+                    icon: Icon(
+                      FontAwesomeIcons.google,
+                      color: Colors.blueAccent,
+                    ),
+                    buttonColor: Colors.white,
+                    textColor: Colors.blue,
                   ),
-                  buttonColor: Colors.white,
-                  textColor: Colors.blue,
                 ),
               ),
-            ),
-            if(Platform.isIOS)...[
               GestureDetector(
                 onTap: () async {
                   try {
