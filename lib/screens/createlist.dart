@@ -111,6 +111,8 @@ class _CreateListsScreenState extends State<CreateListScreen> {
   late DateTime localTime;
   bool tripCreated = false;
   bool dateEdited = false;
+  bool titleEdited = false;
+  bool descEdited = false;
   late Future<DocumentSnapshot> tripFuture;
 
   @override
@@ -174,11 +176,15 @@ class _CreateListsScreenState extends State<CreateListScreen> {
     if (!dateEdited) {
       localTime = date;
     }
-    _tripTitleController = TextEditingController(text: snapshot['title']);
-    newTitle = snapshot['title'];
-    _tripDescriptionController =
-        TextEditingController(text: snapshot['description']);
-    newDesc = snapshot['description'];
+    if (!titleEdited) {
+      _tripTitleController = TextEditingController(text: snapshot['title']);
+      newTitle = snapshot['title'];
+    }
+    if (!descEdited) {
+      _tripDescriptionController =
+          TextEditingController(text: snapshot['description']);
+      newDesc = snapshot['description'];
+    }
     (snapshot['beneficiaries'] as List<dynamic>).forEach((uid) {
       friend_bene.add(uid);
       old_benes.add(uid);
@@ -541,6 +547,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             secureText: false,
                             onChanged: (value) {
                               newTitle = value;
+                              titleEdited = true;
                               // print('title is now: ${newTitle}');
                             },
                             suffix: Container(),
@@ -574,6 +581,7 @@ class _CreateListsScreenState extends State<CreateListScreen> {
                             secureText: false,
                             onChanged: (value) {
                               newDesc = value;
+                              descEdited = true;
                             },
                             suffix: Container(),
                             onTap1: () {},
