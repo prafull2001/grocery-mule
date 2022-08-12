@@ -87,6 +87,7 @@ class ShoppingTrip with ChangeNotifier {
   // metadata editing methods
   editTripTitle(String title) {
     _title = title;
+    notifyListeners();
   }
 
   editTripDate(DateTime date) {
@@ -131,12 +132,10 @@ class ShoppingTrip with ChangeNotifier {
   }
 
   // when metadata update fields are called from first screen, this method should be called
-  updateTripMetadata(String title, DateTime date, String description,
-      List<String> beneficiary) {
+  updateTripMetadata(String title, DateTime date, String description) {
     _title = title;
     _date = date;
     _description = description;
-    _beneficiaries = beneficiary;
     updateTripMetadataDB();
     updateDateForAll();
     notifyListeners();
@@ -334,9 +333,11 @@ class ShoppingTrip with ChangeNotifier {
 
   // only updates trip metadata in db
   updateTripMetadataDB() {
+    // print('benes: $_beneficiaries');
     tripCollection.doc(_uuid).update({'title': _title});
     tripCollection.doc(_uuid).update({'date': _date});
     tripCollection.doc(_uuid).update({'description': _description});
+    //tripCollection.doc(_uuid).update({'beneficiaries': _beneficiaries});
   }
 
   // updates after a beneficiary has been added
